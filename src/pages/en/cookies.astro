@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+
+const lang = 'en';
+---
+<BaseLayout lang={lang} title="Cookie Policy — Helyot" description="How Helyot uses cookies on helyot.com — what we collect, why, and how to manage your preferences." noindex>
+<Header lang={lang}/>
+<main style="background:#08080E;color:#F0F0F6;min-height:100vh;padding:5rem 0 6rem;">
+  <div style="max-width:860px;margin:0 auto;padding:0 2rem;">
+
+    <nav style="font-size:0.72rem;color:#8288A5;margin-bottom:2rem;display:flex;gap:.4rem;">
+      <a href="/" style="color:#8288A5;text-decoration:none;" onmouseover="this.style.color='#E8B86D'" onmouseout="this.style.color='#8288A5'">Home</a>
+      <span>/</span><span>Cookie Policy</span>
+    </nav>
+
+    <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:#E8B86D;margin-bottom:.75rem;">LEGAL</p>
+    <h1 style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.03em;margin-bottom:.5rem;">Cookie Policy</h1>
+    <p style="color:#8288A5;font-size:0.84rem;margin-bottom:3rem;">Last updated: 1 June 2025</p>
+
+    <style>
+      .legal-section { margin-bottom: 2.5rem; }
+      .legal-section h2 { font-family:'Spectral',Georgia,serif; font-weight:400; font-size:1.15rem; color:#F0F0F6; margin-bottom:.875rem; padding-bottom:.5rem; border-bottom:1px solid rgba(255,255,255,.07); }
+      .legal-section p, .legal-section li { font-size:0.9rem; color:#8288A5; line-height:1.8; margin-bottom:.625rem; }
+      .legal-section ul { padding-left:1.25rem; }
+      .legal-section a { color:#E8B86D; }
+      .cookie-table { width:100%; border-collapse:collapse; margin:1rem 0; }
+      .cookie-table th { text-align:left; padding:.75rem 1rem; background:rgba(255,255,255,.04); color:#B8B8CC; font-size:.78rem; font-weight:600; border-bottom:1px solid rgba(255,255,255,.08); }
+      .cookie-table td { padding:.75rem 1rem; font-size:0.84rem; color:#8288A5; border-bottom:1px solid rgba(255,255,255,.05); vertical-align:top; }
+      strong { color:#B8B8CC; }
+    </style>
+
+    <div class="legal-section">
+      <h2>1. What Are Cookies</h2>
+      <p>Cookies are small text files placed on your device when you visit a website. They help the website remember your preferences and understand how you interact with it. We use cookies only with your consent, except for strictly necessary cookies required for the site to function.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>2. Types of Cookies We Use</h2>
+      <table class="cookie-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Purpose</th>
+            <th>Examples</th>
+            <th>Consent Required</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Strictly Necessary</strong></td>
+            <td>Essential for the website to function. Cannot be disabled.</td>
+            <td>Cookie consent preference, session state</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>Analytics</strong></td>
+            <td>Help us understand how visitors use the site (page views, time on site, referral source).</td>
+            <td>Google Analytics 4 (_ga, _ga_*)</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td><strong>Marketing</strong></td>
+            <td>Used to track visitors across websites for advertising purposes.</td>
+            <td>Google Ads, Meta Pixel</td>
+            <td>Yes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legal-section">
+      <h2>3. Strictly Necessary Cookies</h2>
+      <table class="cookie-table">
+        <thead><tr><th>Cookie</th><th>Duration</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>cookie_consent</td><td>1 year</td><td>Stores your cookie consent preferences</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legal-section">
+      <h2>4. Analytics Cookies (with consent)</h2>
+      <table class="cookie-table">
+        <thead><tr><th>Cookie</th><th>Duration</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>_ga</td><td>2 years</td><td>Google Analytics — distinguishes users</td></tr>
+          <tr><td>_ga_*</td><td>2 years</td><td>Google Analytics 4 — session data</td></tr>
+        </tbody>
+      </table>
+      <p>We use Google Analytics with IP anonymisation enabled. Your full IP address is never stored. Data is processed in accordance with Google's privacy policy.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>5. Managing Your Preferences</h2>
+      <p>You can change your cookie preferences at any time:</p>
+      <ul>
+        <li><strong>Via our cookie banner</strong> — click "Manage" when the banner appears, or clear your browser cookies to see it again</li>
+        <li><strong>Via your browser</strong> — most browsers allow you to block or delete cookies in Settings → Privacy</li>
+        <li><strong>Google Analytics opt-out</strong> — install the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Browser Add-on</a></li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2>6. Legal Basis (GDPR)</h2>
+      <p>We process cookie data under the following legal bases:</p>
+      <ul>
+        <li><strong>Strictly necessary cookies</strong> — Legitimate Interest (website cannot function without them)</li>
+        <li><strong>Analytics cookies</strong> — Consent (Article 6(1)(a) GDPR)</li>
+        <li><strong>Marketing cookies</strong> — Consent (Article 6(1)(a) GDPR)</li>
+      </ul>
+      <p>As Helyot is based in Cyprus (EU member state), we comply fully with GDPR and the Cyprus implementation thereof.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>7. Contact</h2>
+      <p>For questions about our use of cookies or to exercise your data rights:<br/>
+      Email: <a href="mailto:data@helyot.cy">data@helyot.cy</a><br/>
+      Phone: <a href="tel:+35797499231">+357 97 499 231</a></p>
+      <p>See also our full <a href="/en/privacy">Privacy Policy</a>.</p>
+    </div>
+
+  </div>
+</main>
+<Footer lang={lang}/><CookieConsent lang={lang}/>
+</BaseLayout>

@@ -1,0 +1,114 @@
+---
+/**
+ * RELATED READING — three more articles at the foot of a post.
+ *
+ * Blog posts had two inbound links each: the index and the homepage preview.
+ * Nothing pointed from one article to another, so the section was a set of
+ * dead ends. Picks by shared tag first, then fills up from the newest posts.
+ */
+import { getBlogPosts } from '../../lib/content';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; slug: string; tags?: string[]; }
+const { lang, slug, tags = [] } = Astro.props;
+const en = lang === 'en';
+const base = en ? '/en/blog' : '/ru/blog';
+
+const all = (await getBlogPosts(lang)).filter(p => p.slug !== slug);
+
+/** Score by how many tags a post shares with this one; newest wins on a tie. */
+const scored = all
+  .map(p => ({ p, score: (p.data.tags ?? []).filter((t: string) => tags.includes(t)).length }))
+  .sort((a, b) => b.score - a.score
+    || +new Date(b.p.data.publishedDate) - +new Date(a.p.data.publishedDate));
+
+const picks = scored.slice(0, 3).map(x => x.p);
+
+const fmt = (d: string) =>
+  new Date(d).toLocaleDateString(en ? 'en-GB' : 'ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+
+{picks.length > 0 && (
+  <section class="rr-sec">
+    <div class="container-wide">
+      <p class="cine-label" data-reveal>
+        <span class="cine-label__index">{en ? 'Keep reading' : 'Читать дальше'}</span>
+        {en ? 'From the journal' : 'Из журнала'}
+      </p>
+
+      <div class="rr-list" data-stagger-group>
+        {picks.map((p, i) => (
+          <a href={`${base}/${p.slug}`} class="rr-row" data-stagger-item>
+            <span class="rr-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span class="rr-main">
+              <span class="rr-title">{p.data.title}</span>
+              <span class="rr-desc">{p.data.description}</span>
+            </span>
+            <span class="rr-meta">
+              <time datetime={p.data.publishedDate}>{fmt(p.data.publishedDate)}</time>
+              {p.data.minuteRead && <span class="rr-read">{p.data.minuteRead} {en ? 'min' : 'мин'}</span>}
+            </span>
+          </a>
+        ))}
+      </div>
+
+      <a href={base} class="rr-all" data-reveal>
+        {en ? 'All articles' : 'Все статьи'}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+)}
+
+<style>
+.rr-sec {
+  padding: 4.5rem 0;
+  background: #06060A;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.rr-list { display: flex; flex-direction: column; margin-top: 2rem; }
+.rr-row {
+  display: grid; grid-template-columns: 3rem 1fr auto;
+  gap: 1.5rem; align-items: baseline;
+  padding: 1.3rem 0; text-decoration: none;
+  border-top: 1px solid rgba(255,255,255,.08);
+  transition: padding-left .25s ease;
+}
+.rr-row:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.rr-row:hover { padding-left: .5rem; }
+.rr-n {
+  font-family: 'Spectral', Georgia, serif; font-size: 0.84rem;
+  color: #E8B86D; font-variant-numeric: tabular-nums;
+}
+.rr-main { display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+.rr-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.1rem;
+  color: #F0F0F6; line-height: 1.3; transition: color .18s;
+}
+.rr-row:hover .rr-title { color: #E8B86D; }
+.rr-desc {
+  font-size: .84rem; line-height: 1.6; color: #8288A5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.rr-meta {
+  display: flex; flex-direction: column; align-items: flex-end; gap: .25rem;
+  font-size: 0.72rem; color: #8288A5; white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.rr-read { color: #8288A5; }
+.rr-all {
+  display: inline-flex; align-items: center; gap: .55rem; margin-top: 2rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px; padding: .6rem 1.3rem;
+  transition: background .2s ease, color .2s ease;
+}
+.rr-all svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.rr-all:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.rr-all:hover svg { transform: translateX(3px); }
+
+@media (max-width: 700px) {
+  .rr-sec { padding: 3rem 0; }
+  .rr-row { grid-template-columns: 2.2rem 1fr; gap: .8rem; }
+  .rr-meta { grid-column: 2; flex-direction: row; gap: .8rem; align-items: center; }
+}
+</style>

@@ -1,0 +1,458 @@
+---
+import { type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+
+const steps = lang === 'en' ? [
+  {
+    n: '01', icon: 'visit', title: 'Free Site Visit',
+    when: 'Within 48 hours',
+    color: 'rgba(232,184,109,.14)',
+    desc: 'We come to your property at a time that suits you. We measure every room, photograph the existing condition, and spend as long as you need discussing your brief. No sales pitch.',
+    deliverables: ['Full scope assessment', 'Room-by-room measurements', 'Photo survey', 'Realistic cost estimate'],
+  },
+  {
+    n: '02', icon: 'design', title: '3D Design & Fixed Quote',
+    when: 'Days 2 - 5',
+    color: 'rgba(100,160,255,.12)',
+    desc: 'Our in-house designer prepares full 3D visualisations of every room. You see materials, colours and finishes before a wall is touched. The quote is itemised, fixed, and fully transparent.',
+    deliverables: ['3D renders of every room', 'Material selection board', 'Itemised fixed-price quote', 'Revisions until approved'],
+  },
+  {
+    n: '03', icon: 'contract', title: 'Contract & Start Date',
+    when: 'Days 5 - 7',
+    color: 'rgba(110,219,133,.12)',
+    desc: 'One document. Fixed price. Start date agreed. Nothing in our contract means "this might change later". Every variation requires your written approval before we proceed.',
+    deliverables: ['Fixed-price contract', 'Project schedule', 'Named project manager', 'Confirmed start date'],
+  },
+  {
+    n: '04', icon: 'build', title: 'Build',
+    when: '4 - 16 weeks',
+    color: 'rgba(232,184,109,.14)',
+    desc: 'Real weeks, not vague estimates. Your project manager keeps the schedule and keeps you posted - every Friday, a photo report lands in your inbox: what got finished this week, what starts on Monday, wherever in the world you happen to be.',
+    deliverables: ['Friday photo reports', 'WhatsApp to PM', 'Open-site policy', 'Zero subcontractors'],
+  },
+  {
+    n: '05', icon: 'handover', title: 'Handover & Warranty',
+    when: 'Final day',
+    color: 'rgba(110,219,133,.12)',
+    desc: 'We walk through every room together. Any snagging items are resolved within 5 working days at our cost. You receive keys, CERA certificates, all permits, and your 5-year warranty document.',
+    deliverables: ['Room-by-room walkthrough', 'Snagging resolved in 5 days', 'All permits & certificates', '5-year structural warranty'],
+  },
+] : [
+  {
+    n: '01', icon: 'visit', title: 'Бесплатный выезд',
+    when: 'В течение 48 часов',
+    color: 'rgba(232,184,109,.14)',
+    desc: 'Выезжаем на объект в удобное для вас время. Замеряем каждое помещение, фотографируем текущее состояние. Без обязательств и без продаж.',
+    deliverables: ['Оценка полного объёма', 'Замеры помещений', 'Фотофиксация', 'Реалистичная смета'],
+  },
+  {
+    n: '02', icon: 'design', title: '3D-дизайн и фиксированная смета',
+    when: 'Дни 2 - 5',
+    color: 'rgba(100,160,255,.12)',
+    desc: 'Наш дизайнер готовит полные 3D-визуализации каждого помещения. Вы видите материалы, цвета и отделку до начала работ. Смета постатейная, зафиксированная и прозрачная.',
+    deliverables: ['3D-рендеры каждого помещения', 'Доска выбора материалов', 'Постатейная смета', 'Правки до согласования'],
+  },
+  {
+    n: '03', icon: 'contract', title: 'Договор и дата старта',
+    when: 'Дни 5 - 7',
+    color: 'rgba(110,219,133,.12)',
+    desc: 'Один документ. Фиксированная цена. Дата старта согласована. Любые изменения требуют вашего письменного одобрения до начала выполнения.',
+    deliverables: ['Договор с фиксированной ценой', 'График проекта', 'Назначенный прораб', 'Подтверждённая дата старта'],
+  },
+  {
+    n: '04', icon: 'build', title: 'Строительство',
+    when: '4 - 16 недель',
+    color: 'rgba(232,184,109,.14)',
+    desc: 'Реальные недели, а не примерные сроки. Прораб ведёт график и держит вас в курсе - каждую пятницу в почте фотоотчёт: что сделано на этой неделе, что начнётся в понедельник, где бы вы ни находились.',
+    deliverables: ['Пятничные фотоотчёты', 'WhatsApp с прорабом', 'Свободный доступ', 'Ноль субподрядчиков'],
+  },
+  {
+    n: '05', icon: 'handover', title: 'Сдача и гарантия',
+    when: 'Финальный день',
+    color: 'rgba(110,219,133,.12)',
+    desc: 'Обходим каждое помещение вместе. Замечания устраняются в течение 5 рабочих дней за наш счёт. Вы получаете ключи, сертификаты CERA, разрешения и гарантийный документ.',
+    deliverables: ['Приёмка по помещениям', 'Замечания за 5 дней', 'Все документы и разрешения', 'Гарантия 5 лет на конструктив'],
+  },
+];
+
+const iconPaths: Record<string, string> = {
+  visit: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  design: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  contract: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+  build: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  handover: '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
+};
+
+const stepIcon = (key: string) =>
+  `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${iconPaths[key]}</svg>`;
+
+const checkIcon =
+  `<svg width="13" height="13" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="rgba(232,184,109,.3)"/><path d="M3.5 6L5.5 8L8.5 4" stroke="#C09050" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+---
+
+<style>
+  /* ===== Desktop horizontal accordion ===== */
+  .hwx-row {
+    display: flex;
+    gap: 1rem;
+    height: 560px;
+  }
+  .hwx-panel {
+    position: relative;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0%;
+    min-width: 90px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #161C2C;
+    border: 1px solid rgba(255,255,255,.08);
+    transition: flex-grow .65s cubic-bezier(0.16,1,0.3,1), min-width .65s cubic-bezier(0.16,1,0.3,1), background-color .4s ease, border-color .4s ease, box-shadow .4s ease;
+  }
+  .hwx-panel.is-active {
+    flex-grow: 4;
+    min-width: 380px;
+    background: #1A2236;
+    border-color: rgba(232,184,109,.45);
+    box-shadow: 0 24px 60px -28px rgba(0,0,0,.6);
+  }
+  .hwx-panel:focus-visible {
+    outline: 2px solid #E8B86D;
+    outline-offset: 2px;
+  }
+
+  /* Collapsed strip */
+  .hwx-collapsed {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    opacity: 1;
+    transition: opacity .3s ease;
+  }
+  .hwx-panel.is-active .hwx-collapsed {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .hwx-plus {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.14);
+    color: #9CA3AF;
+    flex-shrink: 0;
+    transition: border-color .3s, color .3s, background-color .3s;
+  }
+  .hwx-panel:hover .hwx-plus {
+    border-color: rgba(232,184,109,.5);
+    color: #C09050;
+    background: rgba(232,184,109,.1);
+  }
+  .hwx-vert {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .9rem;
+    white-space: nowrap;
+  }
+  .hwx-vert-num {
+    font-family:'Spectral',Georgia,serif;
+    font-weight: 800;
+    font-size: .72rem;
+    color: #E8B86D;
+    letter-spacing: .05em;
+  }
+  .hwx-vert-title {
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: #E2E5EC;
+  }
+  .hwx-dotind {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    flex-shrink: 0;
+    transition: background-color .3s;
+  }
+  .hwx-panel:hover .hwx-dotind {
+    background: #E8B86D;
+  }
+
+  /* Expanded content */
+  .hwx-expanded {
+    position: absolute;
+    inset: 0;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+    overflow: hidden;
+  }
+  .hwx-panel.is-active .hwx-expanded {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity .5s ease .2s;
+  }
+  .hwx-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .hwx-icon-box {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: #E8B86D;
+  }
+  .hwx-head-text { display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+  .hwx-num {
+    font-family:'Spectral',Georgia,serif;
+    font-weight: 800;
+    font-size: .72rem;
+    letter-spacing: .15em;
+    color: #E8B86D;
+  }
+  .hwx-head-text h3 {
+    font-family:'Spectral',Georgia,serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -.01em;
+    color: #F5F6FA;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .hwx-when {
+    display: inline-flex;
+    align-self: flex-start;
+    font-size: .65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    color: #A9AFC0;
+    white-space: nowrap;
+  }
+  .hwx-desc {
+    font-size: .92rem;
+    line-height: 1.8;
+    color: #9AA1B5;
+    margin: 0 0 1.75rem;
+    max-width: 50ch;
+  }
+  .hwx-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+    margin-top: auto;
+  }
+  .hwx-card {
+    display: flex; align-items: flex-start; gap: .6rem;
+    padding: .9rem 1rem;
+    background: #1B2233;
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 10px;
+    font-size: .82rem;
+    color: #C5CAD9;
+    line-height: 1.45;
+  }
+  .hwx-check { flex-shrink: 0; margin-top: .15rem; }
+
+  /* Mobile vertical accordion */
+  .hwx-mobile { display: none; }
+  .hwx-m-item { border-bottom: 1px solid rgba(255,255,255,.08); }
+  .hwx-m-item:first-child { border-top: 1px solid rgba(255,255,255,.08); }
+  .hwx-m-summary {
+    list-style: none;
+    display: flex; align-items: center; gap: .9rem;
+    padding: 1.25rem 0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .hwx-m-summary::-webkit-details-marker { display: none; }
+  .hwx-m-num {
+    font-family:'Spectral',Georgia,serif;
+    font-weight: 800;
+    font-size: .85rem;
+    color: #E8B86D;
+    flex-shrink: 0;
+  }
+  .hwx-m-title {
+    font-family:'Spectral',Georgia,serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #F0F2F8;
+    flex: 1;
+  }
+  .hwx-m-when {
+    font-size: .6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    color: #A9AFC0;
+    white-space: nowrap;
+  }
+  .hwx-m-chev {
+    flex-shrink: 0;
+    color: #9AA1B5;
+    transition: transform .3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .hwx-m-item[open] .hwx-m-chev { transform: rotate(180deg); }
+  .hwx-m-body { padding: 0 0 1.5rem; }
+  .hwx-m-body p {
+    font-size: .85rem;
+    color: #9AA1B5;
+    line-height: 1.7;
+    margin: 0 0 1rem;
+  }
+
+  .pt-del-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .4rem .5rem;
+  }
+  @media (max-width: 480px) {
+    .pt-del-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 959px) {
+    .hwx-row { display: none; }
+    .hwx-mobile { display: block; }
+  }
+</style>
+
+<section id="process" style="background:#0E1320;border-top:1px solid rgba(255,255,255,.06);padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+
+    <!-- Section header -->
+    <div class="reveal" style="display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;margin-bottom:3rem;">
+      <div>
+        <p style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#E8B86D;margin-bottom:.5rem;">
+          {lang==='en'?'HOW WE WORK':'КАК МЫ РАБОТАЕМ'}
+        </p>
+        <h2 style="font-family:'Spectral',Georgia,serif;font-weight:700;font-size:clamp(1.8rem,3.5vw,2.5rem);letter-spacing:-.02em;color:#F5F6FA;">
+          {lang==='en'?'What happens at each stage':'Что происходит на каждом этапе'}
+        </h2>
+      </div>
+      <a href="/en/process"
+         style="display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:600;color:#E8B86D;text-decoration:none;white-space:nowrap;padding:.4rem 0;border-bottom:1px solid rgba(232,184,109,.25);transition:border-color .2s,opacity .2s;"
+         onmouseover="this.style.borderColor='rgba(232,184,109,.7)'"
+         onmouseout="this.style.borderColor='rgba(232,184,109,.25)'">
+        {lang==='en'?'Full process':'Подробнее'}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <!-- Desktop: horizontal accordion, 5 panels in a row -->
+    <div class="hwx-row reveal" id="hwx-row">
+      {steps.map((s, i) => (
+        <div class={`hwx-panel${i === 0 ? ' is-active' : ''}`} data-idx={i} tabindex="0" role="button" aria-expanded={i === 0 ? 'true' : 'false'}>
+
+          <!-- Collapsed: vertical label strip -->
+          <div class="hwx-collapsed">
+            <span class="hwx-plus" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </span>
+            <span class="hwx-vert">
+              <span class="hwx-vert-num">{s.n}</span>
+              <span class="hwx-vert-title">{s.title}</span>
+            </span>
+            <span class="hwx-dotind" aria-hidden="true"></span>
+          </div>
+
+          <!-- Expanded: icon, title, description, deliverables grid -->
+          <div class="hwx-expanded">
+            <div class="hwx-head">
+              <div class="hwx-icon-box" style={`background:${s.color}`} set:html={stepIcon(s.icon)} />
+              <div class="hwx-head-text">
+                <span class="hwx-num">{s.n}</span>
+                <h3>{s.title}</h3>
+                <span class="hwx-when" style={`background:${s.color}`}>{s.when}</span>
+              </div>
+            </div>
+            <p class="hwx-desc">{s.desc}</p>
+            <div class="hwx-grid">
+              {s.deliverables.map(d => (
+                <div class="hwx-card">
+                  <span class="hwx-check" set:html={checkIcon} />
+                  <span>{d}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+    <!-- Mobile: vertical accordion -->
+    <div class="hwx-mobile reveal">
+      {steps.map((s, i) => (
+        <details class="hwx-m-item" open={i === 0}>
+          <summary class="hwx-m-summary">
+            <span class="hwx-m-num">{s.n}</span>
+            <span class="hwx-m-title">{s.title}</span>
+            <span class="hwx-m-when" style={`background:${s.color}`}>{s.when}</span>
+            <svg class="hwx-m-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="hwx-m-body">
+            <p>{s.desc}</p>
+            <div class="pt-del-grid">
+              {s.deliverables.map(d => (
+                <div style="display:flex;align-items:flex-start;gap:.5rem;">
+                  <span class="hwx-check" set:html={checkIcon} />
+                  <span style="font-size:.8rem;color:#9AA1B5;line-height:1.5;">{d}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </details>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<script is:inline>
+(function() {
+  var row = document.getElementById('hwx-row');
+  if (!row) return;
+  var panels = row.querySelectorAll('.hwx-panel');
+  var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  function setActive(idx) {
+    panels.forEach(function(p, i) {
+      var active = i === idx;
+      p.classList.toggle('is-active', active);
+      p.setAttribute('aria-expanded', active ? 'true' : 'false');
+    });
+  }
+
+  panels.forEach(function(p, i) {
+    p.addEventListener('click', function() { setActive(i); });
+    p.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(i); }
+    });
+    if (canHover) {
+      p.addEventListener('mouseenter', function() { setActive(i); });
+    }
+  });
+})();
+</script>

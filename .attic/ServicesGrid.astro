@@ -1,0 +1,930 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; hideMethod?: boolean; }
+const { lang, hideMethod = false } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+const en = lang === 'en';
+const servicesBase = en ? '/en/services' : '/ru/uslugi';
+
+/* ── THE HELYOT METHOD — intro stats + 3 stages ───────────────────────────── */
+const methodStats = en ? [
+  { value: '1', label: 'specification — survives from first sketch to final sign-off' },
+  { value: '0', label: 'subcontractors passing your project between companies' },
+  { value: '1', label: 'team that built it is the one that answers for it after' },
+] : [
+  { value: '1', label: 'спецификация — от первого эскиза до подписи в акте' },
+  { value: '0', label: 'субподрядчиков, передающих ваш проект из рук в руки' },
+  { value: '1', label: 'команда — та же, что строила, отвечает и потом' },
+];
+
+const stages = [
+  {
+    id: 'plan',
+    step: '01',
+    label: en ? 'PLAN' : 'ПЛАНИРОВАНИЕ',
+    title: en
+      ? 'We measure twice. You sign once.'
+      : 'Мы измеряем дважды — вы подписываете один раз.',
+    body: en
+      ? "This is usually where renovations start drifting — when the architect's drawing, the contractor's number and the picture in your head turn out to be three different projects sharing one address. We close that gap before it opens: the same people who measure your rooms are the ones who price the job and the ones who build it. There's only ever one version of the plan, so there's nothing left to misread later."
+      : 'Обычно именно здесь ремонт начинает плыть — когда чертёж архитектора, смета подрядчика и то, что представляли вы, оказываются тремя разными проектами с одним адресом. Мы закрываем этот разрыв заранее: те же люди, что замеряют комнаты, считают смету и потом строят. Версия плана всегда одна — переосмыслять позже просто нечего.',
+    bullets: en
+      ? ['One team measures, prices and builds — the plan never changes hands', 'Every material and finish agreed on paper before a single order goes out']
+      : ['Одна команда замеряет, считает и строит — план не передаётся из рук в руки', 'Материалы и отделка согласованы на бумаге до первого заказа'],
+    href: '#booking',
+    linkLabel: en ? 'Request your free site visit' : 'Запросить бесплатный выезд',
+    img: '/images/projects/marina-penthouse.webp',
+    imgAlt: en ? 'Precision in every detail — a completed Helyot project in Limassol' : 'Точность в каждой детали — завершённый проект Helyot в Лимасоле',
+    stat: { value: '1', label: en ? 'version of the plan — yours, ours, the same' : 'версия плана — общая, без разночтений' },
+  },
+  {
+    id: 'build',
+    step: '02',
+    label: en ? 'BUILD' : 'СТРОИТЕЛЬСТВО',
+    title: en
+      ? 'No subcontractors. No phone tag. No excuses.'
+      : 'Без субподрядчиков. Без беготни по звонкам. Без отговорок.',
+    body: en
+      ? "The moment your electrician and your tiler answer to two different bosses, your renovation becomes a negotiation between their companies — and you're the one stuck refereeing it. On a Helyot site, every trade reports to the same project manager, who reports to you. There's no second company to call, no other foreman to blame, and no version of events that contradicts another."
+      : 'Как только ваш электрик и ваш плиточник подчиняются двум разным компаниям, ремонт превращается в переговоры между ними — а разруливать приходится вам. На объекте Helyot каждый специалист отчитывается одному и тому же прорабу, который отчитывается вам. Звонить больше некуда, кивать не на кого, и версии происходящего не расходятся.',
+    bullets: en
+      ? ['Every trade on site is a Helyot employee — never a borrowed crew', 'The same project manager, on site, every working day of the build']
+      : ['Каждый специалист на объекте — в штате Helyot, а не «знакомая бригада»', 'Один и тот же прораб на объекте каждый рабочий день стройки'],
+    href: en ? '/en/services/apartment-renovation' : '/ru/uslugi/apartment-renovation',
+    linkLabel: en ? 'See how a Helyot build runs' : 'Как проходит стройка у Helyot',
+    img: '/images/hero-bg.webp',
+    imgAlt: en ? 'A Helyot site at sunrise — foundations laid, plans on the table' : 'Объект Helyot на рассвете — заложен фундамент, чертежи на столе',
+    stat: { value: '0', label: en ? 'other companies to call when something needs explaining' : 'компаний на стороне — все в штате Helyot' },
+  },
+  {
+    id: 'oversee',
+    step: '03',
+    label: en ? 'OVERSEE' : 'ГАРАНТИЯ',
+    title: en
+      ? 'The day you get your keys is the day our job really starts.'
+      : 'Когда вы получаете ключи — наша работа только начинается.',
+    body: en
+      ? 'Most contractors disappear the week after handover, and the warranty becomes a number in a drawer that nobody picks up. Ours doesn\'t work that way — because the team that built your home is the same team that stands behind it. One photo, one message to our aftercare line, and the people who know exactly how your walls were built are the ones who come to fix them.'
+      : 'Большинство подрядчиков исчезают через неделю после сдачи, а гарантия превращается в номер в ящике стола, на который никто не отвечает. У нас иначе: команда, которая строила ваш дом, — та же, что отвечает за него потом. Одно фото, одно сообщение в сервисную линию — и приезжают именно те, кто знает, как устроены ваши стены.',
+    bullets: en
+      ? ['Structural and waterproofing cover written into the contract — never sold as an add-on', 'One message to our aftercare line, answered by people who already know your project']
+      : ['Гарантия на конструктив и гидроизоляцию — в договоре, а не платной опцией', 'Одно сообщение в сервисную линию — отвечают те, кто уже знает ваш объект'],
+    href: en ? '/en/process' : '/ru/kontakty',
+    linkLabel: en ? 'How our warranty works' : 'Как работает наша гарантия',
+    img: '/images/projects/germasogeia-villa.webp',
+    imgAlt: en ? 'Completed villa handover — Helyot Limassol' : 'Передача готовой виллы — Helyot Лимасол',
+    stat: { value: '5+10', label: en ? 'years — structural frame, then waterproofing' : 'лет — конструктив и гидроизоляция' },
+  },
+];
+
+/* ── Small service cards ─────────────────────────────────────────────────── */
+const catAccent: Record<string,string> = {
+  spaces:'#E8B86D', commercial:'#818CF8', specialist:'#22D3EE', trades:'#94A3B8'
+};
+const catLabel: Record<string,string> = {
+  spaces: en?'Spaces':'Помещения',
+  commercial: en?'Commercial':'Коммерческий',
+  specialist: en?'Specialist':'Специальные',
+  trades: en?'Trades':'Отделка',
+};
+
+/* SVG paths for each card — Heroicons outline 24px */
+const icons: Record<string,string> = {
+  bath: 'M4 22h16M10 2v4m4-4v4M4 10h16M4 14h16M6 18h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z',
+  kitchen: 'M3 6h18M3 12h18M3 18h18M9 6v12M15 6v12',
+  office: 'M3 21V8l9-5 9 5v13M3 21h18M9 21v-6h6v6',
+  pool: 'M2 12c2-4 6-4 8 0s6 4 8 0M2 18c2-4 6-4 8 0s6 4 8 0M2 6c2-4 6-4 8 0s6 4 8 0',
+  terrace: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10',
+  smart: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18',
+  floor: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
+  paint: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
+  water: 'M12 3c-4.97 0-9 3.582-9 8 0 2.898 1.765 5.41 4.38 6.814L7 21h10l-.38-3.186C19.235 16.41 21 13.898 21 11c0-4.418-4.03-8-9-8z',
+};
+
+type Card = { iconKey:string; num:string; cat:string; title:string; price:string; href:string; desc:string };
+const smallCards: Card[] = [
+  { iconKey:'bath',    num:'04', cat:'spaces',     title:tr('services.bathroom'),    price:en?'from €3,500':'от €3 500',  href:`${servicesBase}/bathroom-renovation`,    desc:en?'Full bathroom renovation — waterproofing, tiling, sanitary ware.':'Полный ремонт ванной — гидроизоляция, плитка, сантехника.' },
+  { iconKey:'kitchen', num:'05', cat:'spaces',     title:tr('services.kitchen'),     price:en?'from €8,000':'от €8 000',  href:`${servicesBase}/kitchen-renovation`,     desc:en?'Custom kitchen redesign, cabinetry, worktops, appliances.':'Перепланировка кухни, мебель, столешница, техника.' },
+  { iconKey:'office',  num:'06', cat:'commercial', title:tr('services.office'),      price:en?'from €250/m²':'от €250/м²',href:en?'/en/services/office-fit-out':'/ru/uslugi/office-fit-out', desc:en?'Office fit-out — partitioning, M&E, AV, smart systems.':'Офис: перегородки, инженерия, AV, умный дом.' },
+  { iconKey:'pool',    num:'07', cat:'spaces',     title:tr('services.pool'),        price:en?'from €4,500':'от €4 500',  href:`${servicesBase}/pool-renovation`,        desc:en?'Pool resurfacing, tiling, filtration and deck works.':'Гидроизоляция, облицовка, фильтрация, отмостка.' },
+  { iconKey:'terrace', num:'08', cat:'spaces',     title:tr('services.terrace'),     price:en?'from €1,800':'от €1 800',  href:`${servicesBase}/terrace-outdoor`,        desc:en?'Pergolas, decking, outdoor kitchens and landscaping.':'Pergola, декинг, летние кухни, озеленение.' },
+  { iconKey:'smart',   num:'09', cat:'specialist', title:tr('services.smartHome'),   price:en?'from €3,000':'от €3 000',  href:`${servicesBase}/smart-home`,             desc:en?'KNX, Lutron, Sonos — climate, lighting and security.':'KNX, Lutron, Sonos — климат, свет, безопасность.' },
+  { iconKey:'floor',   num:'10', cat:'trades',     title:tr('services.flooring'),    price:en?'from €35/m²':'от €35/м²',  href:`${servicesBase}/flooring`,               desc:en?'Engineered wood, porcelain, marble and luxury vinyl.':'Паркет, керамогранит, мрамор, LVT.' },
+  { iconKey:'paint',   num:'11', cat:'trades',     title:tr('services.painting'),    price:en?'from €18/m²':'от €18/м²',  href:`${servicesBase}/painting-plastering`,    desc:en?'Machine plaster, decorative finishes and paint systems.':'Машинная штукатурка, декоративные покрытия.' },
+  { iconKey:'water',   num:'12', cat:'trades',     title:tr('services.waterproofing'),price:en?'from €22/m²':'от €22/м²', href:`${servicesBase}/waterproofing`,          desc:en?'Flat roof, terrace and wet room waterproofing.':'Гидроизоляция кровель, террас, ванных.' },
+];
+---
+
+<!-- ══ THE HELYOT METHOD ════════════════════════════════════════════════════ -->
+{!hideMethod && (
+<section id="method" style="background:#121219;border-top:1px solid rgba(255,255,255,.07);padding:6rem 0 5rem;">
+  <div class="container-wide">
+
+    <!-- Intro band — centered headline + paragraph, glass-card stat plates below ── -->
+    <div class="method-intro reveal" id="method-intro">
+      <div class="method-glow" aria-hidden="true"></div>
+      <div class="method-copy">
+        <p class="method-eyebrow">
+          <span class="method-eyebrow-mark" aria-hidden="true"></span>
+          {en ? 'THE HELYOT DIFFERENCE' : 'ОТЛИЧИЕ HELYOT'}
+          <span class="method-eyebrow-mark" aria-hidden="true"></span>
+        </p>
+        <h2 class="method-h2">
+          {en ? (
+            <><span class="m-line">Renovations don't fail on site.</span><span class="m-line">They fail <em>in the gaps</em> between contractors.</span></>
+          ) : (
+            <><span class="m-line">Ремонт не проваливается на стройке.</span><span class="m-line">Он проваливается <em>в&nbsp;зазорах</em></span><span class="m-line">между подрядчиками.</span></>
+          )}
+        </h2>
+        <p class="method-sub">
+          {en
+            ? 'A typical Limassol renovation passes through five companies that have never worked together — the architect, the contractor, the electrician, the tiler, the painter — and you stand in the middle, absorbing every dropped handoff, every "that wasn’t in my scope." We close those gaps differently. Here is exactly how — in three stages.'
+            : 'Обычный ремонт в Лимасоле проходит через пять компаний, которые никогда не работали вместе — архитектор, подрядчик, электрик, плиточник, маляр, — а вы остаётесь посередине и расхлёбываете каждую нестыковку, каждое «это не моя зона ответственности». Мы закрываем эти зазоры иначе. Вот как именно — в три этапа.'}
+        </p>
+      </div>
+
+      <!-- Stat plates — glass cards (same frosted-glass language as the stage badges), corner ticks echo the architectural motif -->
+      <div class="method-stats" role="list" aria-label={en ? 'Three numbers that matter' : 'Три цифры, которые важны'}>
+        {methodStats.map((s, i) => (
+          <div class="method-stat" role="listitem" style={`transition-delay:${.1 + i * .08}s`}>
+            <span class="method-stat-tick method-stat-tick--tl" aria-hidden="true"></span>
+            <span class="method-stat-tick method-stat-tick--br" aria-hidden="true"></span>
+            <span class="method-stat-num">{s.value}</span>
+            <span class="method-stat-label">{s.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Rail + stages -->
+    <div class="method-grid">
+
+      <!-- Sticky rail -->
+      <nav class="method-rail" aria-label={en ? 'Process steps' : 'Этапы работы'}>
+        <div class="rail-track" aria-hidden="true"><span class="rail-fill" id="rail-fill"></span></div>
+        {stages.map((s, i) => (
+          <button type="button" class="rail-item" data-rail={i} data-target={`stage-${s.id}`} aria-label={s.title}>
+            <span class="rail-dot" aria-hidden="true"></span>
+            <span class="rail-text">
+              <span class="rail-step">{s.step}</span>
+              <span class="rail-label">{s.label}</span>
+            </span>
+          </button>
+        ))}
+      </nav>
+
+      <!-- Stages -->
+      <div class="method-stages">
+        {stages.map((s, i) => (
+          <article class={`stage ${i % 2 === 1 ? 'stage--reverse' : ''} reveal`} id={`stage-${s.id}`} data-stage={i}>
+
+            <div class="stage-text">
+              <div class="stage-meta">
+                <span class="stage-step">{s.step}</span>
+                <span class="stage-meta-line" aria-hidden="true"></span>
+                <span class="stage-label">{s.label}</span>
+              </div>
+              <h3 class="stage-title">{s.title}</h3>
+              <p class="stage-body">{s.body}</p>
+              <ul class="stage-bullets">
+                {s.bullets.map(b => (
+                  <li>
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <circle cx="10" cy="10" r="9" stroke="rgba(232,184,109,.3)"/>
+                      <path d="M6 10l2.5 2.5L14 7" stroke="#E8B86D" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+              <a href={s.href} class="stage-link">
+                {s.linkLabel}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+              </a>
+            </div>
+
+            <div class="stage-visual" aria-hidden="true">
+              <span class="stage-ghost">{s.step}</span>
+              <img src={s.img} alt={s.imgAlt} width="640" height="520" loading="lazy" class="stage-img" />
+              <div class="stage-overlay"></div>
+              <div class="stage-badge">
+                <span class="stage-badge-value">{s.stat.value}</span>
+                <span class="stage-badge-label">{s.stat.label}</span>
+              </div>
+            </div>
+
+          </article>
+        ))}
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script is:inline>
+(function(){
+  var grid   = document.querySelector('.method-grid');
+  var navEl  = document.querySelector('.method-rail');
+  var rail   = document.querySelectorAll('.rail-item');
+  var fill   = document.getElementById('rail-fill');
+  var stages = document.querySelectorAll('.stage');
+  if(!grid || !navEl || !rail.length || !stages.length) return;
+
+  var TOP_OFFSET = 120; /* matches design top gap above the rail */
+  var tick = false;
+
+  function setActive(idx){
+    rail.forEach(function(el, i){ el.classList.toggle('is-active', i === idx); });
+    if(fill) fill.style.height = (((idx + 1) / rail.length) * 100) + '%';
+  }
+
+  /* Pin the rail with JS — position:sticky can't target the viewport here
+     because html/body compute overflow-y:auto from overflow-x:hidden,
+     making <body> (not the viewport) the sticky containing block. */
+  function updateRailPosition(){
+    if(window.innerWidth < 901){
+      navEl.classList.remove('rail-fixed', 'rail-pinned');
+      navEl.style.left = '';
+      return;
+    }
+    var gridRect  = grid.getBoundingClientRect();
+    var railH     = navEl.offsetHeight;
+
+    if(gridRect.top > TOP_OFFSET){
+      navEl.classList.remove('rail-fixed', 'rail-pinned');
+      navEl.style.left = '';
+    } else if(gridRect.bottom - railH > TOP_OFFSET){
+      navEl.classList.add('rail-fixed');
+      navEl.classList.remove('rail-pinned');
+      navEl.style.left = gridRect.left + 'px';
+    } else {
+      navEl.classList.remove('rail-fixed');
+      navEl.classList.add('rail-pinned');
+      navEl.style.left = '';
+    }
+  }
+
+  function onScroll(){
+    if(tick) return;
+    tick = true;
+    requestAnimationFrame(function(){ updateRailPosition(); tick = false; });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  updateRailPosition();
+
+  rail.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = btn.getAttribute('data-target');
+      var target = id ? document.getElementById(id) : null;
+      if(target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          setActive(parseInt(entry.target.getAttribute('data-stage') || '0', 10));
+        }
+      });
+    }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
+    stages.forEach(function(s){ io.observe(s); });
+  } else {
+    setActive(0);
+  }
+})();
+</script>
+)}
+
+<!-- ══ SMALL SERVICE CARDS ══════════════════════════════════════════════════ -->
+<section style="background:#0E1320;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;" id="services">
+  <div class="container-wide">
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-bottom:3rem;" class="reveal">
+      <div>
+        <p style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#E8B86D;margin-bottom:.75rem;">{en?'MORE SERVICES':'ДРУГИЕ УСЛУГИ'}</p>
+        <h2 style="font-family:'Spectral','Georgia',system-ui,sans-serif;font-weight:800;font-size:clamp(1.8rem,3.5vw,2.5rem);letter-spacing:-.025em;color:#F5F6FA;">
+          {en?'Every trade. Every time. In-house.':'Все работы. Всегда. Своими силами.'}
+        </h2>
+      </div>
+      <a href={en ? '/en/services' : '/ru/uslugi/apartment-renovation'} class="svc-more-link" aria-label={en?'All 20 services':'Все 20 услуг'}>
+        {en?'All 20 services':'Все 20 услуг'}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
+    </div>
+
+    <div class="svc-grid">
+      {smallCards.map((s, i) => (
+        <a href={s.href}
+           class="svc-card reveal"
+           style={`animation-delay:${i*0.05}s`}
+           aria-label={s.title}>
+
+          <!-- Accent bar — brand colour of the service category, brightens on hover -->
+          <span class="svc-accent" aria-hidden="true" style={`background:linear-gradient(90deg,${catAccent[s.cat]},transparent);`}></span>
+
+          <!-- Ghost number -->
+          <span class="svc-num" aria-hidden="true">{s.num}</span>
+
+          <!-- SVG icon box -->
+          <div class="svc-icon" style={`border-color:${catAccent[s.cat]}30;background:${catAccent[s.cat]}0D;`}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                 stroke={catAccent[s.cat]} stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d={icons[s.iconKey]}/>
+            </svg>
+          </div>
+
+          <!-- Category tag -->
+          <span class="svc-tag" style={`color:${catAccent[s.cat]};border-color:${catAccent[s.cat]}22;background:${catAccent[s.cat]}0D;`}>
+            {catLabel[s.cat]}
+          </span>
+          <h3 class="svc-title">{s.title}</h3>
+          <p class="svc-desc">{s.desc}</p>
+          <div class="svc-footer">
+            <span class="svc-price">{s.price}</span>
+            <span class="svc-arrow-wrap" aria-hidden="true">
+              {en ? 'Learn more' : 'Подробнее'}
+              <svg class="svc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </span>
+          </div>
+
+        </a>
+      ))}
+    </div>
+
+    <div style="text-align:center;margin-top:2.5rem;" class="reveal">
+      <a href={en ? '/en/services' : '/ru/uslugi/apartment-renovation'} class="btn-outline">
+        {en?'All 20 services →':'Все 20 услуг →'}
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ── Method intro band — centered headline + glass stat plates ──
+     Soft radial glow gives the band depth; plates reuse the frosted-
+     glass language already proven on the stage badges below.       ── */
+  .method-intro {
+    position: relative;
+    isolation: isolate;
+    max-width: 760px;
+    margin: 0 auto 4.5rem;
+    text-align: center;
+  }
+  .method-glow {
+    position: absolute;
+    top: -6rem;
+    left: 50%;
+    width: 640px;
+    height: 360px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(232,184,109,.07), transparent 72%);
+    filter: blur(8px);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .method-copy { min-width: 0; }
+  .method-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .28em;
+    color: #E8B86D;
+    margin: 0 0 1.5rem;
+  }
+  .method-eyebrow-mark {
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: #E8B86D;
+    opacity: .8;
+    flex-shrink: 0;
+  }
+  .method-h2 {
+    font-family: 'Spectral','Georgia',system-ui,sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 3.6vw, 2.875rem);
+    letter-spacing: -.03em;
+    line-height: 1.28;
+    color: #F0F0F6;
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+  }
+  .method-h2 .m-line { display: block; }
+  .method-h2 em {
+    font-style: normal;
+    color: #E8B86D;
+  }
+  .method-sub {
+    font-size: .9375rem;
+    color: #9090A8;
+    line-height: 1.8;
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  /* ── Stat plates — frosted-glass cards, corner ticks (architectural motif) ── */
+  .method-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    max-width: 720px;
+    margin: 3rem auto 0;
+  }
+  .method-stat {
+    position: relative;
+    flex: 1 1 208px;
+    padding: 1.875rem 1.5rem;
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity .6s var(--m-ease, cubic-bezier(.16,1,.3,1)),
+                transform .6s var(--m-ease, cubic-bezier(.16,1,.3,1)),
+                border-color .3s ease, background-color .3s ease;
+  }
+  .method-intro.visible .method-stat { opacity: 1; transform: none; }
+  .method-stat:hover {
+    border-color: rgba(232,184,109,.3);
+    background: rgba(255,255,255,.04);
+  }
+  .method-stat-tick {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 1px solid rgba(232,184,109,.4);
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+  .method-stat:hover .method-stat-tick { opacity: 1; }
+  .method-stat-tick--tl { top: -1px; left: -1px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
+  .method-stat-tick--br { bottom: -1px; right: -1px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
+  .method-stat-num {
+    display: block;
+    font-family: 'Spectral','Georgia',system-ui,sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.875rem, 2.6vw, 2.375rem);
+    letter-spacing: -.025em;
+    line-height: 1;
+    color: #E8B86D;
+    margin-bottom: .625rem;
+  }
+  .method-stat-label {
+    display: block;
+    font-size: .8rem;
+    color: #9090A8;
+    line-height: 1.55;
+  }
+
+  /* ── Rail + stages grid ──────────────────────────────────── */
+  .method-grid {
+    display: grid;
+    grid-template-columns: 168px 1fr;
+    gap: 4rem;
+    align-items: start;
+    position: relative;
+  }
+
+  /* Rail — pinned via JS (position:sticky is unreliable here because
+     html/body compute overflow-y:auto from overflow-x:hidden, which
+     makes <body> the sticky containing block instead of the viewport) */
+  .method-rail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-left: 1.75rem;
+    width: 168px;
+  }
+  .method-rail.rail-fixed {
+    position: fixed;
+    top: 7.5rem;
+  }
+  .method-rail.rail-pinned {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+  }
+  .rail-track {
+    position: absolute;
+    left: 0;
+    top: .35rem;
+    bottom: .35rem;
+    width: 1px;
+    background: rgba(255,255,255,.08);
+  }
+  .rail-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 0%;
+    background: #E8B86D;
+    transition: height .4s cubic-bezier(.16,1,.3,1);
+  }
+  .rail-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .875rem;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    opacity: .4;
+    transition: opacity .25s;
+  }
+  .rail-item:hover { opacity: .7; }
+  .rail-item.is-active { opacity: 1; }
+  .rail-dot {
+    position: absolute;
+    left: -1.75rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #121219;
+    border: 1.5px solid rgba(255,255,255,.25);
+    transition: border-color .25s, background .25s, transform .25s;
+  }
+  .rail-item.is-active .rail-dot {
+    background: #E8B86D;
+    border-color: #E8B86D;
+    transform: scale(1.25);
+  }
+  .rail-text { display: flex; flex-direction: column; gap: .15rem; }
+  .rail-step {
+    font-family: 'Spectral','Georgia',system-ui;
+    font-size: .68rem;
+    font-weight: 700;
+    color: #E8B86D;
+    letter-spacing: .14em;
+  }
+  .rail-label {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #C0C0D8;
+  }
+
+  /* Stages */
+  .method-stages {
+    display: flex;
+    flex-direction: column;
+    gap: 7rem;
+    grid-column: 2;
+    min-width: 0;
+  }
+  .stage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    align-items: center;
+  }
+  .stage--reverse .stage-text { order: 2; }
+  .stage--reverse .stage-visual { order: 1; }
+
+  .stage-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .stage-step {
+    font-family: 'Spectral','Georgia',system-ui;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #E8B86D;
+    letter-spacing: .16em;
+  }
+  .stage-meta-line {
+    width: 24px;
+    height: 1px;
+    background: rgba(232,184,109,.3);
+    flex-shrink: 0;
+    display: block;
+  }
+  .stage-label {
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    color: #7878A0;
+    text-transform: uppercase;
+  }
+  .stage-title {
+    font-family: 'Spectral','Georgia',system-ui,sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.5rem, 2.6vw, 2.05rem);
+    letter-spacing: -.025em;
+    line-height: 1.18;
+    color: #F0F0F6;
+    margin: 0 0 1.1rem;
+  }
+  .stage-body {
+    font-size: .9rem;
+    color: #7878A0;
+    line-height: 1.75;
+    max-width: 480px;
+    margin: 0 0 1.75rem;
+  }
+  .stage-bullets {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin: 0 0 2rem;
+    padding: 0;
+    list-style: none;
+  }
+  .stage-bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    font-size: .85rem;
+    color: #C0C0D8;
+    line-height: 1.5;
+  }
+  .stage-bullets svg { flex-shrink: 0; margin-top: .15rem; }
+  .stage-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .85rem;
+    font-weight: 600;
+    color: #E8B86D;
+    text-decoration: none;
+    transition: gap .2s cubic-bezier(.16,1,.3,1), opacity .15s;
+  }
+  .stage-link:hover { gap: .875rem; opacity: .85; }
+
+  /* Visual side */
+  .stage-visual {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.07);
+    background: #15151E;
+    aspect-ratio: 6 / 5;
+  }
+  .stage-ghost {
+    position: absolute;
+    top: -1.25rem;
+    right: -.5rem;
+    font-family: 'Spectral','Georgia',system-ui;
+    font-size: 9rem;
+    font-weight: 900;
+    line-height: 1;
+    color: rgba(255,255,255,.04);
+    z-index: 1;
+    letter-spacing: -.05em;
+    pointer-events: none;
+    user-select: none;
+  }
+  .stage-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform .6s cubic-bezier(.16,1,.3,1);
+  }
+  .stage-visual:hover .stage-img { transform: scale(1.04); }
+  .stage-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(18,18,25,.8) 0%, rgba(18,18,25,.05) 45%);
+    z-index: 2;
+  }
+  .stage-badge {
+    position: absolute;
+    left: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    background: rgba(18,18,25,.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    padding: .75rem 1.125rem;
+  }
+  .stage-badge-value {
+    font-family: 'Spectral','Georgia',system-ui,sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -.02em;
+    color: #E8B86D;
+  }
+  .stage-badge-label {
+    font-size: .65rem;
+    color: #9090A8;
+    max-width: 160px;
+    line-height: 1.4;
+  }
+
+  /* ── Small service cards ─────────────────────────────────── */
+  .svc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .svc-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #161C2C;
+    border: 1px solid rgba(255,255,255,.08);
+    padding: 1.875rem 1.625rem;
+    text-decoration: none;
+    transition: transform .28s cubic-bezier(.16,1,.3,1), border-color .25s ease-out, background .25s ease-out, box-shadow .28s ease-out;
+    display: block;
+    cursor: pointer;
+  }
+  .svc-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(232,184,109,.4);
+    background: #1A2236;
+    box-shadow: 0 20px 48px -16px rgba(232,184,109,.18), 0 4px 16px rgba(0,0,0,.3);
+  }
+
+  /* Top accent bar — category colour, fades in on hover */
+  .svc-accent {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2.5px;
+    opacity: 0;
+    transform: scaleX(.4);
+    transform-origin: left center;
+    transition: opacity .25s ease-out, transform .35s cubic-bezier(.16,1,.3,1);
+  }
+  .svc-card:hover .svc-accent { opacity: 1; transform: scaleX(1); }
+
+  .svc-num {
+    position: absolute;
+    top: .75rem;
+    right: 1.25rem;
+    font-family: 'Spectral','Georgia',system-ui;
+    font-size: 4.25rem;
+    font-weight: 900;
+    line-height: 1;
+    color: rgba(255,255,255,.04);
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -.04em;
+    transition: color .3s ease-out;
+  }
+  .svc-card:hover .svc-num { color: rgba(255,255,255,.07); }
+
+  .svc-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 13px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid;
+    margin-bottom: 1.25rem;
+    transition: transform .3s cubic-bezier(.16,1,.3,1);
+  }
+  .svc-card:hover .svc-icon { transform: scale(1.08) rotate(-4deg); }
+
+  .svc-tag {
+    display: inline-block;
+    font-size: .64rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .25rem .55rem;
+    border-radius: 99px;
+    border: 1px solid;
+    margin-bottom: .625rem;
+  }
+
+  .svc-title {
+    font-family: 'Spectral','Georgia',system-ui;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #F5F6FA;
+    margin: 0 0 .5rem;
+    line-height: 1.3;
+    letter-spacing: -.015em;
+    transition: color .2s ease-out;
+  }
+  .svc-card:hover .svc-title { color: #E8B86D; }
+
+  .svc-desc {
+    font-size: .85rem;
+    color: #A9AFC0;
+    line-height: 1.6;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.7em;
+  }
+
+  .svc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.25rem;
+    padding-top: 1.125rem;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+
+  .svc-price {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #E8B86D;
+    padding: .3rem .7rem;
+    background: rgba(232,184,109,.08);
+    border: 1px solid rgba(232,184,109,.18);
+    border-radius: 99px;
+  }
+
+  .svc-arrow-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .78rem;
+    font-weight: 600;
+    color: #9AA1B5;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .25s ease-out, transform .25s cubic-bezier(.16,1,.3,1), color .2s ease-out;
+  }
+  .svc-card:hover .svc-arrow-wrap {
+    opacity: 1;
+    transform: translateX(0);
+    color: #E8B86D;
+  }
+  .svc-arrow { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+  .svc-card:hover .svc-arrow { transform: translateX(3px); }
+
+  .svc-more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #E8B86D;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: gap .2s;
+  }
+  .svc-more-link:hover { gap: .7rem; }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .method-grid { grid-template-columns: 140px 1fr; gap: 2.5rem; }
+    .stage { gap: 2.5rem; }
+  }
+  @media (max-width: 900px) {
+    .method-intro { max-width: 560px; margin-bottom: 3.5rem; }
+    .method-stats { flex-direction: column; }
+    .method-stat { padding: 1.5rem 1.25rem; text-align: center; }
+    .method-rail { display: none; }
+    .method-grid { grid-template-columns: 1fr; gap: 0; }
+    .method-stages { gap: 4rem; }
+    .stage,
+    .stage--reverse {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+    .stage-text,
+    .stage--reverse .stage-text { order: 1; }
+    .stage-visual,
+    .stage--reverse .stage-visual { order: 2; }
+    .stage-ghost { font-size: 6rem; }
+    .svc-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .svc-grid { grid-template-columns: 1fr; }
+    .stage-visual { aspect-ratio: 4 / 3; }
+    .stage-badge { left: 1rem; bottom: 1rem; right: 1rem; }
+    .method-h2 { font-size: clamp(1.75rem, 7.5vw, 2.25rem); }
+  }
+</style>

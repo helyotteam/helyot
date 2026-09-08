@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import PageHero from '../../components/shared/PageHero.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+import { t } from '../../i18n';
+
+const lang = 'ru';
+const strings = t(lang);
+---
+
+<BaseLayout lang={lang} title={strings.privacy.title} noindex>
+  <Header lang={lang} />
+  <main>
+    <PageHero lang={lang} eyebrow="Юридическая информация" title={strings.privacy.title}
+      subtitle={strings.privacy.lastUpdated}
+      breadcrumb={[{label:'Главная',href:'/ru'},{label:'Конфиденциальность',href:'/ru/privacy'}]} />
+    <section class="py-20 bg-[#08080E]">
+      <div class="container-narrow">
+        <div class="card p-10">
+          <div class="prose-article space-y-8">
+            <section>
+              <h2>1. Кто мы</h2>
+              <p>
+                <strong>{strings.site.name}</strong> — сайт helyot.com.
+                Строительная и ремонтная компания, Лимассол, Кипр.
+                Контакт: <a href={`mailto:${strings.site.dataEmail}`}>{strings.site.dataEmail}</a>
+              </p>
+            </section>
+
+            <section>
+              <h2>2. Какие данные мы собираем</h2>
+              <ul>
+                <li><strong>Контактные данные</strong> — имя, телефон, email, которые вы указываете в формах.</li>
+                <li><strong>Данные использования</strong> — посещённые страницы, время на сайте (только с вашего согласия, через Google Analytics).</li>
+                <li><strong>Технические данные</strong> — анонимизированный IP, тип браузера и устройства.</li>
+                <li><strong>Cookie-данные</strong> — см. раздел 5.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2>3. Как мы используем данные</h2>
+              <ul>
+                <li>Для ответа на ваши запросы и предоставления услуг по ремонту.</li>
+                <li>Для улучшения сайта и пользовательского опыта.</li>
+                <li>Для отправки сообщений, связанных с вашим проектом.</li>
+                <li>Для выполнения законодательных обязательств.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2>4. Кому мы передаём данные</h2>
+              <ul>
+                <li><strong>Google Analytics</strong> — анонимизированная аналитика (только с вашего согласия).</li>
+                <li><strong>Netlify</strong> — хостинг-провайдер, обрабатывающий формы.</li>
+                <li><strong>Маркетинговым брокерам — нет.</strong> Мы не продаём ваши данные.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2>5. Cookies</h2>
+              <ul>
+                <li><strong>Необходимые</strong> — для работы сайта. Отключить нельзя.</li>
+                <li><strong>Аналитические</strong> — Google Analytics 4. Только с вашего согласия.</li>
+                <li><strong>Маркетинговые</strong> — персонализация рекламы (по умолчанию выключены).</li>
+              </ul>
+              <p>Ваши настройки хранятся 365 дней. Вы можете изменить их через баннер cookie.</p>
+            </section>
+
+            <section>
+              <h2>6. Хранение данных</h2>
+              <p>Контактные данные хранятся до 3 лет. Данные аналитики — 14 месяцев (по умолчанию GA4).</p>
+            </section>
+
+            <section>
+              <h2>7. Ваши права по GDPR</h2>
+              <ul>
+                <li>Право на доступ к своим данным.</li>
+                <li>Право на исправление неточных данных.</li>
+                <li>Право на удаление данных («право на забвение»).</li>
+                <li>Право на возражение против обработки.</li>
+                <li>Право на переносимость данных.</li>
+                <li>Право отозвать согласие в любой момент.</li>
+              </ul>
+              <p>
+                Для реализации прав отправьте запрос на
+                {' '}<a href={`mailto:${strings.site.dataEmail}`}>{strings.site.dataEmail}</a>.
+                Ответ — в течение 30 дней.
+              </p>
+            </section>
+
+            <section>
+              <h2>8. Международные передачи</h2>
+              <p>Google Analytics может передавать данные в США на основании стандартных договорных условий (SCCs) по ст. 46 GDPR.</p>
+            </section>
+
+            <section>
+              <h2>9. Изменения политики</h2>
+              <p>При существенных изменениях мы разместим уведомление на главной странице. Дата в начале документа отражает последнее обновление.</p>
+            </section>
+
+            <section>
+              <h2>10. Контакт</h2>
+              <p>
+                Контролёр данных: {strings.site.name}, Лимассол, Кипр.<br />
+                Email: <a href={`mailto:${strings.site.dataEmail}`}>{strings.site.dataEmail}</a><br />
+                Телефон: <a href={`tel:${strings.site.phone.replace(/\s/g, '')}`}>{strings.site.phone}</a>
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+</BaseLayout>

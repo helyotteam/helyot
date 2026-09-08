@@ -1,0 +1,61 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import Header from '../../../components/shared/Header.astro';
+import Footer from '../../../components/shared/Footer.astro';
+import ShareButtons from '../../../components/ui/ShareButtons.astro';
+import ReadingProgress from '../../../components/ui/ReadingProgress.astro';
+import ArticleNav from '../../../components/sections/ArticleNav.astro';
+import ReadingPush from '../../../components/ui/ReadingPush.astro';
+import RelatedReading from '../../../components/sections/RelatedReading.astro';
+import ArticleCta from '../../../components/sections/ArticleCta.astro';
+import CookieConsent from '../../../components/ui/CookieConsent.astro';
+import { t } from '../../../i18n/ui';
+import { SITE } from '../../../i18n/routing';
+import { readingMinutes, extractFaq } from '../../../lib/article';
+
+export async function getStaticPaths() {
+  let posts: Awaited<ReturnType<typeof getCollection<'blog_ru'>>> = [];
+  try { posts = await getCollection('blog_ru'); } catch {}
+  return posts.map((post) => ({ params: { slug: post.slug } }));
+}
+
+const { slug } = Astro.params;
+const lang = 'ru';
+
+let post: Awaited<ReturnType<typeof getEntry<'blog_ru', string>>> | undefined;
+try { post = await getEntry('blog_ru', slug!); } catch {}
+if (!post) return Astro.redirect('/404');
+
+const { Content, headings } = await post.render();
+
+/* Derived, not declared: the hand-typed minuteRead had drifted on most posts. */
+const minutes = readingMinutes(post.body);
+const faq = extractFaq(post.body);
+const canonicalUrl = `${SITE}/ru/blog/${slug}`;
+---
+
+<BlogLayout lang={lang} title={post.data.seoTitle ?? post.data.title} description={post.data.description}
+  publishedDate={post.data.publishedDate} ogImage={post.data.ogImage} slug={slug!}
+  minuteRead={minutes} tags={post.data.tags} faq={faq}>
+  <Header lang={lang} />
+  <main id="main-content"><article class="article-shell mx-auto px-4 py-16">
+    <header class="mb-10">
+      {post.data.ogImage && <img src={post.data.ogImage} alt={post.data.title} width="800" height="450" class="w-full rounded-[4px] mb-8 object-cover" style="max-height:420px" loading="eager" />}
+      <div class="flex flex-wrap gap-2 mb-4">{post.data.tags?.map((tag) => <span class="tag">{tag}</span>)}</div>
+      <h1 class="font-display font-normal text-4xl text-white mb-4" style="line-height:1.1;letter-spacing:-.01em;">{post.data.title}</h1>
+      <p class="text-gray-500 text-sm">{t(lang,'blog.published')} {post.data.publishedDate}{` · ${minutes} ${t(lang,'blog.minRead')}`}</p>
+    </header>
+    <ReadingProgress lang={lang} headings={headings} />
+    <div class="prose-article"><Content /></div>
+    <footer class="mt-12 pt-8 border-t border-white/10">
+      <ShareButtons url={canonicalUrl} title={post.data.title} lang={lang} />
+    </footer>
+  </article></main>
+  <ArticleNav lang={lang} slug={post.slug} />
+  <RelatedReading lang={lang} slug={post.slug} tags={post.data.tags} />
+  <ArticleCta lang={lang} />
+  <Footer lang={lang} />
+  <ReadingPush lang={lang} />
+  <CookieConsent lang={lang} />
+</BlogLayout>

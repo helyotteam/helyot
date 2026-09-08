@@ -1,0 +1,223 @@
+---
+/**
+ * CineHero — shared cinematic page hero (matches the location-page look).
+ * Photo background + Ken Burns + editorial eyebrow + Spectral display H1.
+ * Use on every inner page so the whole site speaks one language.
+ */
+import { type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  eyebrow?: string;
+  index?: string;                       // small label before the eyebrow
+  title: string;                        // may contain <em> markup via titleHtml
+  titleHtml?: string;                   // raw HTML title (wins over title)
+  subtitle?: string;
+  photo?: string;                       // background image
+  breadcrumb?: { label: string; href?: string }[];
+  cta?: { label: string; href: string };
+  ctaSecondary?: { label: string; href: string };
+  meta?: { label: string; value: string }[];   // right-aligned stat pairs
+  compact?: boolean;                    // shorter hero (contact / faq etc.)
+}
+const {
+  eyebrow, index, title, titleHtml, subtitle, photo,
+  breadcrumb, cta, ctaSecondary, meta, compact = false,
+} = Astro.props;
+---
+
+<section class={`ch-hero vignette ${compact ? 'ch-hero--compact' : ''}`}>
+  {photo && (
+    <div class="ch-hero-bg cine-scene" aria-hidden="true">
+      <img src={photo} alt="" loading="eager" fetchpriority="high" decoding="async"
+        width="1600" height="1000" data-kenburns />
+    </div>
+  )}
+  <div class={`ch-hero-grade ${photo ? '' : 'ch-hero-grade--nophoto'}`} aria-hidden="true"></div>
+
+  <div class="container-wide" style="position:relative;z-index:2;">
+    {breadcrumb && breadcrumb.length > 0 && (
+      <>
+        <nav aria-label="Breadcrumb" class="ch-bc">
+          {breadcrumb.map((c, i) => (
+            <>
+              {c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}
+              {i < breadcrumb.length - 1 && <span class="ch-bc-sep" aria-hidden="true">/</span>}
+            </>
+          ))}
+        </nav>
+        <script type="application/ld+json" set:html={JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: breadcrumb.map((c, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: c.label,
+            ...(c.href ? { item: `https://helyot.com${c.href}` } : {}),
+          })),
+        })} />
+      </>
+    )}
+
+    {eyebrow && (
+      <p class="cine-label" data-reveal>
+        {index && <span class="cine-label__index">{index}</span>}
+        {eyebrow}
+      </p>
+    )}
+
+    {titleHtml
+      ? <h1 class="cine-display ch-h1" set:html={titleHtml} data-words />
+      : <h1 class="cine-display ch-h1" data-words>{title}</h1>}
+
+    {(subtitle || meta) && (
+      <div class="ch-row">
+        {subtitle && <p class="ch-sub" data-reveal data-reveal-delay="0.3">{subtitle}</p>}
+        {meta && (
+          <div class="ch-meta" data-reveal data-reveal-delay="0.45">
+            {meta.map(m => (
+              <div class="ch-meta-item">
+                <span class="ch-meta-lbl">{m.label}</span>
+                <span class="ch-meta-val">{m.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    {(cta || ctaSecondary) && (
+      <div class="ch-ctas" data-reveal data-reveal-delay="0.6">
+        {cta && (
+          <a href={cta.href} class="ch-cta" data-magnetic>{cta.label}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        )}
+        {ctaSecondary && (
+          <a href={ctaSecondary.href} class="ch-cta ch-cta--ghost" data-magnetic>{ctaSecondary.label}</a>
+        )}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+.ch-hero {
+  position: relative;
+  padding: 9.5rem 0 4.5rem;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background: #08080E;
+  overflow: hidden;
+}
+.ch-hero--compact { padding: 8rem 0 3.5rem; }
+.ch-hero--compact .ch-bc { top: -4.6rem; }
+
+.ch-hero-bg { position: absolute; inset: 0; z-index: 0; }
+.ch-hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+
+.ch-hero-grade {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(180deg, transparent 55%, rgba(8,8,14,.80) 100%),
+    linear-gradient(100deg,
+      rgba(8,8,14,.84) 0%,
+      rgba(8,8,14,.62) 45%,
+      rgba(8,8,14,.30) 75%,
+      rgba(8,8,14,.10) 100%);
+}
+.ch-hero-grade--nophoto {
+  background:
+    radial-gradient(ellipse 90% 70% at 80% -10%, rgba(232,184,109,.10) 0%, transparent 60%),
+    #08080E;
+}
+
+/* Pinned to the top of the hero and kept small, so it reads as a location
+   marker rather than a second label row above the headline. */
+.ch-bc {
+  position: absolute;
+  top: -5.6rem; left: 0;
+  display: flex; align-items: center; gap: .3rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; letter-spacing: .02em; color: #8288A5;
+  flex-wrap: wrap;
+}
+.ch-bc a { color: #8288A5; text-decoration: none; transition: color .15s; }
+.ch-bc a:hover { color: #9DA0B8; }
+.ch-bc [aria-current="page"] { color: #8288A5; }
+.ch-bc-sep { color: #8288A5; }
+
+.ch-h1 {
+  max-width: 20ch;
+  margin: 1.4rem 0 2rem;
+  text-shadow: 0 2px 32px rgba(4,4,8,.75);
+}
+
+.ch-row {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 3rem; flex-wrap: wrap; margin-bottom: 2.2rem;
+}
+.ch-sub {
+  font-size: .95rem; line-height: 1.75; color: #B8B8CC;
+  max-width: 52ch; margin: 0; text-shadow: 0 1px 16px rgba(4,4,8,.8);
+}
+.ch-meta { display: flex; gap: 2.6rem; }
+.ch-meta-item { display: flex; flex-direction: column; gap: .35rem; }
+.ch-meta-lbl {
+  font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; color: #8288A5;
+}
+.ch-meta-val {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 1.25rem; font-weight: 500; color: #F0F0F6;
+}
+
+/* Same button language as the header and the home hero: outline only,
+   4px radius, Jost lowercase. No fills, no pills, no glow. */
+.ch-ctas { display: flex; gap: 1.4rem; flex-wrap: wrap; align-items: center; }
+.ch-cta {
+  display: inline-flex; align-items: center; gap: .55rem;
+  padding: .8rem 1.8rem; border-radius: 4px;
+  background: transparent; border: 1px solid #E8B86D; color: #E8B86D;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-weight: 400; font-size: .95rem; letter-spacing: .02em;
+  text-transform: lowercase; text-decoration: none;
+  transition: background .2s ease, color .2s ease; will-change: transform;
+}
+.ch-cta svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.ch-cta:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.ch-cta:hover svg { transform: translateX(3px); }
+
+/* Secondary is a quiet underlined link so the hero keeps one clear action */
+.ch-cta--ghost {
+  border-color: transparent; color: #B8B8CC;
+  padding-left: 0; padding-right: 0; position: relative;
+}
+.ch-cta--ghost::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: .5rem;
+  height: 1px; background: rgba(255,255,255,.28);
+  transition: background .2s ease;
+}
+.ch-cta--ghost:hover { background: transparent; color: #FFFFFF; }
+.ch-cta--ghost:hover::after { background: rgba(255,255,255,.7); }
+
+@media (max-width: 860px) {
+  /* On desktop the crumb hangs above the eyebrow on a negative offset. That
+     kept colliding with the sticky header on a phone, so here it simply flows
+     as the first line of the hero instead of being positioned. */
+  .ch-hero { padding: 7.5rem 0 3rem; }
+  .ch-hero--compact { padding: 7rem 0 2.5rem; }
+  .ch-bc,
+  .ch-hero--compact .ch-bc {
+    position: static;
+    font-size: 0.78rem; line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  /* Crumb links are 15px tall — pad them into a usable touch target. */
+  .ch-bc a { padding: .45rem 0; }
+  .ch-row { flex-direction: column; align-items: flex-start; gap: 1.6rem; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .ch-meta-lbl { font-size: .72rem; }
+}
+</style>

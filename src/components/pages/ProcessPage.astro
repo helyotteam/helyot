@@ -1,0 +1,402 @@
+---
+/**
+ * HOW WE WORK — shared bilingual page.
+ *
+ * The RU route used to render the homepage's <ProcessScenes> and nothing else,
+ * so it was a straight duplicate of a section people had already scrolled past.
+ * This page now carries what the homepage deliberately leaves out: what you
+ * receive at each stage, when money changes hands, and how long real projects
+ * take. Payment milestones are the ones already published in the FAQ.
+ */
+import CineHero from '../shared/CineHero.astro';
+import BookingForm from '../sections/BookingForm.astro';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+
+const stages = en ? [
+  { n: '01', title: 'Free site visit', when: 'Within 48 hours',
+    desc: 'We come to your property at a time that suits you — evenings and weekends included. We measure every room, photograph the existing condition, and spend as long as you need on what you actually want. No sales pitch: an honest conversation about what is possible and what it typically costs for properties like yours.',
+    got: ['Written brief', 'Room-by-room measurements', 'Photo survey of the existing condition', 'Realistic scope and cost range'] },
+  { n: '02', title: 'Design concept and fixed quote', when: 'Days 2–5',
+    desc: 'Our in-house designer prepares concepts for every room. You see lighting, materials, finishes and furniture positions before a wall is touched. Two revision rounds are included. The quote attached is itemised line by line and fixed — no provisional sums.',
+    got: ['Layouts for every main room', 'Material and finish board', 'Itemised fixed-price quote', 'Revisions until you approve'] },
+  { n: '03', title: 'One contract, one price', when: 'Days 5–7',
+    desc: 'One document. The exact price, the exact scope, the start date and the handover date, all in writing. If the scope changes at your request we issue a written variation order — you see the cost and approve it before we proceed, not after.',
+    got: ['Fixed-price contract', 'Schedule with milestones', 'Named project manager', 'Confirmed start date'] },
+  { n: '04', title: 'Permits and pre-construction', when: '1–2 weeks before start',
+    desc: 'Where the work needs consent we prepare or coordinate the drawings, file with the municipality and follow it through. In the same window we pre-order materials and brief your team. Nothing structural begins before the permit is in hand, and nothing is improvised on day one.',
+    got: ['Filed and obtained on your behalf', 'Materials pre-ordered and staged', 'Team briefed on the design', 'Site protection plan agreed'] },
+  { n: '05', title: 'Build', when: '4–18 weeks, scope dependent',
+    desc: 'Your in-house team works to the signed schedule. The project manager is on site daily and sends a photo walkthrough every Friday — wherever in the world you are. You can visit during working hours without notice. It is your home.',
+    got: ['Friday photo reports', 'WhatsApp line to your PM', 'Open-site policy', 'No subcontractors on your project'] },
+  { n: '06', title: 'Handover and warranty', when: 'Final day',
+    desc: 'We walk every room together with a snag list. Anything noted is resolved within 5 working days at our cost — no debate, no invoice. You receive keys, CERA electrical certificates, permits and sign-offs, and your 5-year structural warranty document.',
+    got: ['Room-by-room sign-off', 'Snagging cleared in 5 working days', 'All permits and certificates', '5-year structural warranty'] },
+] : [
+  { n: '01', title: 'Бесплатный выезд', when: 'В течение 48 часов',
+    desc: 'Приезжаем на объект в удобное для вас время — включая вечера и выходные. Замеряем каждое помещение, фотографируем текущее состояние и столько, сколько нужно, разбираемся в задаче. Без продаж: честный разговор о том, что возможно и сколько это обычно стоит для похожих объектов.',
+    got: ['Письменное техзадание', 'Замеры по помещениям', 'Фотофиксация текущего состояния', 'Реалистичный объём и вилка бюджета'] },
+  { n: '02', title: 'Дизайн-концепция и фиксированная смета', when: 'Дни 2–5',
+    desc: 'Наш дизайнер готовит концепции всех помещений. Вы видите свет, материалы, отделку и расстановку мебели до начала работ. Два круга правок включены. Смета постатейная и зафиксированная — без «резервных сумм».',
+    got: ['Планировки всех основных помещений', 'Подборка материалов и отделки', 'Постатейная смета с фикс. ценой', 'Правки до вашего согласования'] },
+  { n: '03', title: 'Один договор, одна цена', when: 'Дни 5–7',
+    desc: 'Один документ. Точная цена, точный объём, дата старта и дата сдачи — всё письменно. Если вы меняете объём, оформляем письменное допсоглашение: вы видите стоимость и одобряете её до работ, а не после.',
+    got: ['Договор с фиксированной ценой', 'График с контрольными точками', 'Назначенный прораб', 'Подтверждённая дата старта'] },
+  { n: '04', title: 'Разрешения и подготовка', when: 'За 1–2 недели до старта',
+    desc: 'Если работы требуют согласования, мы готовим или координируем чертежи, подаём в муниципалитет и доводим до результата. В это же время закупаем материалы и вводим бригаду в проект. Конструктив не начинается без разрешения, и в первый день ничего не придумывается на ходу.',
+    got: ['Подаём и получаем от вашего имени', 'Материалы закуплены заранее', 'Бригада ознакомлена с проектом', 'Согласована защита помещений'] },
+  { n: '05', title: 'Строительство', when: '4–18 недель, по объёму',
+    desc: 'Ваша бригада работает по подписанному графику. Прораб на объекте каждый день и каждую пятницу присылает фотообход — где бы вы ни находились. Приезжать можно в рабочее время без предупреждения. Это ваш дом.',
+    got: ['Пятничные фотоотчёты', 'Прямой WhatsApp с прорабом', 'Свободный доступ на объект', 'Никаких субподрядчиков'] },
+  { n: '06', title: 'Сдача и гарантия', when: 'Финальный день',
+    desc: 'Обходим каждое помещение вместе со списком замечаний. Всё отмеченное устраняем за 5 рабочих дней за наш счёт — без споров и без счетов. Вы получаете ключи, сертификаты CERA, разрешения и подписанный гарантийный документ на 5 лет.',
+    got: ['Приёмка по помещениям', 'Замечания закрыты за 5 рабочих дней', 'Все разрешения и сертификаты', 'Гарантия 5 лет на конструктив'] },
+];
+
+/** Milestones exactly as published in the FAQ — nothing new invented here. */
+const payments = en ? [
+  { pct: '30%', when: 'On signing',            note: 'Mobilisation — team scheduled, materials ordered.' },
+  { pct: '30%', when: 'Structural completion', note: 'Demolition, structural work and first fix done.' },
+  { pct: '30%', when: 'Second fix',            note: 'Before finishes go on.' },
+  { pct: '10%', when: 'Handover',              note: 'Paid after snagging is resolved, not before.' },
+] : [
+  { pct: '30%', when: 'При подписании',        note: 'Мобилизация — бригада в графике, материалы заказаны.' },
+  { pct: '30%', when: 'Конструктив завершён',  note: 'Демонтаж, конструктив и черновые работы сделаны.' },
+  { pct: '30%', when: 'Чистовая подготовка',   note: 'До того, как ложится отделка.' },
+  { pct: '10%', when: 'Сдача',                 note: 'После устранения замечаний, а не до.' },
+];
+
+const durations = en ? [
+  { type: 'Studio / 1-bedroom apartment', sqm: '40–65 m²',   weeks: '4–6 weeks',   trades: 'Plastering, tiling, electrics, plumbing, paint, carpentry' },
+  { type: '2–3 bedroom apartment',        sqm: '70–120 m²',  weeks: '6–9 weeks',   trades: 'Full gut-out, all trades, kitchen and bathrooms' },
+  { type: 'Villa — full renovation',      sqm: '200–400 m²', weeks: '12–18 weeks', trades: 'All trades, pool, landscaping coordination, smart home' },
+  { type: 'Commercial / office fit-out',  sqm: '100–300 m²', weeks: '4–8 weeks',   trades: 'Partitions, electrics, HVAC coordination, flooring' },
+] : [
+  { type: 'Студия / 1 спальня',           sqm: '40–65 м²',   weeks: '4–6 недель',   trades: 'Штукатурка, плитка, электрика, сантехника, покраска, столярка' },
+  { type: 'Квартира 2–3 спальни',         sqm: '70–120 м²',  weeks: '6–9 недель',   trades: 'Полный демонтаж, все работы, кухня и санузлы' },
+  { type: 'Вилла — ремонт под ключ',      sqm: '200–400 м²', weeks: '12–18 недель', trades: 'Все работы, бассейн, координация ландшафта, умный дом' },
+  { type: 'Офис / коммерция',             sqm: '100–300 м²', weeks: '4–8 недель',   trades: 'Перегородки, электрика, координация HVAC, полы' },
+];
+
+const faqs = en ? [
+  { q: 'How quickly can you start after signing?',
+    a: 'For most projects, within 2–3 weeks of signing. That time goes on permits, pre-ordering materials and briefing the team. Faster starts are possible on smaller jobs — ask at the site visit.' },
+  { q: 'I am not in Cyprus. Can you run the project without me on site?',
+    a: 'Yes, and we do it regularly. You get a photo report every Friday, your project manager is on WhatsApp during working hours, and we video-call before and after key milestones. You do not need to be in Cyprus for the build.' },
+  { q: 'What does the 5-year warranty actually cover?',
+    a: 'Any defect arising from our work: structural, waterproofing, tiling, plastering, electrical installations and plumbing. If something fails through our workmanship inside 5 years, we fix it at our cost. The document is signed and handed over on the final day.' },
+  { q: 'What if I want to change something mid-project?',
+    a: 'It goes through a written variation order. We set out what changes, what it costs and how it affects the schedule. You approve it in writing before we proceed — nothing moves without your sign-off.' },
+] : [
+  { q: 'Как быстро можно начать после подписания?',
+    a: 'На большинстве проектов — через 2–3 недели после подписания. Это время уходит на разрешения, закупку материалов и ввод бригады в проект. На небольших объектах старт бывает быстрее — спросите на выезде.' },
+  { q: 'Меня нет на Кипре. Можно вести проект без меня?',
+    a: 'Да, и мы делаем это регулярно. Каждую пятницу — фотоотчёт, прораб на связи в WhatsApp в рабочее время, перед ключевыми этапами и после них созваниваемся по видео. Присутствовать на Кипре во время работ не обязательно.' },
+  { q: 'Что именно покрывает гарантия 5 лет?',
+    a: 'Любой дефект, возникший из-за наших работ: конструктив, гидроизоляция, плитка, штукатурка, электромонтаж, сантехника. Если в течение 5 лет что-то выходит из строя по нашей вине — устраняем за свой счёт. Документ подписывается и передаётся в день сдачи.' },
+  { q: 'А если я захочу что-то изменить по ходу?',
+    a: 'Через письменное допсоглашение. Описываем, что меняется, сколько это стоит и как влияет на сроки. Вы одобряете письменно — без вашей подписи ничего не двигается.' },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+
+const faqHref = en ? '/en/faq' : '/ru/faq';
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<CineHero
+  lang={lang}
+  photo="/images/projects/marina-penthouse.webp"
+  index={en ? 'How we work' : 'Как мы работаем'}
+  eyebrow={en ? 'The process' : 'Процесс'}
+  titleHtml={en
+    ? `You see the price before we lift <em>a single tool.</em>`
+    : `Вы видите цену до того, как мы возьмём <em>инструмент.</em>`}
+  subtitle={en
+    ? 'Six stages from site visit to warranty handover. Every stage has a fixed deliverable, a defined timeline and one person accountable for it.'
+    : 'Шесть этапов от выезда на объект до сдачи с гарантией. У каждого — фиксированный результат, определённый срок и конкретный ответственный.'}
+  breadcrumb={en
+    ? [{ label: 'Home', href: '/' }, { label: 'How We Work' }]
+    : [{ label: 'Главная', href: '/ru' }, { label: 'Как мы работаем' }]}
+  cta={{ label: en ? 'Free estimate' : 'Бесплатная смета', href: '#booking' }}
+  ctaSecondary={{ label: en ? 'See the stages' : 'Смотреть этапы', href: '#stages' }}
+/>
+
+<!-- ══ STAGES ══════════════════════════════════════════════ -->
+<section id="stages" class="pp-sec">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal>
+      <span class="cine-label__index">{en ? 'Stage by stage' : 'Этап за этапом'}</span>
+      {en ? 'What actually happens' : 'Что происходит на деле'}
+    </p>
+    <h2 class="cine-display pp-h2" data-words>
+      {en ? <>Six stages. <em>Nothing improvised.</em></> : <>Шесть этапов. <em>Ничего на ходу.</em></>}
+    </h2>
+
+    <div class="pp-stages">
+      {stages.map(s => (
+        <article class="pp-stage" data-reveal>
+          <div class="pp-stage-n" aria-hidden="true">{s.n}</div>
+          <div class="pp-stage-body">
+            <div class="pp-stage-head">
+              <h3>{s.title}</h3>
+              <span class="pp-when">{s.when}</span>
+            </div>
+            <p class="pp-desc">{s.desc}</p>
+            <p class="pp-got-key">{en ? 'What you receive' : 'Что вы получаете'}</p>
+            <ul class="pp-got">
+              {s.got.map(g => <li>{g}</li>)}
+            </ul>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ══ PAYMENTS ════════════════════════════════════════════ -->
+<section class="pp-sec pp-sec--alt">
+  <div class="container-wide">
+    <div class="pp-split">
+      <div>
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{en ? 'Money' : 'Деньги'}</span>
+          {en ? 'When you pay' : 'Когда вы платите'}
+        </p>
+        <h2 class="cine-display pp-h2" data-words>
+          {en ? <>Four milestones. <em>All in the contract.</em></> : <>Четыре платежа. <em>Все в договоре.</em></>}
+        </h2>
+        <p class="pp-lead">
+          {en
+            ? 'Every milestone is tied to work you can see finished, not to a date on a calendar. Smaller projects use a shorter schedule — it is written into your contract either way. There are no discretionary invoices.'
+            : 'Каждый платёж привязан к работам, которые можно увидеть выполненными, а не к дате в календаре. На небольших объектах схема короче — в любом случае она прописана в вашем договоре. Счетов «по усмотрению» не бывает.'}
+        </p>
+      </div>
+
+      <ol class="pp-pay" data-stagger-group>
+        {payments.map(p => (
+          <li class="pp-pay-row" data-stagger-item>
+            <span class="pp-pay-pct">{p.pct}</span>
+            <span class="pp-pay-body">
+              <span class="pp-pay-when">{p.when}</span>
+              <span class="pp-pay-note">{p.note}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DURATIONS ═══════════════════════════════════════════ -->
+<section class="pp-sec">
+  <div class="container-wide">
+    <div class="pp-split">
+      <div>
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{en ? 'Timelines' : 'Сроки'}</span>
+          {en ? 'How long it takes' : 'Сколько это занимает'}
+        </p>
+        <h2 class="cine-display pp-h2" data-words>
+          {en ? <>Real weeks, <em>not estimates.</em></> : <>Реальные недели, <em>а не «примерно».</em></>}
+        </h2>
+        <p class="pp-lead">
+          {en
+            ? 'Every project is different, but these are the honest ranges for common scopes in Cyprus, assuming a full renovation with our own team. Timelines run from contract signing to handover; permits and material ordering happen in the 1–2 weeks before the start date.'
+            : 'Каждый объект свой, но это честные диапазоны для типичных задач на Кипре — при полном ремонте нашей бригадой. Сроки считаются от подписания договора до сдачи; разрешения и закупка материалов проходят за 1–2 недели до старта.'}
+        </p>
+      </div>
+
+      <div class="pp-tbl">
+        <div class="pp-tbl-head">
+          <span>{en ? 'Project type' : 'Тип объекта'}</span>
+          <span>{en ? 'Duration' : 'Срок'}</span>
+          <span>{en ? 'Scope' : 'Объём'}</span>
+        </div>
+        {durations.map(d => (
+          <div class="pp-tbl-row" data-reveal>
+            <div>
+              <p class="pp-tbl-type">{d.type}</p>
+              <p class="pp-tbl-sqm">{d.sqm}</p>
+            </div>
+            <span class="pp-tbl-weeks">{d.weeks}</span>
+            <p class="pp-tbl-trades">{d.trades}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ═════════════════════════════════════════════════ -->
+<section class="pp-sec pp-sec--alt">
+  <div class="container-wide" style="max-width:860px;">
+    <p class="cine-label" data-reveal>
+      <span class="cine-label__index">{en ? 'Questions' : 'Вопросы'}</span>
+      {en ? 'Before you call' : 'Перед звонком'}
+    </p>
+    <h2 class="cine-display pp-h2" data-words>
+      {en ? <>Things people ask <em>first.</em></> : <>О чём спрашивают <em>в первую очередь.</em></>}
+    </h2>
+
+    <div class="pp-faq">
+      {faqs.map(f => (
+        <details class="pp-faq-item">
+          <summary>{f.q}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+
+    <a href={faqHref} class="pp-all">{en ? 'All questions' : 'Все вопросы'}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<BookingForm lang={lang} />
+
+<style>
+.pp-sec {
+  padding: 6rem 0;
+  background: #08080E;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.pp-sec--alt { background: #06060A; }
+.pp-h2 { margin: 1.1rem 0 1.4rem; font-size: clamp(1.7rem, 3.4vw, 2.7rem); }
+.pp-lead { font-size: 0.9rem; line-height: 1.8; color: #9DA0B8; max-width: 46ch; margin: 0; }
+
+/* ── Stages ─────────────────────────────────────────────── */
+.pp-stages { margin-top: 3rem; }
+.pp-stage {
+  display: grid; grid-template-columns: minmax(80px, 120px) 1fr;
+  gap: 1.2rem 3rem; align-items: start;
+  padding: 2.6rem 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.pp-stage:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.pp-stage-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: clamp(2.4rem, 4.5vw, 3.6rem); line-height: .85;
+  color: transparent; -webkit-text-stroke: 1px rgba(232,184,109,.4);
+  user-select: none; transition: color .5s ease;
+}
+.pp-stage:hover .pp-stage-n { color: rgba(232,184,109,.14); }
+.pp-stage-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1.6rem; flex-wrap: wrap; margin-bottom: .9rem;
+}
+.pp-stage-head h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: clamp(1.2rem, 2vw, 1.55rem); color: #F0F0F6; margin: 0;
+}
+.pp-when {
+  font-size: .66rem; letter-spacing: .24em; text-transform: uppercase;
+  color: #E8B86D; white-space: nowrap;
+}
+.pp-desc { font-size: .9rem; line-height: 1.8; color: #B8B8CC; max-width: 62ch; margin: 0 0 1.5rem; }
+.pp-got-key {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; text-transform: lowercase; letter-spacing: .05em;
+  color: #8288A5; margin: 0 0 .6rem;
+}
+.pp-got {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: .4rem 2rem; max-width: 56rem;
+}
+.pp-got li { position: relative; padding-left: 1.1rem; font-size: 0.78rem; color: #8288A5; }
+.pp-got li::before {
+  content: ''; position: absolute; left: 0; top: .55em;
+  width: .45rem; height: 1px; background: rgba(232,184,109,.6);
+}
+
+/* ── Split layout used by payments + durations ──────────── */
+.pp-split { display: grid; grid-template-columns: 1fr 1.35fr; gap: 3.5rem; align-items: start; }
+
+/* ── Payments ───────────────────────────────────────────── */
+.pp-pay { list-style: none; margin: 0; padding: 0; }
+.pp-pay-row {
+  display: grid; grid-template-columns: 5.5rem 1fr; gap: 1.5rem; align-items: baseline;
+  padding: 1.4rem 0; border-top: 1px solid rgba(255,255,255,.08);
+}
+.pp-pay-row:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.pp-pay-pct {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.6rem; color: #E8B86D;
+  font-variant-numeric: tabular-nums;
+}
+.pp-pay-body { display: flex; flex-direction: column; gap: .3rem; }
+.pp-pay-when { font-size: .95rem; color: #F0F0F6; }
+.pp-pay-note { font-size: 0.84rem; line-height: 1.6; color: #8288A5; max-width: 48ch; }
+
+/* ── Durations table ────────────────────────────────────── */
+.pp-tbl { border: 1px solid rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
+.pp-tbl-head, .pp-tbl-row {
+  display: grid; grid-template-columns: 1fr 7.5rem 1fr; gap: 1.5rem;
+  padding: .95rem 1.4rem; align-items: center;
+}
+.pp-tbl-head {
+  background: rgba(255,255,255,.03); border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.pp-tbl-head span {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .66rem; text-transform: lowercase; letter-spacing: .05em; color: #8288A5;
+}
+.pp-tbl-row + .pp-tbl-row { border-top: 1px solid rgba(255,255,255,.05); }
+.pp-tbl-row:hover { background: rgba(255,255,255,.02); }
+.pp-tbl-type { font-size: 0.84rem; color: #B8B8CC; margin: 0; }
+.pp-tbl-sqm { font-size: .72rem; color: #8288A5; margin: .15rem 0 0; }
+.pp-tbl-weeks { font-family: 'Spectral', Georgia, serif; font-size: .95rem; color: #E8B86D; }
+.pp-tbl-trades { font-size: 0.78rem; line-height: 1.6; color: #8288A5; margin: 0; }
+
+/* ── FAQ ────────────────────────────────────────────────── */
+.pp-faq { display: flex; flex-direction: column; margin-top: 1.2rem; }
+.pp-faq-item { border-bottom: 1px solid rgba(255,255,255,.07); }
+.pp-faq-item:first-child { border-top: 1px solid rgba(255,255,255,.07); }
+.pp-faq-item summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.2rem;
+  padding: 1.2rem 0; cursor: pointer; list-style: none;
+  font-size: .95rem; color: #B8B8CC; transition: color .15s;
+}
+.pp-faq-item summary::-webkit-details-marker { display: none; }
+.pp-faq-item summary:hover { color: #F0F0F6; }
+.pp-faq-item[open] summary { color: #E8B86D; }
+.pp-faq-item summary svg { flex-shrink: 0; opacity: .35; transition: transform .25s; }
+.pp-faq-item[open] summary svg { transform: rotate(180deg); }
+.pp-faq-item p { font-size: 0.9rem; line-height: 1.8; color: #9DA0B8; margin: 0; padding: 0 0 1.3rem; max-width: 62ch; }
+
+.pp-all {
+  display: inline-flex; align-items: center; gap: .55rem; margin-top: 2rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px; padding: .6rem 1.3rem;
+  transition: background .2s ease, color .2s ease;
+}
+.pp-all:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+
+@media (max-width: 900px) {
+  .pp-sec { padding: 3.5rem 0; }
+  .pp-split { grid-template-columns: 1fr; gap: 2rem; }
+  .pp-lead { max-width: none; }
+  .pp-stage { grid-template-columns: 1fr; gap: .8rem; padding: 2rem 0; }
+  .pp-stage-n { font-size: 2.4rem; }
+  .pp-got { grid-template-columns: 1fr; }
+  .pp-tbl-head { display: none; }
+  .pp-tbl-row { grid-template-columns: 1fr; gap: .4rem; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .pp-when { font-size: 0.72rem; }
+  .pp-got-key { font-size: 0.78rem; }
+  .pp-tbl-head span { font-size: 0.72rem; }
+}
+</style>

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /netlify/
+Disallow: /amp/
+Sitemap: https://helyot.com/sitemap.xml

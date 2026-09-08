@@ -1,0 +1,1245 @@
+---
+/**
+ * SERVICE DETAIL — shared by /en/services/[slug] and /ru/uslugi/[slug].
+ *
+ * Two 280-line near-duplicates used to sit in the route files and had already
+ * drifted apart. One component, both languages.
+ *
+ * WRITTEN TO BE QUOTED. Answer engines lift short, self-contained statements
+ * that name the thing, the place, the number and the unit in one sentence, so:
+ *   - the page opens with a direct-answer paragraph, not a marketing line;
+ *   - the key facts are a labelled table, not prose;
+ *   - every heading below is a question someone actually types;
+ *   - Service + Offer + FAQPage + HowTo are all emitted as structured data.
+ * Nothing here is invented: prices come from pricingData, scope and FAQs from
+ * servicesData, and the standards named are the ones the site already claims.
+ */
+import CineHero from '../shared/CineHero.astro';
+import BookingForm from '../sections/BookingForm.astro';
+import { type ServiceData, getRelatedServices } from '../../lib/servicesData';
+import { priceRowsBySlug } from '../../lib/pricingData';
+import { categoryHero, categoryBand } from '../../lib/servicePhotos';
+import { matrixLocations } from '../../lib/citiesData';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; svc: ServiceData; }
+const { lang, svc } = Astro.props;
+const en = lang === 'en';
+
+const title    = en ? svc.titleEn : svc.titleRu;
+const heroSub  = en ? svc.heroSubEn : svc.heroSubRu;
+const priceLbl = en ? svc.priceLabelEn : svc.priceLabelRu;
+const timeline = en ? svc.timelineEn : svc.timelineRu;
+const includes = en ? svc.includesEn : svc.includesRu;
+const faqs     = en ? svc.faqsEn : svc.faqsRu;
+
+const related    = getRelatedServices(svc.relatedSlugs).slice(0, 4);
+const heroPhoto  = categoryHero[svc.category];
+const bandPhoto  = categoryBand[svc.category];
+const priceRows  = priceRowsBySlug[svc.slug] ?? [];
+const svcBase    = en ? '/en/services' : '/ru/uslugi';
+// Only locations the service × location matrix actually generates.
+const topLocations = matrixLocations;
+
+const catLabel = en
+  ? { spaces: 'Residential', commercial: 'Commercial', specialist: 'Specialist', trades: 'Trades & works' }
+  : { spaces: 'Жильё', commercial: 'Коммерция', specialist: 'Спецработы', trades: 'Виды работ' };
+
+/* ── The direct answer. First thing a reader or a model sees. ───────────── */
+/* Titles are a mix of singular, plural and coordinate phrases ("Окна и двери",
+   "Bathroom & Wet Rooms"), so the opening clause is dash-joined rather than
+   verb-joined — a template with a conjugated verb disagrees with half of them. */
+const answer = en
+  ? `${title} in Limassol — from ${svc.priceLabelEn.replace(/^from /, '')}, typically ${svc.timelineEn.toLowerCase()}. Helyot quotes it as a single fixed-price contract covering labour, standard materials and waste removal, delivered by 35 in-house specialists with no subcontractors, and hands over a 5-year structural warranty on the final day. The site visit and the quote are free.`
+  : `${title} в Лимасоле — от ${svc.priceLabelRu.replace(/^от /, '')}, срок обычно ${svc.timelineRu.toLowerCase()}. Helyot оформляет это одним договором с фиксированной ценой — работа, стандартные материалы и вывоз мусора включены, выполняют 35 штатных специалистов без субподряда, а в день сдачи вы получаете гарантию 5 лет на конструктив. Выезд и смета бесплатны.`;
+
+const facts = en ? [
+  { k: 'Starting price', v: svc.priceLabelEn },
+  { k: 'Typical duration', v: svc.timelineEn },
+  { k: 'Price type', v: 'Fixed in the contract' },
+  { k: 'Warranty', v: '5 years structural · 10 years wet-room waterproofing' },
+  { k: 'Who does the work', v: '35 in-house specialists, no subcontractors' },
+  { k: 'Permits', v: 'Prepared and filed by us where required' },
+  { k: 'Area served', v: 'Limassol, Paphos, Larnaca, Nicosia, free Famagusta area' },
+  { k: 'Site visit', v: 'Free, usually within 48 hours' },
+] : [
+  { k: 'Стартовая цена', v: svc.priceLabelRu },
+  { k: 'Типичный срок', v: svc.timelineRu },
+  { k: 'Тип цены', v: 'Фиксируется в договоре' },
+  { k: 'Гарантия', v: '5 лет на конструктив · 10 лет на гидроизоляцию' },
+  { k: 'Кто выполняет', v: '35 штатных специалистов, без субподряда' },
+  { k: 'Разрешения', v: 'Готовим и подаём сами, если требуются' },
+  { k: 'География', v: 'Лимасол, Пафос, Ларнака, Никосия, свободная зона Фамагусты' },
+  { k: 'Выезд', v: 'Бесплатно, обычно в течение 48 часов' },
+];
+
+/* What the fixed price does NOT cover. Stated plainly because the question
+   gets asked on every project and a vague answer is what erodes trust. */
+const excluded = en ? [
+  'Sanitary ware, tiles and flooring you choose yourself — we fit them at no extra labour cost',
+  'Loose furniture, appliances and window dressings',
+  'Structural surprises found once walls are opened — priced as a written variation before any work',
+  'Municipal permit fees themselves, which are paid at cost with the receipt attached',
+] : [
+  'Сантехника, плитка и напольные покрытия, которые вы выбираете сами — монтируем без доплаты за работу',
+  'Мебель, техника и текстиль',
+  'Скрытые конструктивные проблемы, вскрывшиеся после демонтажа — оформляются письменным допсоглашением до работ',
+  'Сами пошлины муниципалитета — оплачиваются по факту с приложением квитанции',
+];
+
+/* Documents handed over. Every item here already exists elsewhere on the site;
+   nothing is a placeholder for a certificate we do not actually issue. */
+const documents = en ? [
+  { t: 'Fixed-price contract', d: 'Scope, total, start date and handover date in one document.' },
+  { t: 'Itemised quote', d: 'Line by line, so you can see what each part of the job costs.' },
+  { t: 'Project schedule', d: 'Milestones your payments are tied to, not calendar dates.' },
+  { t: 'CERA electrical certificate', d: 'Issued on any job involving electrical installation.' },
+  { t: 'Municipal permits', d: 'Filed by us and handed over with the approvals attached.' },
+  { t: '5-year warranty document', d: 'Signed and handed to you on the final walkthrough.' },
+] : [
+  { t: 'Договор с фиксированной ценой', d: 'Объём, сумма, дата старта и дата сдачи в одном документе.' },
+  { t: 'Постатейная смета', d: 'Построчно — видно, сколько стоит каждая часть работ.' },
+  { t: 'График проекта', d: 'Контрольные точки, к которым привязаны платежи, а не даты в календаре.' },
+  { t: 'Сертификат CERA', d: 'Выдаётся на любых работах с электромонтажом.' },
+  { t: 'Разрешения муниципалитета', d: 'Подаём мы, передаём вам вместе с согласованиями.' },
+  { t: 'Гарантийный документ на 5 лет', d: 'Подписывается и передаётся на финальной приёмке.' },
+];
+
+const standards = en ? [
+  { t: 'EN 14891', d: 'The European standard for liquid-applied waterproofing. Used under every wet room and terrace we build.' },
+  { t: 'CERA registration', d: 'Cyprus electrical authority registration — required for a legal installation certificate.' },
+  { t: 'European supply', d: 'Materials sourced directly from German, Italian and Spanish manufacturers at trade rates, passed on at cost.' },
+] : [
+  { t: 'EN 14891', d: 'Европейский стандарт наливной гидроизоляции. Применяем под каждой мокрой зоной и террасой.' },
+  { t: 'Регистрация CERA', d: 'Регистрация в электротехническом органе Кипра — без неё не выдаётся легальный сертификат на электрику.' },
+  { t: 'Европейские поставки', d: 'Материалы напрямую от производителей Германии, Италии и Испании по оптовым ценам, которые передаём вам.' },
+];
+
+const whyUs: Record<string, { title: string; body: string }[]> = en ? {
+  spaces: [
+    { title: 'One fixed price, no surprises', body: 'Quoted as a fixed-price contract. Material price rises and labour overruns are ours to absorb, not yours.' },
+    { title: 'In-house team, no subcontracting', body: 'Electricians, plumbers, plasterers and tilers are permanent Helyot employees — the same standard on every trade.' },
+    { title: '5-year structural warranty', body: 'Written and handed over at completion, with wet rooms covered for ten.' },
+  ],
+  commercial: [
+    { title: 'Phased around your operations', body: 'Noisy works scheduled for evenings and weekends so the business keeps trading through the project.' },
+    { title: 'One project manager', body: 'A single contact who handles commercial deadlines and multi-trade coordination.' },
+    { title: 'Completion date in the contract', body: 'The handover date is contractual, not aspirational.' },
+  ],
+  specialist: [
+    { title: 'Certified, not just experienced', body: 'Current certification across each discipline: CERA electrical, EN 14891 waterproofing, energy works.' },
+    { title: 'European supplier network', body: 'Materials direct from Germany, Italy and Spain at the rates we buy them for.' },
+    { title: 'Design and build under one roof', body: 'Designers and site team in the same office — no handover gap between drawing and build.' },
+  ],
+  trades: [
+    { title: 'Certified applicators', body: 'Manufacturer-certified painters, waterproofers and flooring installers, not generalists.' },
+    { title: 'Trade pricing passed on', body: 'We buy materials at trade rates and give you the discount. Our margin is on labour.' },
+    { title: 'Clean site, every day', body: 'Surfaces protected before work starts, cleared at the end of each day, full waste removal at completion.' },
+  ],
+} : {
+  spaces: [
+    { title: 'Одна фиксированная цена', body: 'Договор с фиксированной суммой. Подорожание материалов и перерасход по работам — наша проблема, не ваша.' },
+    { title: 'Штатная бригада, без субподряда', body: 'Электрики, сантехники, штукатуры и плиточники — постоянные сотрудники Helyot. Один стандарт на всех работах.' },
+    { title: 'Гарантия 5 лет на конструктив', body: 'Письменная, передаётся при сдаче. На мокрые зоны — десять лет.' },
+  ],
+  commercial: [
+    { title: 'Подстраиваемся под работу бизнеса', body: 'Шумные работы — вечером и в выходные, чтобы бизнес продолжал работать всё время ремонта.' },
+    { title: 'Один прораб', body: 'Один контакт, который держит коммерческие сроки и координирует все бригады.' },
+    { title: 'Дата сдачи в договоре', body: 'Дата передачи объекта — договорная, а не «ориентировочная».' },
+  ],
+  specialist: [
+    { title: 'Сертификация, а не только опыт', body: 'Действующая сертификация по каждому направлению: электрика CERA, гидроизоляция EN 14891, энергоработы.' },
+    { title: 'Европейские поставщики', body: 'Материалы напрямую из Германии, Италии и Испании по нашим закупочным ценам.' },
+    { title: 'Проект и стройка в одних руках', body: 'Дизайнеры и стройка в одном офисе — между чертежом и объектом ничего не теряется.' },
+  ],
+  trades: [
+    { title: 'Сертифицированные исполнители', body: 'Маляры, гидроизолировщики и укладчики с сертификацией производителей, а не универсалы.' },
+    { title: 'Оптовые цены — вам', body: 'Покупаем материалы по оптовым ценам и отдаём скидку вам. Зарабатываем на работе.' },
+    { title: 'Чистый объект каждый день', body: 'Поверхности защищаем до начала, убираем в конце каждого дня, мусор вывозим при сдаче.' },
+  ],
+};
+
+const process = en ? [
+  { n: '01', title: 'Free site visit', body: 'We come to your property, usually within 48 hours. We measure, photograph the existing condition and ask the questions that change the price.' },
+  { n: '02', title: 'Fixed-price quote', body: 'A written quote with a line-by-line breakdown and a fixed total. No provisional sums, no "subject to survey".' },
+  { n: '03', title: 'Work starts on the agreed date', body: 'Your project manager arrives with the in-house team on the date in the contract. One contact throughout.' },
+  { n: '04', title: 'Handover and sign-off', body: 'We walk through together. Snagging is cleared within five working days at our cost, then documents and keys.' },
+] : [
+  { n: '01', title: 'Бесплатный выезд', body: 'Приезжаем в течение 48 часов. Замеряем и фотографируем состояние.' },
+  { n: '02', title: 'Фиксированная смета', body: 'Построчная разбивка, сумма зафиксирована. Без резервных статей.' },
+  { n: '03', title: 'Старт в согласованную дату', body: 'Штатная бригада выходит в дату из договора. Один контакт на проект.' },
+  { n: '04', title: 'Сдача и приёмка', body: 'Обход вместе. Замечания — пять дней за наш счёт. Затем ключи.' },
+];
+
+const c = en ? {
+  eyebrow: 'Service', crumbHome: 'Home', crumbSvc: 'Services', homeHref: '/',
+  ctaMain: 'Free estimate', ctaAlt: 'WhatsApp',
+  mPrice: 'From', mTime: 'Timeline', mWar: 'Warranty', mWarVal: '5 yr',
+  answerLabel: 'In short', answerTitle: (t: string) => `What does ${t.toLowerCase()} in Limassol involve?`,
+  factsTitle: 'Key facts',
+  incLabel: 'Scope', incTitle: 'What the price includes',
+  excTitle: 'What it does not include',
+  priceLabel: 'Pricing', priceTitle: (t: string) => `How much does ${t.toLowerCase()} cost?`,
+  colWork: 'Work', colPrice: 'From',
+  priceNote: 'Baseline rates for the Republic of Cyprus: labour plus standard materials, waste removal included. Your written quote is fixed after a free survey.',
+  stdLabel: 'Standards', stdTitle: 'What we build to',
+  docLabel: 'Paperwork', docTitle: 'What you receive in writing',
+  whyLabel: 'Difference', whyTitle: 'Why owners here choose Helyot',
+  procLabel: 'Process', procTitle: 'How the job runs',
+  procMore: 'The full process',
+  faqLabel: 'Questions', faqTitle: (t: string) => `${t} — questions we get asked`,
+  locTitle: (t: string) => `${t} by location`,
+  relTitle: 'Related services',
+  area: 'Helyot operates across the government-controlled areas of the Republic of Cyprus — Limassol, Paphos, Larnaca, Nicosia and the free Famagusta area. We do not undertake projects in the occupied northern areas.',
+} : {
+  eyebrow: 'Услуга', crumbHome: 'Главная', crumbSvc: 'Услуги', homeHref: '/ru',
+  ctaMain: 'Бесплатная смета', ctaAlt: 'WhatsApp',
+  mPrice: 'От', mTime: 'Срок', mWar: 'Гарантия', mWarVal: '5 лет',
+  answerLabel: 'Коротко', answerTitle: (t: string) => `Что включает ${t.toLowerCase()} в Лимасоле?`,
+  factsTitle: 'Главные факты',
+  incLabel: 'Объём', incTitle: 'Что входит в цену',
+  excTitle: 'Что в неё не входит',
+  priceLabel: 'Цены', priceTitle: (t: string) => `Сколько стоит ${t.toLowerCase()}?`,
+  colWork: 'Работа', colPrice: 'От',
+  priceNote: 'Базовые ставки для Республики Кипр: работа плюс стандартные материалы, вывоз мусора включён. Ваша смета фиксируется письменно после бесплатного выезда.',
+  stdLabel: 'Стандарты', stdTitle: 'По каким нормам работаем',
+  docLabel: 'Документы', docTitle: 'Что вы получаете письменно',
+  whyLabel: 'Разница', whyTitle: 'Почему выбирают Helyot',
+  procLabel: 'Процесс', procTitle: 'Как идёт работа',
+  procMore: 'Весь процесс',
+  faqLabel: 'Вопросы', faqTitle: (t: string) => `${t} — что спрашивают чаще всего`,
+  locTitle: (t: string) => `${t} по локациям`,
+  relTitle: 'Смежные услуги',
+  area: 'Helyot работает на подконтрольной правительству территории Республики Кипр — Лимасол, Пафос, Ларнака, Никосия и свободная зона Фамагусты. На оккупированных северных территориях мы не работаем.',
+};
+
+const processHref = en ? '/en/process' : '/ru/process';
+
+const schema: any[] = [{
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: title,
+  description: en ? svc.seoDescEn : svc.seoDescRu,
+  serviceType: title,
+  provider: {
+    '@type': 'LocalBusiness', name: 'Helyot',
+    address: { '@type': 'PostalAddress', addressLocality: 'Limassol', addressCountry: 'CY' },
+  },
+  areaServed: { '@type': 'Country', name: 'Cyprus' },
+  ...(svc.priceFrom ? {
+    offers: {
+      '@type': 'Offer', priceCurrency: 'EUR',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: svc.priceFrom, priceCurrency: 'EUR',
+        unitText: svc.priceUnit === 'sqm' ? 'square metre' : 'project',
+      },
+    },
+  } : {}),
+}, {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: c.procTitle,
+  step: process.map((p, i) => ({
+    '@type': 'HowToStep', position: i + 1, name: p.title, text: p.body,
+  })),
+}];
+if (faqs.length > 0) {
+  schema.push({
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: faqs.map(f => ({
+      '@type': 'Question', name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  });
+}
+
+/* Deep-dive content: only painting carries it so far; every block below
+   renders only when the service actually has the data. */
+const deep = en ? svc.deepEn : svc.deepRu;
+---
+
+{schema.map(s => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+
+{deep && <div class="pt-page-flag" aria-hidden="true"></div>}
+
+<CineHero
+  lang={lang}
+  photo={heroPhoto}
+  index={catLabel[svc.category]}
+  eyebrow={c.eyebrow}
+  titleHtml={en ? `${svc.titleEn} <em>in Limassol.</em>` : `${svc.titleRu} <em>в Лимасоле.</em>`}
+  subtitle={heroSub}
+  breadcrumb={[
+    { label: c.crumbHome, href: c.homeHref },
+    { label: c.crumbSvc, href: svcBase },
+    { label: title },
+  ]}
+  meta={[
+    { label: c.mPrice, value: priceLbl.replace(/^(from |от )/, '') },
+    { label: c.mWar,   value: c.mWarVal },
+  ]}
+  cta={{ label: c.ctaMain, href: '#booking' }}
+  ctaSecondary={{ label: c.ctaAlt, href: 'https://wa.me/35797499231' }}
+/>
+
+<!-- ══ DIRECT ANSWER + FACTS ═══════════════════════════════ -->
+{!deep && (
+<section class="sd-sec">
+  <div class="container-wide">
+    <div class="sd-split">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{c.answerLabel}</span>{catLabel[svc.category]}</p>
+        <h2 class="cine-display sd-h2" data-words>{c.answerTitle(title)}</h2>
+        <p class="sd-answer" data-reveal>{answer}</p>
+      </div>
+
+      <dl class="sd-facts" data-reveal>
+        <p class="sd-facts-key">{c.factsTitle}</p>
+        {facts.map(f => (
+          <div class="sd-fact">
+            <dt>{f.k}</dt>
+            <dd>{f.v}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>
+
+)}
+<!-- ══ SCOPE ═══════════════════════════════════════════════ -->
+{!deep && (
+<section class="sd-sec sd-sec--alt">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{c.incLabel}</span>{c.incTitle}</p>
+    <h2 class="cine-display sd-h2" data-words>
+      {en ? <>Everything below is <em>in the price.</em></> : <>Всё перечисленное <em>уже в цене.</em></>}
+    </h2>
+
+    <div class="sd-inc" data-stagger-group>
+      {includes.map((item, i) => (
+        <div class="sd-inc-item" data-stagger-item>
+          <span class="sd-inc-n">{String(i + 1).padStart(2, '0')}</span>
+          <span>{item}</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="sd-exc">
+      <h3>{c.excTitle}</h3>
+      <ul>{excluded.map(e => <li>{e}</li>)}</ul>
+    </div>
+  </div>
+</section>
+
+)}
+<!-- ══ BAND ════════════════════════════════════════════════ -->
+{!deep && (
+<div class="sd-band cine-scene" aria-hidden="true">
+  <img src={bandPhoto} alt="" loading="lazy" decoding="async" width="1600" height="900" data-parallax="0.18" />
+  <div class="sd-band-cap">
+    <span>{title}</span><span class="sd-band-rule"></span><span>{en ? 'Limassol · Cyprus' : 'Лимасол · Кипр'}</span>
+  </div>
+</div>
+
+)}
+<!-- ══ PRICES ══════════════════════════════════════════════ -->
+{!deep && priceRows.length > 0 && (
+  <section class="sd-sec">
+    <div class="container-wide">
+      <div class="sd-split">
+        <div>
+          <p class="cine-label" data-reveal><span class="cine-label__index">{c.priceLabel}</span>{priceLbl}</p>
+          <h2 class="cine-display sd-h2" data-words>{c.priceTitle(title)}</h2>
+          <p class="sd-lead" data-reveal>{c.priceNote}</p>
+        </div>
+
+        <div class="sd-tbl">
+          <div class="sd-tbl-head"><span>{c.colWork}</span><span>{c.colPrice}</span></div>
+          {priceRows.map(row => (
+            <div class="sd-tbl-row" data-reveal>
+              <p>{en ? row.en : row.ru}</p>
+              <span>{en ? row.priceEn : row.priceRu}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- ══ STANDARDS + DOCUMENTS ═══════════════════════════════ -->
+{!deep && (
+<section class="sd-sec sd-sec--alt">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{c.stdLabel}</span>{c.stdTitle}</p>
+    <h2 class="cine-display sd-h2" data-words>
+      {en ? <>Named standards, <em>not adjectives.</em></> : <>Конкретные нормы, <em>а не прилагательные.</em></>}
+    </h2>
+
+    <div class="sd-std" data-stagger-group>
+      {standards.map(s => (
+        <div class="sd-std-item" data-stagger-item>
+          <h3>{s.t}</h3>
+          <p>{s.d}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="sd-docs">
+      <p class="sd-docs-key">{c.docTitle}</p>
+      <div class="sd-docs-grid">
+        {documents.map(d => (
+          <div class="sd-doc">
+            <h4>{d.t}</h4>
+            <p>{d.d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+)}
+<!-- ══ WHY ═════════════════════════════════════════════════ -->
+{!deep && (
+<section class="sd-sec">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{c.whyLabel}</span>{c.whyTitle}</p>
+    <h2 class="cine-display sd-h2" data-words>
+      {en ? <>Three things that <em>change the outcome.</em></> : <>Три вещи, которые <em>меняют результат.</em></>}
+    </h2>
+    <div class="sd-rows" data-stagger-group>
+      {whyUs[svc.category].map((w, i) => (
+        <div class="sd-row" data-stagger-item>
+          <span class="sd-row-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <h3 class="sd-row-title">{w.title}</h3>
+            <p class="sd-row-text">{w.body}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+)}
+
+<!-- ══ PROCESS ═════════════════════════════════════════════
+     Full-bleed photo split into four vertical panes by hairlines — one pane
+     per stage, copy sitting on the image itself rather than under it. -->
+{deep && (
+<>
+<!-- ══ 02 · SCOPE — everything visible ═════════════════════ -->
+<section class="pt-sec pt-scope">
+  <div class="container-wide">
+    <div class="pt-scope-head">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Scope' : 'Объём'}</span>{deep.scopeTitle}</p>
+        <h2 class="cine-display pt-h2" data-words>
+          {en ? <>Every surface, <em>its own system.</em></> : <>Каждой поверхности — <em>своя система.</em></>}
+        </h2>
+      </div>
+      <p class="pt-lead" data-reveal>{deep.scopeLead}</p>
+    </div>
+
+    <div class="pt-grid" data-stagger-group>
+      {deep.scope.map((it, i) => (
+        <article class="pt-card" data-stagger-item>
+          {it.photo && (
+            <span class="pt-card-img cine-scene">
+              <img src={it.photo} alt="" width="640" height="400" loading="lazy" decoding="async" />
+              <span class="pt-card-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            </span>
+          )}
+          <h3>{it.title}</h3>
+          <p>{it.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ══ 03 · PROFILES — alternating full-bleed zigzag ══════════ -->
+<section class="pt-sec pt-sec--alt">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Property type' : 'Тип объекта'}</span>{deep.profileTitle}</p>
+    <h2 class="cine-display pt-h2 pt-h2--wide" data-words>
+      {en ? <>Find yours, <em>skip the rest.</em></> : <>Найдите свой, <em>остальное пропустите.</em></>}
+    </h2>
+  </div>
+  <div class="container-wide">
+  {deep.profiles.map((pr, i) => (
+    <article class={i % 2 === 1 ? 'pt-zag pt-zag--rev' : 'pt-zag'} data-reveal>
+      <span class="pt-zag-img cine-scene">
+        <img src={pr.photo} alt={pr.alt} width="900" height="700" loading="lazy" decoding="async" />
+      </span>
+      <div class="pt-zag-body">
+        <span class="pt-zag-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <h3>{pr.title}</h3>
+        <p class="pt-zag-lead">{pr.target}.</p>
+        <p class="pt-zag-focus">{pr.focus}.</p>
+        <p class="pt-zag-who">{pr.idealFor}</p>
+      </div>
+    </article>
+  ))}
+  </div>
+</section>
+
+<!-- ══ 04 · BUDGET — the number is the headline ═══════════════ -->
+<section class="pt-sec">
+  <div class="container-wide">
+    <div class="pt-head-wide">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Budget' : 'Бюджет'}</span>{deep.benchTitle}</p>
+        <h2 class="cine-display pt-h2 pt-h2--wide" data-words>
+          {en ? <>Real projects, <em>real numbers.</em></> : <>Реальные проекты, <em>реальные суммы.</em></>}
+        </h2>
+      </div>
+      <p class="pt-lead pt-lead--right" data-reveal>{deep.benchLead}</p>
+    </div>
+
+    <ol class="pt-ladder" data-stagger-group>
+      {deep.benchmarks.map(b => (
+        <li class="pt-rung" data-stagger-item>
+          <span class="pt-rung-price">{b.range}</span>
+          <div class="pt-rung-body">
+            <h3>{b.title}</h3>
+            <p>{b.scope}</p>
+          </div>
+          <span class="pt-rung-dur">{b.duration}</span>
+        </li>
+      ))}
+    </ol>
+
+    <div class="pt-factors">
+      <h3 class="pt-factors-key" data-reveal>{deep.factorsTitle}</h3>
+      <div class="pt-factors-grid" data-stagger-group>
+        {deep.factors.map((f, i) => (
+          <div class="pt-factor" data-stagger-item>
+            <span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h4>{f.title}</h4>
+            <p>{f.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 05 · STANDARD — split screen, one spine ════════════════ -->
+<section class="pt-sec pt-sec--alt pt-vs-sec">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Standard' : 'Стандарт'}</span>{deep.standardTitle}</p>
+    <h2 class="cine-display pt-h2 pt-h2--wide" data-words>
+      {en ? <>The difference is <em>before the first coat.</em></> : <>Разница — <em>до первого слоя.</em></>}
+    </h2>
+    <p class="pt-lead" data-reveal>{deep.standardLead}</p>
+
+    <div class="pt-vs" data-stagger-group>
+      <div class="pt-vs-head" aria-hidden="true">
+        <span class="pt-vs-stage"></span>
+        <span class="pt-vs-basic">{deep.standardHeads[1]}</span>
+        <span class="pt-vs-us">{deep.standardHeads[2]}</span>
+      </div>
+      {deep.standard.map(r => (
+        <div class="pt-vs-row" data-stagger-item>
+          <span class="pt-vs-stage">{r.stage}</span>
+          <span class="pt-vs-basic">{r.basic}</span>
+          <span class="pt-vs-us">{r.helyot}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ══ 06 · CLIMATE — vertical spine, alternating sides ═══════ -->
+<section class="pt-sec">
+  <div class="container-wide">
+    <div class="pt-head-wide">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Local conditions' : 'Местные условия'}</span>{deep.climateTitle}</p>
+        <h2 class="cine-display pt-h2 pt-h2--wide" data-words>
+          {en ? <>Why paint fails here, <em>and how we stop it.</em></> : <>Почему краска здесь не держится — <em>и как это снимается.</em></>}
+        </h2>
+      </div>
+      <p class="pt-lead pt-lead--right" data-reveal>{deep.climateLead}</p>
+    </div>
+
+    <div class="pt-cli" data-stagger-group>
+      {deep.climate.map((cl, i) => (
+        <article class="pt-cli-card" data-stagger-item>
+          <span class="pt-cli-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{cl.title}</h3>
+          <div class="pt-cli-prob">
+            <span>{en ? 'What goes wrong' : 'Что происходит'}</span>
+            <p>{cl.problem}</p>
+          </div>
+          <div class="pt-cli-sol">
+            <span>{en ? 'What we do' : 'Что делаем'}</span>
+            <p>{cl.solution}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+</>
+)}
+
+<section class="sd-proc">
+  <picture class="sd-proc-bg">
+    <source media="(max-width: 700px)" srcset="/images/process-band-mobile.webp" />
+    <img src="/images/process-band.webp" alt="" width="1800" height="868" loading="lazy" decoding="async" aria-hidden="true" />
+  </picture>
+  <div class="sd-proc-grade" aria-hidden="true"></div>
+  <div class="sd-proc-rules" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <div class="sd-proc-in">
+    <div class="sd-proc-head">
+      <p class="cine-label" data-reveal><span class="cine-label__index">{c.procLabel}</span>{c.procTitle}</p>
+      <h2 class="cine-display sd-proc-h2" data-words>
+        {en ? <>From first call <em>to handover.</em></> : <>От первого звонка <em>до сдачи.</em></>}
+      </h2>
+    </div>
+
+    <div class="sd-proc-cols" data-stagger-group>
+      {process.map(step => (
+        <div class="sd-proc-col" data-stagger-item>
+          <span class="sd-proc-n" aria-hidden="true">{step.n}</span>
+          <h3 class="sd-proc-title">{step.title}</h3>
+          <p class="sd-proc-text">{step.body}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<section class="sd-sec sd-sec--alt sd-sec--tight">
+  <div class="container-wide">
+    <a href={processHref} class="sd-btn" data-reveal>{c.procMore}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+
+{faqs.length > 0 && (
+  <section class="sd-sec">
+    <div class="container-wide" style="max-width:820px;">
+      <p class="cine-label" data-reveal><span class="cine-label__index">{c.faqLabel}</span>{title}</p>
+      <h2 class="cine-display sd-h2" data-words>{c.faqTitle(title)}</h2>
+      <div class="sd-faq">
+        {faqs.map(faq => (
+          <details class="sd-faq-item">
+            <summary>{faq.q}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <p>{faq.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+{deep && (
+
+<section class="sd-sec sd-sec--alt">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Fit' : 'Кому подходит'}</span>{deep.fitTitle}</p>
+    <h2 class="cine-display sd-h2" data-words>
+      {en ? <>Worth being <em>straight about.</em></> : <>Честно <em>с самого начала.</em></>}
+    </h2>
+    <div class="sd-fit">
+      <div class="sd-fit-col sd-fit-yes" data-reveal>
+        <p class="sd-fit-key">{deep.fitYesTitle}</p>
+        <ul>{deep.fitYes.map(x => <li>{x}</li>)}</ul>
+      </div>
+      <div class="sd-fit-col sd-fit-no" data-reveal>
+        <p class="sd-fit-key">{deep.fitNoTitle}</p>
+        <ul>{deep.fitNo.map(x => <li>{x}</li>)}</ul>
+      </div>
+    </div>
+  </div>
+</section>
+)}
+
+
+<section class="sd-sec sd-sec--alt">
+  <div class="container-wide">
+    <div class="sd-links-grid">
+      <div>
+        <h3 class="sd-h3" data-reveal>{c.locTitle(title)}</h3>
+        <ul class="sd-links">
+          {topLocations.map(l => (
+            <li><a href={`${svcBase}/${svc.slug}/${l.slug}`}>{title} {en ? l.inEn : l.inRu}</a></li>
+          ))}
+        </ul>
+      </div>
+      {related.length > 0 && (
+        <div>
+          <h3 class="sd-h3" data-reveal>{c.relTitle}</h3>
+          <ul class="sd-links">
+            {related.map(r => (
+              <li><a href={`${svcBase}/${r.slug}`}>{en ? r.titleEn : r.titleRu}<span> — {en ? r.priceLabelEn : r.priceLabelRu}</span></a></li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+    <p class="sd-area">{c.area}</p>
+  </div>
+</section>
+
+<BookingForm lang={lang} />
+
+<style>
+.sd-sec {
+  padding: 6rem 0;
+  background: #08080E;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.sd-sec--alt { background: #06060A; }
+.sd-h2 { margin: 1.1rem 0 0; font-size: clamp(1.6rem, 3.2vw, 2.5rem); }
+.sd-h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.15rem;
+  color: #F0F0F6; margin: 0 0 1.2rem;
+}
+.sd-split { display: grid; grid-template-columns: 1fr 1.15fr; gap: 3.5rem; align-items: start; }
+.sd-lead { font-size: .9rem; line-height: 1.8; color: #9DA0B8; max-width: 46ch; margin: 1.4rem 0 0; }
+
+/* ── Direct answer ──────────────────────────────────────── */
+.sd-answer {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 1.08rem; line-height: 1.75; color: #B8B8CC;
+  max-width: 54ch; margin: 1.6rem 0 0;
+}
+
+.sd-facts { margin: 0; padding: 0; }
+.sd-facts-key {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; text-transform: lowercase; letter-spacing: .05em;
+  color: #8288A5; margin: 0 0 .3rem;
+}
+.sd-fact {
+  display: grid; grid-template-columns: 11rem 1fr; gap: 1.5rem;
+  padding: .85rem 0; border-top: 1px solid rgba(255,255,255,.07);
+}
+.sd-fact dt {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; color: #8288A5;
+}
+.sd-fact dd { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #E4E4F0; }
+
+/* ── Scope ──────────────────────────────────────────────── */
+.sd-inc { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 3rem; margin-top: 2.4rem; }
+.sd-inc-item {
+  display: flex; gap: 1.1rem; align-items: baseline; padding: .9rem 0;
+  font-size: 0.9rem; color: #B8B8CC; line-height: 1.6;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.sd-inc-n {
+  font-family: 'Spectral', Georgia, serif; font-size: .78rem;
+  color: rgba(232,184,109,.65); flex-shrink: 0; font-variant-numeric: tabular-nums;
+}
+
+.sd-exc { margin-top: 3rem; padding-top: 1.8rem; border-top: 1px solid rgba(232,184,109,.25); }
+.sd-exc h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.1rem;
+  color: #F0F0F6; margin: 0 0 1rem;
+}
+.sd-exc ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .6rem 3rem; }
+.sd-exc li { position: relative; padding-left: 1.2rem; font-size: .84rem; line-height: 1.7; color: #8288A5; }
+.sd-exc li::before {
+  content: ''; position: absolute; left: 0; top: .62em;
+  width: .55rem; height: 1px; background: rgba(255,255,255,.28);
+}
+
+/* ── Band ───────────────────────────────────────────────── */
+.sd-band {
+  position: relative; height: clamp(280px, 42vh, 460px);
+  border-top: 1px solid rgba(255,255,255,.07);
+  border-bottom: 1px solid rgba(255,255,255,.07); overflow: hidden;
+}
+.sd-band img { width: 100%; height: 100%; object-fit: cover; }
+.sd-band::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(8,8,14,.5), rgba(8,8,14,.08) 45%, rgba(8,8,14,.58));
+}
+.sd-band-cap {
+  position: absolute; left: 0; right: 0; bottom: 1.6rem; z-index: 1;
+  display: flex; align-items: center; justify-content: center; gap: 1.1rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; letter-spacing: .2em; text-transform: lowercase;
+  color: rgba(240,240,246,.9); text-shadow: 0 1px 12px rgba(4,4,8,.85);
+}
+.sd-band-rule { width: 3rem; height: 1px; background: rgba(232,184,109,.7); }
+
+/* ── Price table ────────────────────────────────────────── */
+.sd-tbl { border: 1px solid rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
+.sd-tbl-head, .sd-tbl-row {
+  display: grid; grid-template-columns: 1fr 9rem; gap: 1.5rem;
+  padding: .9rem 1.4rem; align-items: baseline;
+}
+.sd-tbl-head { background: rgba(255,255,255,.03); border-bottom: 1px solid rgba(255,255,255,.08); }
+.sd-tbl-head span {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .66rem; text-transform: lowercase; letter-spacing: .05em; color: #8288A5;
+}
+.sd-tbl-head span:last-child, .sd-tbl-row span { text-align: right; }
+.sd-tbl-row + .sd-tbl-row { border-top: 1px solid rgba(255,255,255,.05); }
+.sd-tbl-row:hover { background: rgba(255,255,255,.02); }
+.sd-tbl-row p { font-size: 0.84rem; color: #B8B8CC; margin: 0; }
+.sd-tbl-row span {
+  font-family: 'Spectral', Georgia, serif; font-size: .95rem; color: #E8B86D;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+
+/* ── Standards + documents ──────────────────────────────── */
+.sd-std { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 2.6rem; margin-top: 2.6rem; }
+.sd-std-item { padding-top: 1.5rem; border-top: 1px solid rgba(232,184,109,.3); }
+.sd-std-item h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.02rem;
+  color: #E8B86D; margin: 0 0 .55rem;
+}
+.sd-std-item p { font-size: .84rem; line-height: 1.7; color: #8288A5; margin: 0; }
+
+.sd-docs { margin-top: 3.4rem; }
+.sd-docs-key {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; text-transform: lowercase; letter-spacing: .05em;
+  color: #8288A5; margin: 0 0 1.2rem;
+}
+.sd-docs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem 2.6rem; }
+.sd-doc { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.08); }
+.sd-doc h4 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 0.95rem;
+  color: #E4E4F0; margin: 0 0 .35rem;
+}
+.sd-doc p { font-size: 0.78rem; line-height: 1.6; color: #8288A5; margin: 0; }
+
+/* ── Numbered rows ──────────────────────────────────────── */
+.sd-rows { display: flex; flex-direction: column; margin-top: 2.4rem; }
+.sd-row {
+  display: grid; grid-template-columns: 4rem 1fr; gap: 1.5rem;
+  padding: 1.7rem 0; border-top: 1px solid rgba(255,255,255,.08);
+}
+.sd-row:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.sd-row-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.9rem;
+  line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(232,184,109,.4);
+}
+.sd-row-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.2rem;
+  color: #F0F0F6; margin: 0 0 .5rem;
+}
+.sd-row-text { font-size: .9rem; line-height: 1.75; color: #9DA0B8; margin: 0; max-width: 64ch; }
+
+.sd-btn {
+  display: inline-flex; align-items: center; gap: .55rem; margin-top: 2.2rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px; padding: .6rem 1.3rem;
+  transition: background .2s ease, color .2s ease;
+}
+.sd-btn svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.sd-btn:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.sd-btn:hover svg { transform: translateX(3px); }
+
+
+/* ── Process band ───────────────────────────────────────── */
+.sd-proc {
+  position: relative;
+  min-height: clamp(520px, 62vh, 720px);
+  display: flex; align-items: stretch;
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  overflow: hidden;
+  background: #06060A;
+}
+.sd-proc-bg { position: absolute; inset: 0; z-index: 0; }
+.sd-proc-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 55%; }
+/* Dark at the foot where the copy sits, clear at the top so the building reads */
+.sd-proc-grade {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg,
+    rgba(6,6,10,.58) 0%,
+    rgba(6,6,10,.26) 26%,
+    rgba(6,6,10,.52) 56%,
+    rgba(6,6,10,.90) 100%);
+}
+
+/* Three 1px hairlines cutting the whole photo into four vertical panes. A
+   separate layer, so they run the full height rather than only beside text. */
+.sd-proc-rules { position: absolute; inset: 0; z-index: 2; }
+.sd-proc-rules i {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: rgba(255,255,255,.4);
+}
+.sd-proc-rules i:nth-child(1) { left: 25%; }
+.sd-proc-rules i:nth-child(2) { left: 50%; }
+.sd-proc-rules i:nth-child(3) { left: 75%; }
+
+.sd-proc-in {
+  position: relative; z-index: 3;
+  display: flex; flex-direction: column; justify-content: space-between;
+  align-items: stretch;
+  /* flex item of .sd-proc — needs to grow, or width:100% still gets shrunk */
+  flex: 1 1 auto; min-width: 0;
+  width: 100%; padding: 3.5rem 0 0;
+}
+.sd-proc-head { width: 100%; padding: 0 1.6rem 2rem; }
+.sd-proc-h2 {
+  margin: 1.1rem 0 0; font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+  max-width: 22ch; text-shadow: 0 2px 28px rgba(4,4,8,.8);
+}
+
+/* One column per pane, aligned to the same 25% boundaries as the hairlines */
+.sd-proc-cols {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  align-items: end; width: 100%;
+}
+.sd-proc-col { padding: 1.6rem 1.6rem 2.4rem; }
+.sd-proc-n {
+  display: block;
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.7rem;
+  color: #E8B86D; line-height: 1; margin-bottom: .9rem;
+  text-shadow: 0 1px 14px rgba(4,4,8,.9);
+}
+.sd-proc-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.02rem;
+  color: #FFFFFF; margin: 0 0 .55rem; line-height: 1.3;
+  text-shadow: 0 1px 14px rgba(4,4,8,.9);
+}
+.sd-proc-text {
+  font-size: 0.78rem; line-height: 1.7; color: #D9DAE6; margin: 0;
+  text-shadow: 0 1px 12px rgba(4,4,8,.95);
+}
+.sd-sec--tight { padding: 2.4rem 0; }
+
+@media (max-width: 900px) {
+  .sd-proc { min-height: 0; }
+  .sd-proc-in { padding-top: 2.5rem; }
+  .sd-proc-h2 { max-width: none; }
+  .sd-proc-cols { grid-template-columns: repeat(2, 1fr); }
+  .sd-proc-col { padding: 1.2rem 1.1rem 1.6rem; }
+  /* Two panes on tablet, so only the centre line stays */
+  .sd-proc-rules i:nth-child(1),
+  .sd-proc-rules i:nth-child(3) { display: none; }
+}
+@media (max-width: 560px) {
+  .sd-proc-cols { grid-template-columns: 1fr; }
+  .sd-proc-rules { display: none; }
+  .sd-proc-col { border-top: 1px solid rgba(255,255,255,.28); padding-bottom: 1.2rem; }
+}
+
+/* ── FAQ ────────────────────────────────────────────────── */
+.sd-faq { display: flex; flex-direction: column; margin-top: 2rem; }
+.sd-faq-item { border-bottom: 1px solid rgba(255,255,255,.07); }
+.sd-faq-item:first-child { border-top: 1px solid rgba(255,255,255,.07); }
+.sd-faq-item summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.2rem;
+  padding: 1.2rem 0; cursor: pointer; list-style: none;
+  font-size: .95rem; color: #B8B8CC; transition: color .15s;
+}
+.sd-faq-item summary::-webkit-details-marker { display: none; }
+.sd-faq-item summary:hover { color: #F0F0F6; }
+.sd-faq-item[open] summary { color: #E8B86D; }
+.sd-faq-item summary svg { flex-shrink: 0; opacity: .35; transition: transform .25s; }
+.sd-faq-item[open] summary svg { transform: rotate(180deg); }
+.sd-faq-item p { font-size: 0.9rem; line-height: 1.8; color: #9DA0B8; margin: 0; padding: 0 0 1.3rem; max-width: 64ch; }
+
+/* ── Links ──────────────────────────────────────────────── */
+.sd-links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.sd-links { list-style: none; margin: 0; padding: 0; }
+.sd-links li { padding: .45rem 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+.sd-links a { font-size: 0.9rem; color: #9DA0B8; text-decoration: none; transition: color .15s; }
+.sd-links a span { color: #8288A5; }
+.sd-links a:hover { color: #E8B86D; }
+.sd-area {
+  margin: 3rem 0 0; padding-top: 1.6rem; border-top: 1px solid rgba(255,255,255,.06);
+  font-size: .78rem; line-height: 1.7; color: #8288A5; max-width: 72ch;
+}
+
+@media (max-width: 1000px) {
+  .sd-split { grid-template-columns: 1fr; gap: 2.4rem; }
+  .sd-lead, .sd-answer { max-width: none; }
+  .sd-std { grid-template-columns: 1fr; gap: 1.6rem; }
+  .sd-docs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+  .sd-sec { padding: 3.5rem 0; }
+  .sd-inc, .sd-links-grid { grid-template-columns: 1fr; gap: 0 2rem; }
+  .sd-exc ul { grid-template-columns: 1fr; }
+  .sd-docs-grid { grid-template-columns: 1fr; }
+  .sd-fact { grid-template-columns: 1fr; gap: .2rem; }
+  .sd-row { grid-template-columns: 2.6rem 1fr; gap: 1rem; padding: 1.4rem 0; }
+  .sd-links-grid { gap: 2.4rem; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .sd-facts-key, .sd-docs-key, .sd-got-key { font-size: 0.78rem;   .sd-band-cap { font-size: 0.78rem; }
+}
+  .sd-tbl-head span { font-size: 0.72rem; }
+}
+
+
+/* ══ PAINTING DEEP BLOCKS ══════════════════════════════════════════════════
+   Six sections used to share one shape — container, heading, grid of cards —
+   which read as a single grey column however good the copy was. Each block
+   now has its own spatial logic: a sticky split, a full-bleed zigzag, a price
+   ladder, a split screen and a spine. The palette and the two typefaces are
+   the site's; only the composition changed.
+   Motion stays on transform/opacity, ease-out, under 300ms.             */
+
+.pt-sec { padding: 7rem 0; background: #08080E; }
+.pt-sec--alt { background: #06060A; }
+.pt-h2 { margin: 1.2rem 0 0; font-size: clamp(1.9rem, 3.4vw, 3rem); }
+.pt-h2--wide { max-width: 18ch; }
+.pt-lead { margin: 1.4rem 0 0; font-size: 1rem; line-height: 1.75; color: #9DA0B8; max-width: 46ch; }
+.pt-lead--right { margin-top: 0; align-self: end; }
+.pt-head-wide { display: grid; grid-template-columns: 1.1fr .9fr; gap: 3rem; align-items: end; }
+
+/* ── 02 · sticky split with hanging numerals ── */
+/* ── 02 · card grid ──
+   This was a horizontal accordion. It looked good and it cost too much: 83
+   words of copy across six panels, 17 of them visible, five hover actions to
+   read the rest — and on touch it collapsed to a plain list, so the effect
+   only ever existed on a desktop. Six labels of a dozen words each want to be
+   scanned, not opened. Everything is on screen now; the photograph, the gold
+   frame on hover and the numeral carry the richness instead.
+   Removing it also took away six tabindex divs that had no role and gave
+   keyboard users six anonymous stops. */
+.pt-scope-head { display: grid; grid-template-columns: 1.05fr .95fr; gap: 3rem; align-items: end; margin-bottom: 3.2rem; }
+.pt-scope .pt-h2 { font-size: clamp(2.1rem, 4vw, 3.3rem); }
+.pt-scope .pt-lead { margin: 0; max-width: 46ch; }
+
+.pt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.4rem 2rem; }
+.pt-card {
+  display: flex; flex-direction: column;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(255,255,255,.09);
+  transition: transform .35s cubic-bezier(.22,1,.36,1);
+}
+.pt-card:hover { transform: translateY(-4px); }
+.pt-card-img {
+  display: block; aspect-ratio: 16 / 10; margin-bottom: 1.1rem;
+  border-radius: 4px; border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 0 0 0 rgba(232,184,109,0);
+  transition: box-shadow .4s ease, border-color .4s ease;
+}
+.pt-card:hover .pt-card-img { border-color: rgba(232,184,109,.42); }
+.pt-card-img img {
+  filter: saturate(.85) brightness(.72);
+  transition: filter .5s ease, transform .9s cubic-bezier(.22,1,.36,1);
+}
+.pt-card:hover .pt-card-img img { filter: saturate(1) brightness(.92); transform: scale(1.04); }
+.pt-card-n {
+  position: absolute; left: .85rem; top: .7rem; z-index: 1;
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.6rem;
+  line-height: 1; color: transparent;
+  -webkit-text-stroke: 1px rgba(243,213,160,.75);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 12px rgba(4,4,8,.8);
+  transition: color .4s ease;
+}
+.pt-card:hover .pt-card-n { color: rgba(232,184,109,.28); }
+.pt-card h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.2rem;
+  color: #F0F0F6; margin: 0 0 .5rem; line-height: 1.28;
+  transition: color .25s ease;
+}
+.pt-card:hover h3 { color: #E8B86D; }
+.pt-card p { margin: 0; font-size: .94rem; line-height: 1.66; color: #9DA0B8; }
+
+@media (max-width: 1000px) {
+  .pt-scope-head { grid-template-columns: 1fr; gap: 1.4rem; align-items: start; }
+  .pt-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem 1.6rem; }
+}
+@media (max-width: 640px) {
+  .pt-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt-card:hover { transform: none; }
+  .pt-card:hover .pt-card-img img { transform: none; }
+}
+
+/* ── 03 · zigzag, image bleeding to the viewport edge ── */
+/* Images were half the row at 5:4 and dwarfed the copy. The picture column is
+   now the smaller of the two and less tall; the zigzag and the bleed stay. */
+.pt-zag {
+  display: grid; grid-template-columns: .78fr 1.22fr; align-items: center;
+  gap: 0 4rem; margin-top: 4.5rem;
+}
+.pt-zag--rev { grid-template-columns: 1.22fr .78fr; }
+.pt-zag-img { display: block; aspect-ratio: 4 / 3; }
+.pt-zag-img img { filter: saturate(.88) brightness(.86); transition: transform .8s cubic-bezier(.16,1,.3,1), filter .3s ease; }
+.pt-zag:hover .pt-zag-img img { transform: scale(1.04); filter: none; }
+/* The rows used to sit outside .container-wide so the pictures bled to the
+   viewport edge. Measured at 1440: photos landed on 0 and 1440 while the copy
+   stopped 363px short of the page grid — the images looked stuck to the glass
+   and the text looked adrift. Both columns now live on the same grid as every
+   other section. */
+.pt-zag-body { padding: 0; }
+.pt-zag--rev .pt-zag-body { order: -1; padding: 0; }
+.pt-zag-n {
+  display: block; font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: 3.4rem; line-height: 1; color: transparent;
+  -webkit-text-stroke: 1px rgba(232,184,109,.4); margin-bottom: .6rem;
+}
+.pt-zag-body h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: clamp(1.7rem, 2.6vw, 2.3rem); letter-spacing: -.02em;
+  color: #F0F0F6; margin: 0 0 1.6rem; line-height: 1.15;
+}
+/* No label column. Three gold uppercase captions per card, nine on screen,
+   turned the block into a spec sheet — and that caps/gold treatment belongs to
+   .cine-label, once per section. The copy carries its own hierarchy instead:
+   the job in display type, the detail in body, the audience as a footnote. */
+.pt-zag-lead {
+  margin: 0 0 .9rem; max-width: 34ch;
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: 1.24rem; line-height: 1.45; color: #F0F0F6;
+}
+.pt-zag-focus { margin: 0 0 1.5rem; max-width: none; font-size: .97rem; line-height: 1.68; color: #9DA0B8; }
+.pt-zag-who {
+  margin: 0; padding-top: 1.1rem; max-width: none;
+  border-top: 1px solid rgba(255,255,255,.09);
+  font-size: .88rem; line-height: 1.55; color: #8288A5;
+}
+
+/* ── 04 · price ladder ── */
+.pt-ladder { list-style: none; margin: 3.5rem 0 0; padding: 0; }
+.pt-rung {
+  display: grid; grid-template-columns: minmax(11rem, .8fr) 1.6fr auto;
+  gap: 1rem 2.5rem; align-items: baseline;
+  padding: 2.1rem 0; border-top: 1px solid rgba(255,255,255,.09);
+  transition: transform .28s cubic-bezier(.16,1,.3,1);
+}
+.pt-rung:last-child { border-bottom: 1px solid rgba(255,255,255,.09); }
+.pt-rung:hover { transform: translateX(6px); }
+.pt-rung-price {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: clamp(1.7rem, 2.7vw, 2.5rem); line-height: 1; letter-spacing: -.025em;
+  color: #E8B86D; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.pt-rung-body h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.2rem;
+  color: #F0F0F6; margin: 0 0 .45rem; line-height: 1.3;
+}
+.pt-rung-body p { margin: 0; font-size: .93rem; line-height: 1.65; color: #9DA0B8; }
+.pt-rung-dur {
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .8rem;
+  color: #8288A5; text-transform: lowercase; white-space: nowrap;
+}
+
+.pt-factors { margin-top: 4.5rem; }
+.pt-factors-key {
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .74rem;
+  letter-spacing: .18em; text-transform: uppercase; color: #8288A5;
+  margin: 0 0 1.6rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(232,184,109,.28);
+}
+.pt-factors-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.8rem 2.6rem; }
+.pt-factor span {
+  font-family: 'Spectral', Georgia, serif; font-size: .9rem;
+  color: rgba(232,184,109,.55); font-variant-numeric: tabular-nums;
+}
+.pt-factor h4 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.02rem;
+  color: #F0F0F6; margin: .25rem 0 .35rem;
+}
+.pt-factor p { margin: 0; font-size: .93rem; line-height: 1.6; color: #8288A5; }
+
+/* ── 05 · split screen with one continuous spine ── */
+.pt-vs { position: relative; margin-top: 3.5rem; }
+.pt-vs::before {
+  content: ''; position: absolute; top: 0; bottom: 0;
+  left: calc(18% + ((100% - 18%) / 2)); width: 1px;
+  background: linear-gradient(180deg, rgba(232,184,109,.5), rgba(232,184,109,.12));
+}
+.pt-vs-head, .pt-vs-row {
+  display: grid; grid-template-columns: 18% 1fr 1fr; gap: 0 2.2rem; align-items: start;
+}
+.pt-vs-head { padding-bottom: .9rem; border-bottom: 1px solid rgba(232,184,109,.28); }
+.pt-vs-head span {
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .78rem;
+  letter-spacing: .18em; text-transform: uppercase;
+}
+.pt-vs-head .pt-vs-basic { color: #8288A5; }
+.pt-vs-head .pt-vs-us { color: #E8B86D; padding-left: 2.2rem; }
+.pt-vs-row { padding: 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+.pt-vs-row .pt-vs-stage {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.02rem; color: #F0F0F6;
+}
+.pt-vs-row .pt-vs-basic { font-size: .93rem; line-height: 1.6; color: #8288A5; }
+.pt-vs-row .pt-vs-us   { font-size: .95rem; line-height: 1.6; color: #F0F0F6; padding-left: 2.2rem; }
+
+/* ── 06 · three problem/solution cards ──
+   This was a centred spine with the cards alternating sides. A zigzag needs a
+   run of items to read as rhythm; on three it put two cards left, one right
+   and ran a 1,232px rule down the middle of an empty column. Three equal
+   cards read as a set, which is what they are. Each one splits into what goes
+   wrong and what we do about it, divided by a gold hairline. */
+.pt-cli { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; margin-top: 3.4rem; }
+.pt-cli-card {
+  display: flex; flex-direction: column;
+  padding: 1.8rem 1.6rem;
+  background: #0E0E1A;
+  border: 1px solid rgba(255,255,255,.08); border-radius: 4px;
+  transition: border-color .35s ease, transform .35s cubic-bezier(.22,1,.36,1);
+}
+.pt-cli-card:hover { border-color: rgba(232,184,109,.4); transform: translateY(-3px); }
+.pt-cli-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 2.2rem;
+  line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(232,184,109,.45);
+  font-variant-numeric: tabular-nums; margin-bottom: .9rem;
+}
+.pt-cli-card h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.22rem;
+  color: #F0F0F6; margin: 0 0 1.3rem; line-height: 1.28;
+}
+.pt-cli-prob, .pt-cli-sol { display: flex; flex-direction: column; }
+.pt-cli-prob { padding-bottom: 1.1rem; }
+.pt-cli-sol { margin-top: auto; padding-top: 1.1rem; border-top: 1px solid rgba(232,184,109,.3); }
+.pt-cli-prob span, .pt-cli-sol span {
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .74rem;
+  letter-spacing: .05em; text-transform: lowercase; margin-bottom: .4rem;
+}
+.pt-cli-prob span { color: #8288A5; }
+.pt-cli-sol span { color: #E8B86D; }
+.pt-cli-prob p { margin: 0; font-size: .92rem; line-height: 1.64; color: #8288A5; }
+.pt-cli-sol p  { margin: 0; font-size: .93rem; line-height: 1.64; color: #B8B8CC; }
+
+@media (max-width: 1000px) {
+  .pt-split { grid-template-columns: 1fr; gap: 2.5rem; }
+  .pt-sticky { position: static; }
+  .pt-head-wide { grid-template-columns: 1fr; gap: 1.5rem; align-items: start; }
+  .pt-lead--right { margin-top: 0; }
+  .pt-zag { grid-template-columns: 1fr; gap: 1.8rem; margin-top: 3rem; }
+  .pt-zag-body, .pt-zag--rev .pt-zag-body { order: 0; padding: 0 1rem; }
+  .pt-zag-img { aspect-ratio: 16 / 10; }
+  .pt-factors-grid { grid-template-columns: repeat(2, 1fr); }
+  .pt-cli { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .pt-sec { padding: 4.5rem 0; }
+  .pt-index-row { grid-template-columns: 3rem 1fr; padding: 1.5rem 0; }
+  .pt-index-n { font-size: 1.9rem; }
+  .pt-rung { grid-template-columns: 1fr; gap: .7rem; padding: 1.7rem 0; }
+  .pt-factors-grid { grid-template-columns: 1fr; }
+  .pt-vs::before { display: none; }
+  .pt-vs-head { display: none; }
+  .pt-vs-row { grid-template-columns: 1fr; gap: .55rem; padding: 1.3rem 0; }
+  .pt-vs-row .pt-vs-us { padding-left: 0; border-left: 2px solid rgba(232,184,109,.45); padding-left: .9rem; }
+  .pt-spine::before { left: 1.1rem; }
+  .pt-spine-item, .pt-spine-item:nth-child(even) { width: 100%; margin-left: 0; padding: 0 0 2.6rem 3rem; }
+  .pt-spine-n, .pt-spine-item:nth-child(even) .pt-spine-n { left: 0; right: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt-index-row:hover, .pt-rung:hover { transform: none; }
+  .pt-zag:hover .pt-zag-img img { transform: none; }
+}
+</style>
+

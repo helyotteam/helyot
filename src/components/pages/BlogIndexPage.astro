@@ -1,0 +1,282 @@
+---
+/**
+ * BLOG INDEX — lead article plus an image grid.
+ *
+ * Two things were wrong with the previous version. Most of the list carried no
+ * image at all (a thumbnail appeared on hover, which is nothing on a phone),
+ * and the running order came from publishedDate alone — which floated a
+ * swimming-pool guide to the top of the English front page. Recency is not
+ * editorial value.
+ *
+ * Order now comes from the `featured` weight in each article's frontmatter,
+ * with date as the tie-break, so cost, mistakes, permits and timelines lead and
+ * the niche pieces sit in the grid where they belong.
+ */
+import CineHero from '../shared/CineHero.astro';
+import NewsletterSignup from '../sections/NewsletterSignup.astro';
+import { getBlogPosts } from '../../lib/content';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+
+const all = await getBlogPosts(lang);
+const base = en ? '/en/blog' : '/ru/blog';
+
+/** Editorial weight first, recency only to break ties. */
+const posts = [...all].sort((a, b) =>
+  (b.data.featured ?? 0) - (a.data.featured ?? 0) ||
+  +new Date(b.data.publishedDate) - +new Date(a.data.publishedDate));
+
+const [lead, ...rest] = posts;
+
+const fmt = (d: string) =>
+  new Date(d).toLocaleDateString(en ? 'en-GB' : 'ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const tagCount = new Map<string, number>();
+posts.forEach(p => (p.data.tags ?? []).forEach((t: string) =>
+  tagCount.set(t.toLowerCase(), (tagCount.get(t.toLowerCase()) ?? 0) + 1)));
+const topTags = [...tagCount.entries()]
+  .filter(([, n]) => n > 1).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([t]) => t);
+
+const c = en ? {
+  index: 'The journal', eyebrow: 'Insights · Projects · Expertise',
+  title: `Insights. Projects. <em>Expertise.</em>`,
+  sub: 'Expert insights, real projects and practical advice on construction and renovation in Cyprus.',
+  crumbHome: 'Home', crumbSelf: 'Blog', homeHref: '/',
+  empty: 'Articles are on the way.',
+  leadKicker: 'Start here', min: 'min', all: 'All', filterLbl: 'Filter by topic',
+  more: 'Everything else', noMatch: 'Nothing under this topic yet.', read: 'Read',
+} : {
+  index: 'Журнал', eyebrow: 'Опыт · Проекты · Экспертиза',
+  title: `Опыт. Проекты. <em>Экспертиза.</em>`,
+  sub: 'Экспертный взгляд, реальные проекты и практические советы по строительству и ремонту на Кипре.',
+  crumbHome: 'Главная', crumbSelf: 'Блог', homeHref: '/ru',
+  empty: 'Статьи появятся в ближайшее время.',
+  leadKicker: 'Начните отсюда', min: 'мин', all: 'Все', filterLbl: 'Фильтр по теме',
+  more: 'Всё остальное', noMatch: 'По этой теме пока ничего нет.', read: 'Читать',
+};
+
+const tagsOf = (p: any) => (p.data.tags ?? []).map((t: string) => t.toLowerCase()).join(' ');
+---
+
+<CineHero
+  lang={lang}
+  compact={true}
+  photo="/images/blog-hero.webp"
+  index={c.index}
+  eyebrow={c.eyebrow}
+  titleHtml={c.title}
+  subtitle={c.sub}
+  breadcrumb={[{ label: c.crumbHome, href: c.homeHref }, { label: c.crumbSelf }]}
+/>
+
+{posts.length === 0 ? (
+  <section class="bl-sec"><div class="container-wide"><p class="bl-empty">{c.empty}</p></div></section>
+) : (
+  <>
+    <!-- ══ LEAD ════════════════════════════════════════════ -->
+    <section class="bl-sec bl-sec--lead">
+      <div class="container-wide">
+        <a href={`${base}/${lead.slug}`} class="bl-lead">
+          <span class="bl-lead-img cine-scene">
+            <img src={lead.data.ogImage} alt={lead.data.title}
+              width="1400" height="900" loading="eager" fetchpriority="high" decoding="async" />
+          </span>
+          <span class="bl-lead-body">
+            <span class="bl-kicker">{c.leadKicker}</span>
+            <h2 class="bl-lead-title">{lead.data.title}</h2>
+            <span class="bl-lead-desc">{lead.data.description}</span>
+            <span class="bl-meta">
+              <time datetime={lead.data.publishedDate}>{fmt(lead.data.publishedDate)}</time>
+              {lead.data.minuteRead && <><span class="bl-dot" aria-hidden="true"></span>{lead.data.minuteRead} {c.min}</>}
+            </span>
+            <span class="bl-lead-cta">{c.read}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ══ GRID ════════════════════════════════════════════ -->
+    <section class="bl-sec bl-sec--alt" id="bl-index">
+      <div class="container-wide">
+        <div class="bl-head">
+          <p class="cine-label" data-reveal>
+            <span class="cine-label__index">{String(rest.length).padStart(2, '0')}</span>{c.more}
+          </p>
+          {topTags.length > 0 && (
+            <div class="bl-filter" role="group" aria-label={c.filterLbl}>
+              <button class="bl-tab on" data-tag="all">{c.all}</button>
+              {topTags.map(t => <button class="bl-tab" data-tag={t}>{t}</button>)}
+            </div>
+          )}
+        </div>
+
+        <div class="bl-grid" data-stagger-group>
+          {rest.map(p => (
+            <article class="bl-item" data-tags={tagsOf(p)} data-stagger-item>
+              <a href={`${base}/${p.slug}`} class="bl-card">
+                <span class="bl-card-img cine-scene">
+                  <img src={p.data.ogImage} alt={p.data.title}
+                    width="720" height="480" loading="lazy" decoding="async" />
+                </span>
+                <span class="bl-card-body">
+                  {(p.data.tags ?? [])[0] && <span class="bl-card-tag">{(p.data.tags ?? [])[0]}</span>}
+                  <h3 class="bl-card-title">{p.data.title}</h3>
+                  <span class="bl-card-desc">{p.data.description}</span>
+                  <span class="bl-meta">
+                    <time datetime={p.data.publishedDate}>{fmt(p.data.publishedDate)}</time>
+                    {p.data.minuteRead && <><span class="bl-dot" aria-hidden="true"></span>{p.data.minuteRead} {c.min}</>}
+                  </span>
+                </span>
+              </a>
+            </article>
+          ))}
+        </div>
+        <p class="bl-nomatch" id="bl-nomatch" hidden>{c.noMatch}</p>
+      </div>
+    </section>
+
+    <NewsletterSignup lang={lang} />
+  </>
+)}
+
+<script is:inline>
+(function () {
+  const root = document.getElementById('bl-index');
+  if (!root) return;
+  const tabs = root.querySelectorAll('.bl-tab');
+  const items = root.querySelectorAll('.bl-item');
+  const none = document.getElementById('bl-nomatch');
+
+  tabs.forEach(tab => tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('on'));
+    tab.classList.add('on');
+    const tag = tab.dataset.tag;
+    let shown = 0;
+    items.forEach(el => {
+      const ok = tag === 'all' || (el.dataset.tags || '').split(' ').includes(tag);
+      el.hidden = !ok;
+      if (ok) shown++;
+    });
+    none.hidden = shown > 0;
+  }));
+})();
+</script>
+
+<style>
+.bl-sec {
+  padding: 5rem 0;
+  background: #08080E;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.bl-sec--alt { background: #06060A; }
+.bl-sec--lead { padding: 4rem 0; }
+.bl-empty { color: #8288A5; }
+
+.bl-kicker {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.78rem; text-transform: lowercase; letter-spacing: .06em; color: #E8B86D;
+}
+.bl-meta {
+  display: flex; align-items: center; gap: .7rem;
+  font-size: 0.84rem; color: #8288A5; font-variant-numeric: tabular-nums;
+}
+.bl-dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(232,184,109,.5); }
+
+/* ── Lead ───────────────────────────────────────────────── */
+.bl-lead {
+  display: grid; grid-template-columns: 1.2fr 1fr;
+  gap: 3.5rem; align-items: center; text-decoration: none;
+}
+.bl-lead-img {
+  display: block; aspect-ratio: 16 / 10; overflow: hidden;
+  border-radius: 4px; border: 1px solid rgba(255,255,255,.08);
+}
+.bl-lead-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.16,1,.3,1); }
+.bl-lead:hover .bl-lead-img img { transform: scale(1.04); }
+.bl-lead-body { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
+.bl-lead-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: clamp(1.8rem, 3.8vw, 3rem); line-height: 1.1;
+  letter-spacing: -.02em; color: #F0F0F6; margin: 0; transition: color .2s;
+}
+.bl-lead:hover .bl-lead-title { color: #E8B86D; }
+.bl-lead-desc { font-size: 1.02rem; line-height: 1.7; color: #B8B8CC; max-width: 46ch; }
+.bl-lead-cta {
+  display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; color: #E8B86D;
+  border: 1px solid #E8B86D; border-radius: 4px; padding: .55rem 1.2rem;
+  transition: background .2s ease, color .2s ease;
+}
+.bl-lead-cta svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.bl-lead:hover .bl-lead-cta { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.bl-lead:hover .bl-lead-cta svg { transform: translateX(3px); }
+
+/* ── Grid ───────────────────────────────────────────────── */
+.bl-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap; margin-bottom: 2.2rem;
+}
+.bl-filter { display: flex; flex-wrap: wrap; gap: .4rem; }
+.bl-tab {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; text-transform: lowercase; letter-spacing: .02em;
+  padding: .5rem 1rem; border-radius: 4px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.1); background: transparent; color: #8288A5;
+  transition: color .18s, border-color .18s;
+}
+.bl-tab:hover { color: #E4E4F0; border-color: rgba(255,255,255,.24); }
+.bl-tab.on { color: #E8B86D; border-color: #E8B86D; }
+.bl-tab:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
+
+/* Every article carries its own image — no hover-only thumbnails, which
+   simply never appear on a touch screen. */
+.bl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.6rem 2.2rem; }
+.bl-item[hidden] { display: none; }
+.bl-card { display: flex; flex-direction: column; gap: .8rem; text-decoration: none; height: 100%; }
+.bl-card-img {
+  display: block; aspect-ratio: 3 / 2; overflow: hidden;
+  border-radius: 4px; border: 1px solid rgba(255,255,255,.08);
+}
+.bl-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.16,1,.3,1); }
+.bl-card:hover .bl-card-img img { transform: scale(1.05); }
+.bl-card-body { display: flex; flex-direction: column; gap: .5rem; flex: 1; }
+.bl-card-tag {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; text-transform: lowercase; letter-spacing: .05em; color: #E8B86D;
+}
+.bl-card-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: 1.15rem; line-height: 1.3; color: #E4E4F0; margin: 0;
+  transition: color .18s;
+}
+.bl-card:hover .bl-card-title { color: #E8B86D; }
+.bl-card-desc {
+  font-size: 0.9rem; line-height: 1.7; color: #8288A5;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.bl-card .bl-meta { margin-top: auto; padding-top: .4rem; }
+
+.bl-nomatch { margin: 2rem 0 0; color: #8288A5; font-size: 0.9rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bl-lead-img img, .bl-card-img img, .bl-lead-cta svg { transition: none; }
+}
+@media (max-width: 1050px) {
+  .bl-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .bl-sec, .bl-sec--lead { padding: 3.2rem 0; }
+  .bl-lead { grid-template-columns: 1fr; gap: 1.5rem; }
+  .bl-lead-desc { max-width: none; }
+  .bl-head { margin-bottom: 1.6rem; }
+}
+@media (max-width: 620px) {
+  .bl-grid { grid-template-columns: 1fr; gap: 2.2rem; }
+}
+</style>

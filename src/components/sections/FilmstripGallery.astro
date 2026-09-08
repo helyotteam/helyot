@@ -1,0 +1,151 @@
+---
+/**
+ * GALLERY — before / after grid.
+ * Previously a GSAP-pinned horizontal filmstrip: it swallowed ~4,700px of
+ * vertical scroll, so the page felt stuck. Now it is an ordinary editorial
+ * grid — you scroll past it at normal speed, and hovering a frame still
+ * reveals the "before" shot.
+ */
+import { type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+
+const items = [
+  { src: '/images/gallery/apartment-after-1.webp', before: '/images/gallery/apartment-before-1.webp', labelEn: '2BR Apartment · Germasogeia',     labelRu: 'Квартира 2+1 · Гермасогея',  sqm: 95  },
+  { src: '/images/gallery/villa-after-1.webp',     before: '/images/gallery/villa-before-1.webp',     labelEn: 'Villa Renovation · Potamos',      labelRu: 'Вилла · Потамос',            sqm: 280 },
+  { src: '/images/gallery/kitchen-after-1.webp',    before: '/images/gallery/kitchen-before-1.webp',   labelEn: 'Modern Kitchen · Agios Tychonas', labelRu: 'Кухня · Агиос Тихонас',      sqm: 14  },
+  { src: '/images/gallery/bathroom-after-2.webp',  before: '/images/gallery/bathroom-before-2.webp',  labelEn: 'Spa Bathroom · Germasogeia',      labelRu: 'Ванная спа · Гермасогея',    sqm: 10  },
+  { src: '/images/gallery/apartment-after-2.webp', before: '/images/gallery/apartment-before-2.webp', labelEn: 'Penthouse · Marina',              labelRu: 'Пентхаус · Марина',          sqm: 180 },
+  { src: '/images/gallery/office-after-1.webp',     before: '/images/gallery/office-before-1.webp',    labelEn: 'Tech Office · City Centre',       labelRu: 'Офис · Центр города',        sqm: 240 },
+];
+
+const galleryHref = en ? '/en/gallery' : '/ru/gallery';
+---
+
+<section id="gallery" class="fs-section">
+  <div class="container-wide">
+
+    <div class="fs-head">
+      <div>
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{en ? 'Our work' : 'Наши работы'}</span>
+          {en ? 'Before / After' : 'До / После'}
+        </p>
+        <h2 class="cine-display fs-title" data-words>
+          {en
+            ? <>Our work. <em>Hover to see “before”.</em></>
+            : <>Наши работы. <em>Наведите — увидите «до».</em></>}
+        </h2>
+      </div>
+      <a href={galleryHref} class="fs-all" data-reveal>
+        {en ? 'Full gallery' : 'Вся галерея'}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="fs-grid" data-stagger-group>
+      {items.map((item, i) => (
+        <a href={galleryHref} class="fs-frame" data-stagger-item>
+          <span class="fs-frame-img">
+            <img class="fs-after" src={item.src} alt={en ? item.labelEn : item.labelRu}
+              width="900" height="620" loading="lazy" decoding="async" />
+            <img class="fs-before" src={item.before} alt=""
+              width="900" height="620" loading="lazy" decoding="async" aria-hidden="true" />
+            <span class="fs-tag fs-tag--after">{en ? 'after' : 'после'}</span>
+            <span class="fs-tag fs-tag--before">{en ? 'before' : 'до'}</span>
+          </span>
+          <span class="fs-cap">
+            <span class="fs-cap-n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="fs-cap-label">{en ? item.labelEn : item.labelRu}</span>
+            <span class="fs-cap-sqm">{item.sqm} m²</span>
+          </span>
+        </a>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<style>
+.fs-section {
+  background: #06060A;
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  padding: 6rem 0;
+}
+.fs-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap; margin-bottom: 3rem;
+}
+.fs-title { margin: 1.2rem 0 0; font-size: clamp(1.9rem, 4vw, 3.2rem); }
+.fs-all {
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .95rem; text-transform: lowercase; color: #E8B86D;
+  text-decoration: none; border: 1px solid #E8B86D; border-radius: 4px;
+  padding: .6rem 1.3rem; white-space: nowrap;
+  transition: background .2s ease, color .2s ease;
+}
+.fs-all svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.fs-all:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.fs-all:hover svg { transform: translateX(3px); }
+
+.fs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.2rem 1.8rem;
+}
+.fs-frame { display: block; text-decoration: none; }
+.fs-frame-img {
+  position: relative; display: block;
+  aspect-ratio: 3 / 2; overflow: hidden;
+  border-radius: 4px; border: 1px solid rgba(255,255,255,.08);
+}
+.fs-frame-img img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  transition: opacity .5s ease, transform .8s ease;
+}
+.fs-before { opacity: 0; }
+.fs-frame:hover .fs-before { opacity: 1; }
+.fs-frame:hover .fs-after  { opacity: 0; }
+.fs-frame:hover .fs-frame-img img { transform: scale(1.03); }
+
+.fs-tag {
+  position: absolute; top: .8rem; left: .8rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .66rem; letter-spacing: .14em;
+  padding: .22rem .7rem; border-radius: 3px;
+  transition: opacity .4s ease;
+}
+.fs-tag--after  { background: rgba(8,8,14,.7); color: #E8B86D; border: 1px solid rgba(232,184,109,.35); backdrop-filter: blur(6px); }
+.fs-tag--before { background: rgba(8,8,14,.7); color: #F0F0F6; border: 1px solid rgba(255,255,255,.2);  backdrop-filter: blur(6px); opacity: 0; }
+.fs-frame:hover .fs-tag--after  { opacity: 0; }
+.fs-frame:hover .fs-tag--before { opacity: 1; }
+
+.fs-cap { display: flex; align-items: baseline; gap: 1rem; padding: .9rem .1rem 0; }
+.fs-cap-n {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 0.78rem; color: #E8B86D; font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+.fs-cap-label { font-size: 0.9rem; color: #B8B8CC; transition: color .18s; }
+.fs-frame:hover .fs-cap-label { color: #E8B86D; }
+.fs-cap-sqm { font-size: 0.78rem; color: #8288A5; margin-left: auto; white-space: nowrap; }
+
+@media (max-width: 1000px) { .fs-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  {
+  .fs-section { padding: 3.5rem 0; }
+  .fs-head { margin-bottom: 2rem; }
+  .fs-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fs-frame:hover .fs-frame-img img { transform: none; }
+}
+
+/* Mobile legibility: these labels sit at 9–11px, unreadable on a phone. */
+@media (max-width: 700px) {
+  .fs-tag { font-size: 0.72rem; }
+  .fs-cap-sqm { font-size: 0.78rem; }
+}
+</style>

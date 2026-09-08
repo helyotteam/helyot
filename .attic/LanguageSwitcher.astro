@@ -1,0 +1,17 @@
+---
+import { t, getAlternatePath, type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const alternateLang: Lang = lang === 'en' ? 'ru' : 'en';
+const alternatePath = getAlternatePath(Astro.url, alternateLang);
+---
+
+<a
+  href={alternatePath}
+  class="glass-btn px-3 py-1.5 text-sm font-bold tracking-wider rounded-lg hover:scale-105 transition-all"
+  aria-label={`Switch to ${alternateLang === 'ru' ? 'Russian' : 'English'}`}
+  lang={alternateLang}
+>
+  {t(lang, 'nav.switchLang')}
+</a>

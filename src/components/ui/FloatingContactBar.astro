@@ -1,0 +1,100 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const phone    = t(lang, 'site.phone');
+const whatsapp = t(lang, 'site.whatsapp');
+---
+
+<!-- Desktop: two compact icon buttons that expand to a label on hover.
+     The old version was two full-width pills with a bright green fill that
+     covered page content and pulled the eye away from the page CTA. -->
+<div class="fcb">
+  <a href={`https://wa.me/${whatsapp}?text=Hello%20Helyot`} target="_blank" rel="noopener noreferrer"
+     class="fcb-btn fcb-btn--wa" aria-label="WhatsApp">
+    <svg class="fcb-ico" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.375l-.36-.214-3.727.977.994-3.637-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+    <span class="fcb-label">WhatsApp</span>
+  </a>
+  <a href={`tel:${phone.replace(/\s/g,'')}`} class="fcb-btn" aria-label={phone}>
+    <svg class="fcb-ico" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+    <span class="fcb-label">{phone}</span>
+  </a>
+</div>
+
+<style>
+.fcb {
+  position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 45;
+  display: none; flex-direction: column; align-items: flex-end; gap: .55rem;
+}
+@media (min-width: 768px) { .fcb { display: flex; } }
+
+.fcb-btn {
+  display: flex; align-items: center; gap: 0;
+  height: 44px; width: 44px; padding: 0;
+  border-radius: 4px;
+  background: rgba(10,10,16,.72);
+  border: 1px solid rgba(255,255,255,.14);
+  color: #9DA0B8;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  text-decoration: none; overflow: hidden;
+  transition: width .28s cubic-bezier(.16,1,.3,1), gap .28s cubic-bezier(.16,1,.3,1),
+              padding .28s cubic-bezier(.16,1,.3,1), border-color .2s, color .2s;
+}
+.fcb-ico { width: 18px; height: 18px; flex-shrink: 0; margin: 0 13px; transition: margin .28s cubic-bezier(.16,1,.3,1); }
+.fcb-label {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; white-space: nowrap;
+  opacity: 0; transition: opacity .2s ease .06s;
+}
+.fcb-btn:hover, .fcb-btn:focus-visible {
+  width: auto; padding-right: 1.1rem;
+  border-color: rgba(232,184,109,.45); color: #E8B86D;
+}
+.fcb-btn:hover .fcb-ico, .fcb-btn:focus-visible .fcb-ico { margin-right: .6rem; }
+.fcb-btn:hover .fcb-label, .fcb-btn:focus-visible .fcb-label { opacity: 1; }
+
+.fcb-btn--wa { color: #6EDB85; }
+.fcb-btn--wa:hover, .fcb-btn--wa:focus-visible { border-color: rgba(110,219,133,.45); color: #6EDB85; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fcb-btn, .fcb-ico, .fcb-label { transition: none; }
+}
+</style>
+
+<!-- Mobile bottom bar — floating glass pill, primary CTA highlighted -->
+<div class="fixed bottom-0 left-0 right-0 z-40 md:hidden" style="padding:0 .75rem calc(.625rem + env(safe-area-inset-bottom, 0px));">
+  <div class="flex items-center gap-2"
+       style="background:rgba(20,20,30,0.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.09);border-radius:4px;padding:.5rem;box-shadow:0 12px 36px rgba(0,0,0,0.45),0 2px 8px rgba(0,0,0,0.3);">
+
+    <!-- Call — icon plate -->
+    <a href={`tel:${phone.replace(/\s/g,'')}`} aria-label={`${lang==='en'?'Call':'Позвонить'}: ${phone}`}
+       class="flex items-center justify-center shrink-0 transition-colors"
+       style="width:48px;height:48px;border-radius:13px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);">
+      <svg class="w-[19px] h-[19px]" fill="currentColor" viewBox="0 0 24 24" style="color:#E8B86D;">
+        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+      </svg>
+    </a>
+
+    <!-- WhatsApp — icon plate, brand-green tint -->
+    <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
+       aria-label="WhatsApp"
+       class="flex items-center justify-center shrink-0 transition-colors"
+       style="width:48px;height:48px;border-radius:13px;background:rgba(34,197,94,0.1);border:1px solid rgba(74,222,128,0.16);">
+      <svg class="w-[19px] h-[19px]" fill="currentColor" viewBox="0 0 24 24" style="color:#4ade80;">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.375l-.36-.214-3.727.977.994-3.637-.235-.374A9.818 9.818 0 1112 21.818z"/>
+      </svg>
+    </a>
+
+    <!-- Book — primary CTA, gold gradient pill, takes remaining width -->
+    <a href="#booking" aria-label={lang==='en' ? 'Book a free site visit' : 'Записаться на бесплатный выезд'}
+       class="flex-1 flex items-center justify-center gap-2 transition-transform active:scale-[0.97]"
+       style="height:48px;border-radius:13px;background:linear-gradient(135deg,#F0CB8C,#E8B86D 55%,#D9A554);color:#15151E;box-shadow:0 6px 18px rgba(232,184,109,0.28);">
+      <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="#15151E" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      <span style="font-family:'Jost Variable',system-ui,sans-serif;font-size:0.9rem;font-weight:400;text-transform:lowercase;">{lang==='en'?'Book a visit':'Записаться'}</span>
+    </a>
+
+  </div>
+</div>

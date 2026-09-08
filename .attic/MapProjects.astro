@@ -1,0 +1,94 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+import { projects, mapCenter, mapZoom } from '../../lib/projectsMapData';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+---
+
+<section id="map" style="background:#0E1320;border-top:1px solid rgba(255,255,255,0.07);" class="py-24">
+  <div class="container-wide">
+    <div class="text-center mb-12 reveal">
+      <p class="section-label mb-3">{lang==='en'?'PROJECT MAP':'КАРТА ПРОЕКТОВ'}</p>
+      <h2 class="font-display font-bold text-[#F0F0F6]"
+          style="font-size:clamp(1.8rem,3.5vw,2.5rem);letter-spacing:-0.02em;">{tr('map.title')}</h2>
+      <p class="text-[#7878A0] mt-2">{tr('map.sub')}</p>
+    </div>
+
+    <!-- Filter -->
+    <div class="flex flex-wrap justify-center gap-2 mb-6 reveal">
+      {(['all','apartment','villa','office'] as const).map((type) => (
+        <button data-map-filter={type}
+                class="map-filter-btn text-sm font-medium rounded-xl px-4 py-2 transition-all"
+                style={type==='all'
+                  ? 'background:transparent;border:1.5px solid #E8B86D;color:#E8B86D;'
+                  : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:#7878A0;'}
+                aria-pressed={type==='all'?'true':'false'}>
+          {type==='all'
+            ? tr('map.all')
+            : type==='apartment' ? tr('gallery.apartment')
+            : type==='villa'     ? tr('gallery.villa')
+            :                      tr('gallery.office')}
+        </button>
+      ))}
+    </div>
+
+    <div style="background:#191928;border:1px solid rgba(255,255,255,0.07);border-radius:24px;overflow:hidden;height:500px;" class="reveal" style2="animation-delay:0.2s">
+      <div id="leaflet-map" style="width:100%;height:100%;"></div>
+    </div>
+  </div>
+</section>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script is:inline define:vars={{ projects, mapCenter, mapZoom, lang, viewCase: tr('map.viewCase') }}>
+  (function() {
+    let loaded = false;
+    function initMap() {
+      if (loaded) return; loaded = true;
+      const L = window.L; if (!L) return;
+      const map = L.map('leaflet-map', { center: mapCenter, zoom: mapZoom });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap © CARTO', maxZoom: 19,
+      }).addTo(map);
+      const colorMap = { apartment:'#E8B86D', villa:'#A78BFA', office:'#34D399' };
+      const markers = projects.map((p) => {
+        const color = colorMap[p.type] || '#E8B86D';
+        const icon = L.divIcon({
+          html: `<div style="width:28px;height:28px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`,
+          className:'',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-32]
+        });
+        const title = lang==='ru' ? p.titleRu : p.titleEn;
+        const popup = `<div style="padding:12px;min-width:200px;font-family:Inter,sans-serif">
+          <p style="font-weight:700;color:#F0F0F6;margin-bottom:4px;font-size:13px">${title}</p>
+          <p style="color:#7878A0;font-size:11px;margin-bottom:8px">${p.area} · ${p.sqm}m² · ${p.year}</p>
+          <a href="${p.caseUrl}" style="display:block;background:transparent;border:1.5px solid #E8B86D;color:#E8B86D;text-align:center;padding:6px 10px;border-radius:8px;text-decoration:none;font-weight:600;font-size:12px">${viewCase}</a>
+        </div>`;
+        return { marker: L.marker([p.lat,p.lng],{icon}).addTo(map).bindPopup(popup), type: p.type };
+      });
+      document.querySelectorAll('[data-map-filter]').forEach((btn) => {
+        btn.addEventListener('click', function() {
+          const filter = this.dataset.mapFilter;
+          document.querySelectorAll('[data-map-filter]').forEach((b) => {
+            b.setAttribute('aria-pressed','false');
+            b.style.background = 'rgba(255,255,255,0.04)'; b.style.border = '1px solid rgba(255,255,255,0.07)'; b.style.color = '#7878A0';
+          });
+          this.setAttribute('aria-pressed','true'); this.style.background = '#E8B86D'; this.style.border = 'none'; this.style.color = '#121219';
+          markers.forEach(({marker,type}) => { if (filter==='all'||type===filter) marker.addTo(map); else map.removeLayer(marker); });
+        });
+      });
+    }
+    const container = document.getElementById('leaflet-map');
+    if (!container) return;
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        s.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLcE=';
+        s.crossOrigin = ''; s.onload = initMap;
+        document.head.appendChild(s); obs.disconnect();
+      }
+    }, { rootMargin: '200px' });
+    obs.observe(container);
+  })();
+</script>

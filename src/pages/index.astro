@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/shared/Header.astro';
+import Footer from '../components/shared/Footer.astro';
+import Hero from '../components/sections/Hero.astro';
+import ServicesEditorial from '../components/sections/ServicesEditorial.astro';
+import TrustEditorial from '../components/sections/TrustEditorial.astro';
+import FilmstripGallery from '../components/sections/FilmstripGallery.astro';
+import ProcessScenes from '../components/sections/ProcessScenes.astro';
+import QuoteWall from '../components/sections/QuoteWall.astro';
+import JournalPreview from '../components/sections/JournalPreview.astro';
+import EstimateCalculator from '../components/sections/EstimateCalculator.astro';
+import BookingForm from '../components/sections/BookingForm.astro';
+import CookieConsent from '../components/ui/CookieConsent.astro';
+import FloatingContactBar from '../components/ui/FloatingContactBar.astro';
+import { t } from '../i18n/ui';
+
+const lang = 'en';
+const tr = (k: string) => t(lang, k as any);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: tr('site.name'),
+  description: tr('site.description'),
+  url: 'https://helyot.com',
+  telephone: tr('site.phone'),
+  email: tr('site.email'),
+  address: { '@type': 'PostalAddress', addressLocality: 'Limassol', addressCountry: 'CY' },
+  geo: { '@type': 'GeoCoordinates', latitude: '34.6841', longitude: '33.0379' },
+  sameAs: [tr('site.instagram'), tr('site.facebook'), tr('site.linkedin')],
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday'],
+    opens: '08:00', closes: '18:00',
+  },
+  priceRange: '€€€',
+};
+---
+
+<BaseLayout
+  lang={lang}
+  title="Renovation & Interior Design in Limassol, Cyprus — Helyot"
+  schema={schema}>
+  <link slot="head" rel="preload" as="image" href="/images/hero-main.webp"
+    media="(min-width: 641px)" fetchpriority="high" />
+  <link slot="head" rel="preload" as="image" href="/images/hero-home-mobile.webp"
+    media="(max-width: 640px)" fetchpriority="high" />
+
+  <Header lang={lang} />
+
+  <main>
+    <Hero lang={lang} />
+    <ProcessScenes lang={lang} />
+    <ServicesEditorial lang={lang} />
+    <EstimateCalculator lang={lang} />
+    <FilmstripGallery lang={lang} />
+    <TrustEditorial lang={lang} />
+    <QuoteWall lang={lang} />
+    <JournalPreview lang={lang} limit={6} />
+    <BookingForm lang={lang} />
+  </main>
+
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+  <FloatingContactBar lang={lang} />
+</BaseLayout>

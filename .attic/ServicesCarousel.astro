@@ -1,0 +1,717 @@
+---
+import { type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+const base = lang === 'ru' ? '/ru' : '';
+
+const items = en ? [
+  {
+    id: 'residential',
+    icon: '🏠',
+    label: 'Apartments & Villas',
+    sublabel: 'Residential · from €45,000',
+    accentColor: '#E8B86D',
+    accentRgb: '232,184,109',
+    accentDark: '#C09050',
+    description: 'End-to-end renovation from studio apartments to luxury villas. One in-house team handles design, construction and warranty — no subcontractors, no blame-shifting. Fixed price and timeline are written into the contract before a single wall comes down.',
+    features: [
+      'Full-scope apartment & villa renovation',
+      'Interior design & 3D visualisation',
+      'Fixed price — agreed before work starts',
+      'Structural & waterproofing warranty included',
+      'EU energy grant applications handled',
+      'Live photo updates via WhatsApp',
+    ],
+    metrics: [
+      { label: 'On-time delivery',        value: '98%',  width: 98  },
+      { label: 'Fixed-price compliance',  value: '100%', width: 100 },
+      { label: 'Client satisfaction',     value: '4.9★', width: 98  },
+    ],
+    timeline: [
+      { phase: 'Week 1–2', desc: 'Site survey, design & fixed quote' },
+      { phase: 'Week 3–4', desc: 'Materials ordered, crew assigned'  },
+      { phase: 'Week 5+',  desc: 'Build phase with daily updates'    },
+    ],
+    href: `${base}/services`,
+  },
+  {
+    id: 'bathrooms',
+    icon: '🛁',
+    label: 'Bathrooms & Kitchens',
+    sublabel: 'Wet rooms & cooking · from €3,500',
+    accentColor: '#22D3EE',
+    accentRgb: '34,211,238',
+    accentDark: '#17A8BE',
+    description: 'Specialist wet room and kitchen renovations with multi-layer waterproofing systems and bespoke cabinetry — all executed by in-house tradespeople. Full waterproofing backed by a 5-year written guarantee. Custom cabinetry, sanitary ware, plumbing and tiling all under one roof.',
+    features: [
+      'Multi-layer waterproofing system',
+      'Custom cabinetry & fitted worktops',
+      'Plumbing, tiling & electrical included',
+      '5-year waterproof warranty in contract',
+      'Schlüter & Mapei systems on every wet room',
+      '3D tile layout before ordering',
+    ],
+    metrics: [
+      { label: 'Waterproof warranty',  value: '5 yr',  width: 100 },
+      { label: 'In-house execution',   value: '100%',  width: 100 },
+      { label: 'Average project time', value: '4–7 wk', width: 70 },
+    ],
+    timeline: [
+      { phase: 'Day 1–3',   desc: 'Demolition & surface prep'     },
+      { phase: 'Day 4–14',  desc: 'Waterproofing & substrate'      },
+      { phase: 'Day 15–28', desc: 'Tiling, fixtures & finishing'   },
+    ],
+    href: `${base}/services/bathroom-renovation`,
+  },
+  {
+    id: 'commercial',
+    icon: '🏢',
+    label: 'Commercial & Offices',
+    sublabel: 'Business spaces · from €250/m²',
+    accentColor: '#818CF8',
+    accentRgb: '129,140,248',
+    accentDark: '#6770C6',
+    description: 'Office fit-outs, retail and hospitality spaces — on schedule and on budget. Available for after-hours delivery to minimise business disruption. Every trade in-house, one project manager, one contract — no sub-chains.',
+    features: [
+      'Open-plan & cellular office fit-outs',
+      'M&E, AV & smart building systems',
+      'After-hours delivery option',
+      'KNX, Lutron & Crestron integrations',
+      'Raised access flooring & acoustic ceilings',
+      'CDM compliance documentation',
+    ],
+    metrics: [
+      { label: 'Delivered on schedule',  value: '98%',       width: 98  },
+      { label: 'Business disruption',    value: '< 20 min/d', width: 85 },
+      { label: 'Punch-list clear rate',  value: '100%',      width: 100 },
+    ],
+    timeline: [
+      { phase: 'Week 1',   desc: 'Scope, design & programme'          },
+      { phase: 'Week 2–3', desc: 'First-fix M&E & partitions'         },
+      { phase: 'Week 4+',  desc: 'Second-fix, fit-out & snagging'     },
+    ],
+    href: `${base}/services/office-fit-out`,
+  },
+  {
+    id: 'energy',
+    icon: '⚡',
+    label: 'Smart Home & Energy',
+    sublabel: 'Technology & efficiency · from €3,000',
+    accentColor: '#10B981',
+    accentRgb: '16,185,129',
+    accentDark: '#0D9467',
+    description: 'KNX, Lutron, Sonos — full smart home integration plus EU energy-modernisation grants handled end-to-end so you only open the door. We apply for, track and collect EU grants on your behalf. Solar, heat pumps, insulation and smart controls — all installed by our own engineers.',
+    features: [
+      'KNX, Lutron & Sonos integration',
+      'EU energy grant management (€8k–€20k)',
+      'Solar PV & heat pump installation',
+      'Whole-home insulation & glazing',
+      'Monitoring dashboard via smartphone',
+      'Energy audit report before & after',
+    ],
+    metrics: [
+      { label: 'Avg. electricity bill reduction', value: '40%',   width: 40 },
+      { label: 'EU grant secured (avg.)',         value: '€12k',  width: 80 },
+      { label: 'ROI payback period',              value: '5–7 yr', width: 65 },
+    ],
+    timeline: [
+      { phase: 'Week 1',   desc: 'Energy audit & grant application'   },
+      { phase: 'Week 2–4', desc: 'System design & procurement'        },
+      { phase: 'Week 5+',  desc: 'Installation, testing & handover'   },
+    ],
+    href: `${base}/services/smart-home`,
+  },
+] : [
+  {
+    id: 'residential',
+    icon: '🏠',
+    label: 'Квартиры и виллы',
+    sublabel: 'Жилой ремонт · от €45 000',
+    accentColor: '#E8B86D',
+    accentRgb: '232,184,109',
+    accentDark: '#C09050',
+    description: 'Ремонт под ключ от студий до вилл бизнес-класса. Одна штатная команда занимается проектированием, строительством и гарантийным обслуживанием — без субподрядчиков. Фиксированная цена и срок прописаны в договоре до начала работ.',
+    features: [
+      'Ремонт квартир и вилл под ключ',
+      'Дизайн интерьера и 3D-визуализация',
+      'Фиксированная цена до начала работ',
+      'Гарантия на конструктив и гидроизоляцию',
+      'Оформление субсидий ЕС',
+      'Фотоотчёты в WhatsApp',
+    ],
+    metrics: [
+      { label: 'Сдача в срок',         value: '98%',  width: 98  },
+      { label: 'Фиксированная цена',   value: '100%', width: 100 },
+      { label: 'Рейтинг клиентов',     value: '4.9★', width: 98  },
+    ],
+    timeline: [
+      { phase: 'Нед. 1–2', desc: 'Замер, дизайн, смета'              },
+      { phase: 'Нед. 3–4', desc: 'Заказ материалов, назначение команды' },
+      { phase: 'Нед. 5+',  desc: 'Стройка с ежедневными обновлениями' },
+    ],
+    href: '/ru/uslugi',
+  },
+  {
+    id: 'bathrooms',
+    icon: '🛁',
+    label: 'Ванные и кухни',
+    sublabel: 'Мокрые зоны · от €3 500',
+    accentColor: '#22D3EE',
+    accentRgb: '34,211,238',
+    accentDark: '#17A8BE',
+    description: 'Специализированный ремонт мокрых зон и кухонь с многослойной гидроизоляцией и мебелью под заказ — силами штатных рабочих. Гарантия гидроизоляции 5 лет письменно. Мебель, сантехника, плитка и электрика — всё в одном договоре.',
+    features: [
+      'Многослойная система гидроизоляции',
+      'Мебель и столешницы на заказ',
+      'Сантехника, плитка и электрика',
+      'Гарантия гидроизоляции 5 лет',
+      'Системы Schlüter и Mapei',
+      '3D-раскладка плитки перед заказом',
+    ],
+    metrics: [
+      { label: 'Гарантия гидроизоляции', value: '5 лет',   width: 100 },
+      { label: 'Штатное исполнение',     value: '100%',    width: 100 },
+      { label: 'Среднее время',          value: '4–7 нед', width: 70  },
+    ],
+    timeline: [
+      { phase: 'Дн. 1–3',   desc: 'Демонтаж и подготовка'   },
+      { phase: 'Дн. 4–14',  desc: 'Гидроизоляция и стяжка'  },
+      { phase: 'Дн. 15–28', desc: 'Плитка, сантехника, финиш' },
+    ],
+    href: '/ru/uslugi/remont-vannoj',
+  },
+  {
+    id: 'commercial',
+    icon: '🏢',
+    label: 'Офисы и коммерция',
+    sublabel: 'Коммерческие помещения · от €250/м²',
+    accentColor: '#818CF8',
+    accentRgb: '129,140,248',
+    accentDark: '#6770C6',
+    description: 'Офисы, торговые площади и объекты HoReCa — в срок и в бюджет. Возможна работа в нерабочее время. Все работы силами штатных специалистов, один прораб, один договор.',
+    features: [
+      'Офисы open-space и кабинетного типа',
+      'Инженерные сети, AV и умные системы',
+      'Работа в нерабочее время',
+      'Интеграция KNX, Lutron и Crestron',
+      'Фальшполы и акустические потолки',
+      'Документация CDM',
+    ],
+    metrics: [
+      { label: 'Сдача в срок',         value: '98%',      width: 98  },
+      { label: 'Простой в день',       value: '< 20 мин', width: 85  },
+      { label: 'Закрытие замечаний',   value: '100%',     width: 100 },
+    ],
+    timeline: [
+      { phase: 'Нед. 1',   desc: 'Объём, дизайн, программа'  },
+      { phase: 'Нед. 2–3', desc: 'Коммуникации и перегородки' },
+      { phase: 'Нед. 4+',  desc: 'Чистовая отделка и проверка' },
+    ],
+    href: '/ru/uslugi/office-fit-out',
+  },
+  {
+    id: 'energy',
+    icon: '⚡',
+    label: 'Умный дом и энергетика',
+    sublabel: 'Технологии и эффективность · от €3 000',
+    accentColor: '#10B981',
+    accentRgb: '16,185,129',
+    accentDark: '#0D9467',
+    description: 'KNX, Lutron, Sonos — полная интеграция умного дома плюс оформление субсидий ЕС на энергомодернизацию под ключ. Мы подаём заявки и получаем субсидии за вас. Солнечные панели, тепловые насосы, изоляция — силами наших инженеров.',
+    features: [
+      'Интеграция KNX, Lutron и Sonos',
+      'Субсидии ЕС под ключ (€8 000–€20 000)',
+      'Солнечные панели и тепловые насосы',
+      'Утепление и остекление дома',
+      'Панель мониторинга на смартфоне',
+      'Энергоаудит до и после',
+    ],
+    metrics: [
+      { label: 'Снижение счёта за свет', value: '40%',    width: 40 },
+      { label: 'Субсидия ЕС (avg.)',     value: '€12 000', width: 80 },
+      { label: 'Срок окупаемости',       value: '5–7 лет', width: 65 },
+    ],
+    timeline: [
+      { phase: 'Нед. 1',   desc: 'Аудит и подача заявки'          },
+      { phase: 'Нед. 2–4', desc: 'Проектирование и поставка'       },
+      { phase: 'Нед. 5+',  desc: 'Монтаж, тестирование, сдача'    },
+    ],
+    href: '/ru/uslugi/smart-home',
+  },
+];
+---
+
+<section id="services-accordion" class="sa-section">
+
+  <div class="sa-bg-dots"  aria-hidden="true"></div>
+  <div class="sa-bg-glow sa-bg-glow--tl" aria-hidden="true"></div>
+  <div class="sa-bg-glow sa-bg-glow--br" aria-hidden="true"></div>
+
+  <div class="container-wide">
+
+    <!-- Header -->
+    <div class="sa-header reveal">
+      <div class="sa-header__decor">
+        <div class="sa-hd"></div>
+        <div class="sa-hl"></div>
+        <div class="sa-hd"></div>
+      </div>
+      <h2 class="sa-header__title">
+        {en ? 'Service ' : 'Сервисные '}
+        <span class="sa-header__grad">{en ? 'Playbooks' : 'решения'}</span>
+      </h2>
+      <p class="sa-header__sub">
+        {en
+          ? <>Complete renovation solutions tailored to your <span class="sa-header__hi">project type</span></>
+          : <>Комплексный ремонт под ваш <span class="sa-header__hi">тип проекта</span></>}
+      </p>
+    </div>
+
+    <!-- Accordion -->
+    <div class="sa-list reveal" id="sa-list">
+      {items.map((item, i) => (
+        <div
+          class={`sa-item ${i === 0 ? 'sa-item--open' : ''}`}
+          data-id={item.id}
+          style={[
+            `--accent:${item.accentColor}`,
+            `--accent-dark:${item.accentDark}`,
+            `--accent-a06:rgba(${item.accentRgb},.06)`,
+            `--accent-a10:rgba(${item.accentRgb},.1)`,
+            `--accent-a20:rgba(${item.accentRgb},.2)`,
+            `--accent-a25:rgba(${item.accentRgb},.25)`,
+            `--accent-a35:rgba(${item.accentRgb},.35)`,
+            `--accent-a45:rgba(${item.accentRgb},.45)`,
+            `--accent-a50:rgba(${item.accentRgb},.5)`,
+          ].join(';')}
+        >
+
+          <!-- ── Header row (always visible) ── -->
+          <button
+            type="button"
+            class="sa-item__head"
+            aria-expanded={i === 0 ? 'true' : 'false'}
+            aria-controls={`sa-body-${item.id}`}
+            id={`sa-btn-${item.id}`}
+          >
+            <!-- Left: icon + labels -->
+            <div class="sa-item__left">
+              <div class="sa-item__icon-wrap">
+                <span class="sa-item__icon">{item.icon}</span>
+                <div class="sa-item__icon-glow" aria-hidden="true"></div>
+              </div>
+              <div class="sa-item__labels">
+                <span class="sa-item__label">{item.label}</span>
+                <span class="sa-item__sublabel">{item.sublabel}</span>
+              </div>
+            </div>
+
+            <!-- Right: stat pill + chevron -->
+            <div class="sa-item__right">
+              <span class="sa-item__pill">
+                {item.metrics[0].value}
+                <span class="sa-item__pill-sub">
+                  {item.metrics[0].label.split(' ').slice(-1)[0]}
+                </span>
+              </span>
+              <div class="sa-item__chevron" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+            </div>
+          </button>
+
+          <!-- ── Expandable body ── -->
+          <div
+            class="sa-item__body"
+            id={`sa-body-${item.id}`}
+            role="region"
+            aria-labelledby={`sa-btn-${item.id}`}
+          >
+            <div class="sa-item__inner">
+
+              <!-- Description -->
+              <p class="sa-desc">{item.description}</p>
+
+              <!-- 3-column grid -->
+              <div class="sa-grid">
+
+                <!-- Column 1: Features -->
+                <div class="sa-col">
+                  <div class="sa-col__head">
+                    <div class="sa-col__bar"></div>
+                    <h5 class="sa-col__title">{en ? "What's included" : 'Что входит'}</h5>
+                  </div>
+                  <ul class="sa-features">
+                    {item.features.map(f => (
+                      <li class="sa-feature">
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                          <circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-opacity=".3"/>
+                          <path d="M6 10l2.5 2.5L14 7" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <!-- Column 2: Metrics -->
+                <div class="sa-col">
+                  <div class="sa-col__head">
+                    <div class="sa-col__bar"></div>
+                    <h5 class="sa-col__title">{en ? 'Performance' : 'Показатели'}</h5>
+                  </div>
+                  <div class="sa-metrics">
+                    {item.metrics.map(m => (
+                      <div class="sa-metric">
+                        <div class="sa-metric__top">
+                          <span class="sa-metric__lbl">{m.label}</span>
+                          <span class="sa-metric__val">{m.value}</span>
+                        </div>
+                        <div class="sa-metric__track">
+                          <div class="sa-metric__fill" style={`width:${m.width}%`}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- Column 3: Timeline -->
+                <div class="sa-col">
+                  <div class="sa-col__head">
+                    <div class="sa-col__bar"></div>
+                    <h5 class="sa-col__title">{en ? 'Timeline' : 'График'}</h5>
+                  </div>
+                  <div class="sa-timeline">
+                    {item.timeline.map((step, si) => (
+                      <div class="sa-step">
+                        <div class="sa-step__track">
+                          <div class="sa-step__dot"></div>
+                          {si < item.timeline.length - 1 && <div class="sa-step__line"></div>}
+                        </div>
+                        <div class="sa-step__info">
+                          <div class="sa-step__phase">{step.phase}</div>
+                          <div class="sa-step__desc">{step.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- CTA -->
+              <div class="sa-footer">
+                <a href={item.href} class="sa-cta">
+                  <span>{en ? 'Explore this service' : 'Подробнее об услуге'}</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                  </svg>
+                </a>
+                <a href="#booking" class="sa-cta-primary">
+                  {en ? 'Get a free quote →' : 'Получить смету →'}
+                </a>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<style>
+/* ── Section ───────────────────────────────────────────────── */
+.sa-section {
+  background: #FAFAF7;
+  padding: 6rem 0;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(28,25,23,.07);
+}
+
+/* ── Backgrounds ───────────────────────────────────────────── */
+.sa-bg-dots {
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(28,25,23,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(28,25,23,.022) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+.sa-bg-glow {
+  position:absolute;border-radius:50%;filter:blur(80px);
+  opacity:.15;pointer-events:none;
+}
+.sa-bg-glow--tl {
+  top:-80px;left:-80px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,184,109,.6),transparent 70%);
+}
+.sa-bg-glow--br {
+  bottom:-80px;right:-80px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(34,211,238,.4),rgba(129,140,248,.3),transparent 70%);
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.sa-header { text-align:center;margin-bottom:3rem;position:relative;z-index:2; }
+.sa-header__decor { display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:1.25rem; }
+.sa-hd { width:4px;height:4px;background:#E8B86D;border-radius:50%;opacity:.8; }
+.sa-hl { width:40px;height:1px;background:linear-gradient(90deg,#E8B86D,#22D3EE);opacity:.6; }
+.sa-header__title {
+  font-family:'Spectral',Georgia,serif;
+  font-size:clamp(2rem,4vw,2.75rem);font-weight:800;
+  color:#1C1917;margin-bottom:.875rem;letter-spacing:-.025em;
+}
+.sa-header__grad {
+  background:linear-gradient(135deg,#E8B86D,#C09050);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sa-header__sub { font-size:1.0625rem;color:#5C5754;line-height:1.65; }
+.sa-header__hi  { color:#9B5E0A;font-weight:500; }
+
+/* ── Accordion list ────────────────────────────────────────── */
+.sa-list {
+  max-width:900px;
+  margin:0 auto;
+  display:flex;flex-direction:column;gap:0;
+  position:relative;z-index:2;
+  border-radius:1.25rem;overflow:hidden;
+  box-shadow:0 4px 32px rgba(28,25,23,.07);
+}
+
+/* ── Single item ───────────────────────────────────────────── */
+.sa-item {
+  background:#fff;
+  border:1px solid rgba(28,25,23,.09);
+  border-top:none;
+  position:relative;
+  transition:background .25s ease;
+}
+.sa-item:first-child { border-top:1px solid rgba(28,25,23,.09);border-radius:1.25rem 1.25rem 0 0; }
+.sa-item:last-child  { border-radius:0 0 1.25rem 1.25rem; }
+/* Active accent left border */
+.sa-item--open {
+  background:#FFFDF9;
+}
+.sa-item--open::before {
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--accent);
+  border-radius:3px 0 0 3px;
+}
+
+/* ── Header button ─────────────────────────────────────────── */
+.sa-item__head {
+  width:100%;display:flex;align-items:center;
+  justify-content:space-between;gap:1.5rem;
+  padding:1.25rem 1.75rem;
+  background:none;border:none;cursor:pointer;text-align:left;
+  transition:background .2s ease;
+}
+.sa-item__head:hover { background:rgba(28,25,23,.025); }
+.sa-item--open .sa-item__head { background:transparent; }
+
+.sa-item__left  { display:flex;align-items:center;gap:1rem; }
+.sa-item__right { display:flex;align-items:center;gap:.875rem;flex-shrink:0; }
+
+/* Icon */
+.sa-item__icon-wrap {
+  position:relative;width:46px;height:46px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.sa-item__icon { font-size:1.35rem;position:relative;z-index:2;transition:transform .3s cubic-bezier(.16,1,.3,1); }
+.sa-item--open .sa-item__icon  { transform:scale(1.15); }
+.sa-item__head:hover .sa-item__icon { transform:scale(1.1); }
+.sa-item__icon-glow {
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,var(--accent),transparent 70%);
+  opacity:0;transition:opacity .3s;
+}
+.sa-item--open .sa-item__icon-glow { opacity:.2; }
+
+/* Labels */
+.sa-item__labels { display:flex;flex-direction:column;gap:.15rem; }
+.sa-item__label {
+  font-size:.95rem;font-weight:700;color:#1C1917;
+  letter-spacing:-.01em;line-height:1.2;
+  transition:color .2s;
+}
+.sa-item--open .sa-item__label { color:var(--accent); }
+.sa-item__sublabel { font-size:.72rem;color:#9B948E;letter-spacing:.02em; }
+
+/* Stat pill */
+.sa-item__pill {
+  display:inline-flex;align-items:baseline;gap:.25rem;
+  font-size:.78rem;font-weight:700;color:var(--accent);
+  background:var(--accent-a10);
+  border:1px solid var(--accent-a25);
+  border-radius:999px;padding:.28rem .75rem;
+  white-space:nowrap;
+  transition:background .25s,border-color .25s;
+}
+.sa-item__pill-sub { font-size:.66rem;font-weight:500;opacity:.75; }
+
+/* Chevron */
+.sa-item__chevron {
+  color:#9B948E;
+  transition:transform .35s cubic-bezier(.16,1,.3,1),color .2s;
+}
+.sa-item--open .sa-item__chevron { transform:rotate(180deg);color:var(--accent); }
+
+/* ── Body (collapsible) ────────────────────────────────────── */
+.sa-item__body {
+  max-height:0;overflow:hidden;
+  transition:max-height .55s cubic-bezier(.16,1,.3,1);
+}
+.sa-item--open .sa-item__body { max-height:900px; }
+
+.sa-item__inner {
+  padding:0 1.75rem 1.75rem;
+  border-top:1px solid rgba(28,25,23,.07);
+}
+
+/* Description */
+.sa-desc {
+  font-size:.9rem;color:#5C5754;line-height:1.78;
+  padding-top:1.25rem;margin:0 0 1.5rem;
+  max-width:70ch;
+}
+
+/* ── 3-col grid ────────────────────────────────────────────── */
+.sa-grid {
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+  margin-bottom:1.5rem;
+}
+.sa-col__head { display:flex;align-items:center;gap:.6rem;margin-bottom:.875rem; }
+.sa-col__bar  { width:2px;height:1.2rem;border-radius:1px;background:var(--accent);flex-shrink:0; }
+.sa-col__title { font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#78716C; }
+
+/* Features */
+.sa-features { list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.55rem; }
+.sa-feature  { display:flex;align-items:flex-start;gap:.625rem;font-size:.82rem;color:#44403C;line-height:1.5; }
+.sa-feature svg { flex-shrink:0;margin-top:.1rem; }
+
+/* Metrics */
+.sa-metrics { display:flex;flex-direction:column;gap:.875rem; }
+.sa-metric__top { display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.375rem; }
+.sa-metric__lbl { font-size:.73rem;color:#78716C; }
+.sa-metric__val { font-size:.8rem;font-weight:700;color:var(--accent); }
+.sa-metric__track { height:4px;background:rgba(28,25,23,.08);border-radius:2px;overflow:hidden; }
+.sa-metric__fill {
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-a50));
+  transform-origin:left;
+  transform:scaleX(0);
+  transition:transform .8s cubic-bezier(.16,1,.3,1) .15s;
+}
+.sa-item--open .sa-metric__fill { transform:scaleX(1); }
+
+/* Timeline */
+.sa-timeline { display:flex;flex-direction:column;gap:0; }
+.sa-step { display:flex;gap:.75rem;align-items:flex-start; }
+.sa-step__track { display:flex;flex-direction:column;align-items:center;gap:0;padding-top:.3rem; }
+.sa-step__dot {
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);flex-shrink:0;
+  box-shadow:0 0 0 3px var(--accent-a20);
+}
+.sa-step__line {
+  width:1.5px;flex:1;min-height:1.25rem;
+  background:var(--accent-a25);
+  margin:.25rem 0;
+}
+.sa-step__info { padding-bottom:1rem; }
+.sa-step:last-child .sa-step__info { padding-bottom:0; }
+.sa-step__phase { font-size:.7rem;font-weight:700;color:var(--accent);letter-spacing:.05em;margin-bottom:.2rem; }
+.sa-step__desc  { font-size:.78rem;color:#5C5754;line-height:1.5; }
+
+/* ── Footer / CTA row ──────────────────────────────────────── */
+.sa-footer {
+  display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  padding-top:1.25rem;border-top:1px solid rgba(28,25,23,.08);
+}
+.sa-cta {
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.85rem;font-weight:600;color:#1C1917;
+  text-decoration:none;
+  padding:.6rem 1.25rem;
+  border:1.5px solid rgba(28,25,23,.18);
+  border-radius:999px;
+  background:transparent;
+  transition:border-color .2s,background .2s,transform .2s;
+}
+.sa-cta:hover {
+  border-color:var(--accent);
+  background:var(--accent-a06);
+  transform:translateY(-1px);
+}
+.sa-cta-primary {
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.85rem;font-weight:700;color:#1C1917;
+  text-decoration:none;
+  padding:.65rem 1.5rem;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+  box-shadow:0 4px 18px var(--accent-a35);
+  transition:transform .2s,box-shadow .2s;
+}
+.sa-cta-primary:hover {
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px var(--accent-a45);
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width:768px) {
+  .sa-grid { grid-template-columns:1fr; }
+  .sa-item__head { padding:1rem 1.25rem; }
+  .sa-item__inner { padding:0 1.25rem 1.25rem; }
+  .sa-item__pill  { display:none; }
+}
+@media (max-width:480px) {
+  .sa-item__label   { font-size:.875rem; }
+  .sa-item__sublabel { display:none; }
+  .sa-footer { flex-direction:column;align-items:flex-start; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .sa-item__body { transition:none; }
+  .sa-metric__fill { transition:none;transform:scaleX(1); }
+}
+</style>
+
+<script is:inline>
+(function () {
+  var items = document.querySelectorAll('.sa-item');
+  if (!items.length) return;
+
+  function open(item) {
+    item.classList.add('sa-item--open');
+    var btn = item.querySelector('.sa-item__head');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  }
+  function close(item) {
+    item.classList.remove('sa-item--open');
+    var btn = item.querySelector('.sa-item__head');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  items.forEach(function (item) {
+    var btn = item.querySelector('.sa-item__head');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+      var isOpen = item.classList.contains('sa-item--open');
+
+      /* close all */
+      items.forEach(close);
+
+      /* re-open clicked if it was closed */
+      if (!isOpen) open(item);
+    });
+  });
+})();
+</script>

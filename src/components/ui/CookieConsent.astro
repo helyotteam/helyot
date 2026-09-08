@@ -1,0 +1,106 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const c = (key: string) => t(lang, key);
+---
+
+<div id="cookie-banner" style="display:none;" role="dialog" aria-modal="true" aria-label={c('cookie.title')}
+     class="fixed bottom-0 left-0 right-0 z-[200]">
+  <div style="background:rgba(10,10,20,0.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,0.1);box-shadow:0 -8px 32px rgba(0,0,0,0.5);">
+    <div style="max-width:1280px;margin:0 auto;padding:1.25rem 1.5rem;">
+
+      <!-- Info row -->
+      <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <p style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:.9rem;color:#F0F0F6;margin-bottom:.3rem;">{c('cookie.title')}</p>
+          <p style="font-size:.78rem;color:#8288A5;line-height:1.6;">
+            {c('cookie.text')}&nbsp;
+            <a href="/en/cookies" style="color:#E8B86D;text-decoration:underline;font-size:0.72rem;">
+              {lang==='en'?'Cookie Policy':'Политика куки'}
+            </a>
+          </p>
+        </div>
+
+        <!-- Buttons — Accept and Decline are EQUAL prominence (GDPR requirement) -->
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;flex-shrink:0;">
+          <!-- Decline — same size, different color -->
+          <button id="ck-decline"
+                  class="ck-btn" style="padding:.6rem 1.25rem;border-radius:4px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#B8B8CC;font-family:'Jost Variable',system-ui,sans-serif;font-size:.9rem;font-weight:400;text-transform:lowercase;cursor:pointer;transition:background .15s,border-color .15s;white-space:nowrap;"
+                  onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='transparent'">
+            {c('cookie.decline')}
+          </button>
+          <!-- Manage -->
+          <button id="ck-manage"
+                  class="ck-btn" style="padding:.6rem 1.25rem;border-radius:4px;border:1px solid rgba(232,184,109,.25);background:transparent;color:#E8B86D;font-family:'Jost Variable',system-ui,sans-serif;font-size:.9rem;font-weight:400;text-transform:lowercase;cursor:pointer;transition:background .15s;white-space:nowrap;"
+                  onmouseover="this.style.background='rgba(232,184,109,.07)'" onmouseout="this.style.background='transparent'">
+            {c('cookie.manage')}
+          </button>
+          <!-- Accept All — primary but NOT overwhelming -->
+          <button id="ck-accept"
+                  class="ck-btn" style="padding:.6rem 1.25rem;border-radius:4px;background:transparent;border:1px solid #E8B86D;color:#E8B86D;font-family:'Jost Variable',system-ui,sans-serif;font-size:.9rem;font-weight:400;text-transform:lowercase;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;"
+                  onmouseover="this.style.background='rgba(232,184,109,.12)';this.style.color='#F3D5A0'" onmouseout="this.style.background='transparent';this.style.color='#E8B86D'">
+            {c('cookie.accept')}
+          </button>
+        </div>
+      </div>
+
+      <div id="ck-settings" class="hidden mt-5 pt-5 space-y-3" style="border-top:1px solid rgba(255,255,255,0.07);">
+        {[
+          { id: null,         label: c('cookie.necessary'), checked: true,  disabled: true  },
+          { id:'ck-analytics',label: c('cookie.analytics'), checked: false, disabled: false },
+          { id:'ck-marketing',label: c('cookie.marketing'), checked: false, disabled: false },
+        ].map(({ id, label, checked, disabled }) => (
+          <label class={`flex items-center justify-between px-4 py-3 rounded-[4px] ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
+                 style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+            <span class="text-sm text-[#8288A5]">{label}</span>
+            <input id={id ?? undefined} type="checkbox" checked={checked} disabled={disabled}
+                   class={`w-4 h-4 ${disabled ? 'opacity-40' : 'cursor-pointer'}`}
+                   style="accent-color:#E8B86D;" />
+          </label>
+        ))}
+        <div class="flex justify-end">
+          <button id="ck-save" class="btn-gold text-sm py-2 px-5">{c('cookie.save')}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  declare function gtag(...args: unknown[]): void;
+  const KEY = 'cookie_consent'; const DAYS = 365;
+  function save(a: boolean, m: boolean) {
+    const exp = new Date(); exp.setDate(exp.getDate() + DAYS);
+    localStorage.setItem(KEY, JSON.stringify({ necessary:true, analytics:a, marketing:m, expires:exp.toISOString() }));
+  }
+  function valid() {
+    try { const d = JSON.parse(localStorage.getItem(KEY)||'null'); return d?.expires && new Date(d.expires)>new Date(); } catch { return false; }
+  }
+  function hide() { const b = document.getElementById('cookie-banner'); if (b) b.style.display='none'; }
+  const RAW_GA = import.meta.env.PUBLIC_GA_ID ?? '';
+  const GA_ID = /^G-[A-Z0-9]{6,}$/.test(RAW_GA) ? RAW_GA : '';
+  function enableGA() {
+    if (GA_ID && typeof gtag !== 'undefined') {
+      gtag('consent','update',{analytics_storage:'granted'});
+      gtag('config', GA_ID, {anonymize_ip:true});
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!valid()) { const b = document.getElementById('cookie-banner'); if (b) b.style.display='block'; }
+    document.getElementById('ck-accept')?.addEventListener('click',  () => { save(true,true); hide(); enableGA(); });
+    document.getElementById('ck-decline')?.addEventListener('click', () => { save(false,false); hide(); });
+    document.getElementById('ck-manage')?.addEventListener('click',  () => document.getElementById('ck-settings')?.classList.toggle('hidden'));
+    document.getElementById('ck-save')?.addEventListener('click',    () => {
+      const a = (document.getElementById('ck-analytics') as HTMLInputElement)?.checked ?? false;
+      const m = (document.getElementById('ck-marketing') as HTMLInputElement)?.checked ?? false;
+      save(a,m); hide(); if (a) enableGA();
+    });
+  });
+</script>
+
+<style>
+@media (max-width: 560px) {
+  .ck-btn { flex: 1 1 8rem; text-align: center; }
+}
+</style>

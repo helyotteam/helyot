@@ -1,0 +1,92 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+
+const features = lang === 'en' ? [
+  '3D photorealistic renders included in every project',
+  'Certified interior designers with Cyprus project experience',
+  'Material sourcing from European suppliers at trade prices',
+  'Virtual walkthrough before a single wall is touched',
+  'Mood boards, colour palettes, and furniture layout plans',
+  'Lighting design by certified illumination consultants',
+] : [
+  '3D-фотореалистичные визуализации в каждом проекте',
+  'Сертифицированные дизайнеры с кипрским опытом',
+  'Материалы от ведущих европейских поставщиков',
+  'Виртуальный тур до начала любых работ',
+  'Мудборды, цветовые палитры и планы мебели',
+  'Дизайн освещения от специализированных консультантов',
+];
+---
+
+<section id="design-bureau" style="background:#15151E;border-top:1px solid rgba(255,255,255,0.07);" class="py-24">
+  <div class="container-wide">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+      <div class="reveal">
+        <p class="section-label mb-5">{lang==='en'?'DESIGN BUREAU':'ДИЗАЙН-БЮРО'}</p>
+        <h2 class="font-display font-bold text-[#F0F0F6] mb-5 leading-tight"
+            style="font-size:clamp(1.8rem,3.5vw,2.5rem);letter-spacing:-0.02em;">
+          {lang==='en'?'Your Vision, Perfectly Realised':'Ваша идея — воплощённая точно'}
+        </h2>
+        <p class="text-[#7878A0] leading-relaxed mb-8">
+          {lang==='en'
+            ? 'Our in-house design bureau creates comprehensive interior concepts before a single tile is laid. You approve every detail in 3D before construction begins.'
+            : 'Наше дизайн-бюро разрабатывает полноценные концепции до начала строительства. Вы утверждаете каждую деталь в 3D.'}
+        </p>
+        <ul class="space-y-3 mb-10">
+          {features.map((f, i) => (
+            <li class="flex items-start gap-3 text-[#7878A0] text-sm reveal" style={`animation-delay:${i*0.06}s`}>
+              <div class="w-5 h-5 rounded-full shrink-0 mt-0.5 flex items-center justify-center"
+                   style="background:rgba(232,184,109,0.08);border:1px solid rgba(232,184,109,0.2);">
+                <svg class="w-2.5 h-2.5 text-[#E8B86D]" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              {f}
+            </li>
+          ))}
+        </ul>
+        <a href="/en/services/interior-design" class="btn-gold">
+          {lang==='en'?'Explore Design Bureau':'Дизайн-бюро подробнее'}
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="relative reveal" style="animation-delay:0.15s">
+        <div style="background:linear-gradient(135deg,rgba(232,184,109,0.04) 0%,rgba(100,60,200,0.04) 100%);border:1px solid rgba(255,255,255,0.07);border-radius:24px;overflow:hidden;aspect-ratio:1;" class="flex items-center justify-center">
+          <div class="text-center px-8">
+            <div class="text-6xl mb-5">🎨</div>
+            <p class="font-display text-xl text-[#F0F0F6] mb-2">
+              {lang==='en'?'3D Visualisation':'3D-визуализация'}
+            </p>
+            <p class="text-[#7878A0] text-sm">
+              {lang==='en'?'See the result before work begins':'Увидьте результат до начала работ'}
+            </p>
+          </div>
+        </div>
+
+        <div class="absolute -bottom-4 -left-4 flex items-center gap-3" style="background:#191928;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1rem 1.25rem;">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+               style="background:rgba(232,184,109,0.08);border:1px solid rgba(232,184,109,0.15);">🏆</div>
+          <div>
+            <p class="font-display font-bold text-xl text-[#F0F0F6] leading-none">150+</p>
+            <p class="text-[#7878A0] text-xs mt-0.5">{lang==='en'?'Designs created':'Созданных дизайнов'}</p>
+          </div>
+        </div>
+
+        <div class="absolute -top-4 -right-4 flex items-center gap-3" style="background:#191928;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1rem 1.25rem;">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+               style="background:rgba(100,100,200,0.08);border:1px solid rgba(100,100,200,0.2);">✅</div>
+          <div>
+            <p class="font-display font-bold text-xl text-[#F0F0F6] leading-none">100%</p>
+            <p class="text-[#7878A0] text-xs mt-0.5">{lang==='en'?'Client approval':'Одобрение клиентов'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import ProcessPage from '../../components/pages/ProcessPage.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+import FloatingContactBar from '../../components/ui/FloatingContactBar.astro';
+
+const lang = 'ru';
+---
+
+<BaseLayout lang={lang}
+  title="Как мы работаем — процесс ремонта Helyot | Кипр"
+  description="Шесть этапов от бесплатного выезда до сдачи с гарантией 5 лет: что вы получаете на каждом, когда платите и сколько это занимает. Helyot, Кипр.">
+  <Header lang={lang} />
+  <main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+    <ProcessPage lang={lang} />
+  </main>
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+  <FloatingContactBar lang={lang} />
+</BaseLayout>

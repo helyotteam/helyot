@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "emil-design-eng": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "computedHash": "8bdf9e4e6de7a4969147bf4828a4ad2c5aacd9fba4b690b250a85e0467ca387d"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0"
+    },
+    "ui-ux-pro-max": {
+      "source": "/Users/aleks/Desktop/ui-ux-pro-max-skill-main",
+      "sourceType": "local",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "9bd26c52dfd10dfd613dd3cc85df217dc25a172e380bde41fdfa6fedda288b2a"
+    }
+  }
+}

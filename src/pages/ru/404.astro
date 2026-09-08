@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+import Mascot from '../../components/ui/Mascot.astro';
+import { t } from '../../i18n/ui';
+const lang = 'ru';
+const tr = (k) => t(lang, k);
+const popular = [
+  { href:'/ru/uslugi/apartment-renovation',        label:'Ремонт квартир' },
+  { href:'/ru/uslugi/villa-renovation',          label:'Ремонт вилл' },
+  { href:'/ru/remont/limassol',              label:'Ремонт в Лимассоле' },
+  { href:'/ru/blog',                         label:'Блог' },
+  { href:'/en/gallery',                         label:'Галерея' },
+  { href:'/ru#booking',                      label:'Бесплатная смета' },
+];
+const allPages = [
+  {href:'/ru',label:'Главная'},{href:'/ru/about',label:'О нас'},{href:'/ru/kontakty',label:'Контакты'},
+  {href:'/ru/uslugi/apartment-renovation',label:'Ремонт квартир'},
+  {href:'/ru/uslugi/villa-renovation',label:'Ремонт вилл'},
+  {href:'/ru/uslugi/interior-design',label:'Дизайн интерьера'},
+  {href:'/ru/uslugi/energy-modernization',label:'Энергомодернизация'},
+  {href:'/ru/blog',label:'Блог'},{href:'/en/gallery',label:'Галерея'},
+  {href:'/en/careers',label:'Карьера'},{href:'/en/faq',label:'FAQ'},
+  {href:'/ru/process',label:'Процесс работы'},
+];
+---
+<BaseLayout lang={lang} title="404 — Страница не найдена" noindex>
+  <Header lang={lang} />
+  <main class="min-h-[70vh] flex items-center py-20">
+    <div class="container-wide text-center">
+      <Mascot variant="404" lang={lang} class="mx-auto mb-8" />
+      <p class="font-display font-light text-8xl text-[#F5F6FA] mb-4 opacity-10">404</p>
+      <h1 class="font-display text-3xl text-[#F5F6FA] mb-4">Страница не найдена</h1>
+      <p class="text-[#9DA0B8] text-lg mb-10 max-w-md mx-auto">Извините, такой страницы не существует. Возможно, вы искали что-то из этого?</p>
+      <div class="max-w-md mx-auto mb-10 relative">
+        <input id="s404-input" type="search" placeholder="Поиск по сайту…"
+          class="form-input w-full pr-10" aria-label="Поиск" />
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8288A5] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <ul id="s404-results" class="absolute top-full left-0 right-0 mt-1 card rounded-[4px] overflow-hidden hidden z-10 max-h-64 overflow-y-auto divide-y divide-[rgba(255,255,255,.07)]"></ul>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3 mb-10">
+        {popular.map(link => (
+          <a href={link.href} class="bg-[#0E0E1A] border border-[rgba(255,255,255,.08)] hover:border-[rgba(232,184,109,.35)] hover:text-[#E8B86D] text-[#9DA0B8] font-medium px-5 py-2.5 rounded-[4px] text-sm transition-colors shadow-sm">{link.label}</a>
+        ))}
+      </div>
+      <a href="/ru" class="btn-primary">На главную</a>
+    </div>
+  </main>
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+</BaseLayout>
+<script is:inline define:vars={{allPages}}>
+  const input = document.getElementById('s404-input');
+  const results = document.getElementById('s404-results');
+  input?.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { results.classList.add('hidden'); return; }
+    const m = allPages.filter(p => p.label.toLowerCase().includes(q));
+    if (!m.length) { results.classList.add('hidden'); return; }
+    results.innerHTML = m.map(p => `<li><a href="${p.href}" class="block px-4 py-3 text-sm text-[#9DA0B8] hover:bg-[rgba(255,255,255,.04)] hover:text-[#E8B86D] transition-colors">${p.label}</a></li>`).join('');
+    results.classList.remove('hidden');
+  });
+  document.addEventListener('click', e => { if (!results.contains(e.target) && e.target !== input) results.classList.add('hidden'); });
+</script>

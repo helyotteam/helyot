@@ -1,0 +1,441 @@
+---
+/**
+ * CAREERS — shared by /careers (EN) and /ru/careers (RU).
+ * Vacancy content itself already ships bilingual in careersData.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../shared/Header.astro';
+import Footer from '../shared/Footer.astro';
+import CineHero from '../shared/CineHero.astro';
+import CookieConsent from '../ui/CookieConsent.astro';
+import FloatingContactBar from '../ui/FloatingContactBar.astro';
+import { careers } from '../../lib/careersData';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+
+const perks = en ? [
+  { n:'01', title:'Competitive salary',     desc:'Rates above the Limassol market average. Reviewed annually. Performance bonuses paid quarterly.' },
+  { n:'02', title:'Company tools & vehicle',desc:'You work with Bosch Professional tools. No sharing, no improvising. Company vehicle for site travel.' },
+  { n:'03', title:'Paid training & certs',  desc:'CERA renewals, safety certifications and trade training paid in full by Helyot. Your skills are our investment.' },
+  { n:'04', title:'Health insurance',       desc:'Private health insurance from day one, covering you and immediate family. Full inpatient and outpatient cover.' },
+  { n:'05', title:'25 days annual leave',   desc:'Full 25 days per year plus all Cypriot public holidays. Leave requests are handled fairly and in advance.' },
+  { n:'06', title:'Stable employment',      desc:'Full-time contracts, not agency work. We have never made a redundancy. When we hire, we hire for the long term.' },
+] : [
+  { n:'01', title:'Достойная зарплата',        desc:'Ставки выше средних по Лимасолу. Пересматриваются раз в год. Премии по результатам — ежеквартально.' },
+  { n:'02', title:'Инструмент и авто компании',desc:'Работаете инструментом Bosch Professional. Не делите его ни с кем и ничего не изобретаете. Служебный транспорт для выездов.' },
+  { n:'03', title:'Оплачиваемое обучение',     desc:'Продление CERA, сертификаты по охране труда и профобучение Helyot оплачивает полностью. Ваша квалификация — наша инвестиция.' },
+  { n:'04', title:'Медицинская страховка',     desc:'Частная медстраховка с первого дня — на вас и ближайшую семью. Стационар и амбулаторное лечение.' },
+  { n:'05', title:'25 дней отпуска',           desc:'Полные 25 дней в году плюс все государственные праздники Кипра. Заявки на отпуск рассматриваем честно и заранее.' },
+  { n:'06', title:'Стабильная занятость',      desc:'Постоянные трудовые договоры, а не работа через агентство. Мы ни разу никого не сокращали. Нанимаем — значит надолго.' },
+];
+
+const culture = en ? [
+  'Every person on our team is directly employed — no agency workers, no zero-hours contracts.',
+  'You work with professionals who take pride in their craft. Bad work is not tolerated from clients or from colleagues.',
+  'Your project manager manages the client, the schedule, and the paperwork. You focus on your trade.',
+  'When something goes wrong on site, we fix it at company cost. We never ask tradespeople to absorb our mistakes.',
+] : [
+  'Каждый в команде оформлен напрямую — без агентских работников и договоров без гарантированных часов.',
+  'Вы работаете с профессионалами, которые гордятся своим делом. Плохую работу здесь не терпят — ни от заказчика, ни от коллеги.',
+  'Ваш прораб ведёт заказчика, график и бумаги. Вы занимаетесь своим ремеслом.',
+  'Если на объекте что-то пошло не так — исправляем за счёт компании. Мы никогда не перекладываем наши ошибки на мастеров.',
+];
+
+/* UI copy */
+const c = en ? {
+  metaTitle: 'Careers at Helyot — Join the Team | Limassol',
+  metaDesc:  "Open positions at Helyot — Limassol's most trusted renovation company. Competitive salaries, company tools, paid training. Apply today.",
+  heroIndex: 'Join the team · Cyprus',
+  heroEyebrow: 'Careers',
+  heroTitle: `No agencies. No subcontracting. <em>A real career in craft.</em>`,
+  heroSub: "Helyot employs 35 specialists directly — full-time contracts, company tools, paid certifications, and the most consistent workflow in Limassol. We don't hire to fill a job. We hire to build a team.",
+  crumbHome: 'Home', crumbSelf: 'Careers', homeHref: '/',
+  heroCta: 'See open positions',
+  lifeLabel: 'LIFE AT HELYOT',
+  lifeTitle: 'Stable work. Good tools. No nonsense.',
+  openLabel: 'OPEN POSITIONS',
+  openTitle: 'Positions available now',
+  openMeta: (n: number) => `${n} roles · Limassol, Cyprus · Full-time direct employment only`,
+  lookingFor: "What we're looking for",
+  applyTitle: 'Apply for this position',
+  phName: 'Your full name', phPhone: '+357 97 499 231',
+  upload: 'Upload CV (PDF or DOCX)',
+  send: 'Send application',
+  applied: '✓ Application received. We will contact you within 2 working days.',
+  specLabel: 'NOT LISTED?',
+  specTitle: "Don't see your trade?",
+  specBody: 'We hire throughout the year as the team grows. If you are a skilled plumber, carpenter, plasterer, or project coordinator — send your CV and we will keep it on file. When the right position opens, you will be the first we call.',
+  specName: 'Your name', specPhone: 'Phone / WhatsApp',
+  specTrade: 'Your trade (e.g. Plumber, Carpenter…)',
+  specSend: 'Send speculative application',
+  specDone: "✓ Received. We'll be in touch.",
+  fileErr: 'Please upload PDF or DOCX only.',
+} : {
+  metaTitle: 'Вакансии Helyot — работа в Лимасоле',
+  metaDesc:  'Открытые вакансии в Helyot — ремонтной компании в Лимасоле. Достойная зарплата, инструмент компании, оплачиваемое обучение. Отправьте резюме сегодня.',
+  heroIndex: 'В команду · Кипр',
+  heroEyebrow: 'Вакансии',
+  heroTitle: `Без агентств. Без субподряда. <em>Настоящая карьера в ремесле.</em>`,
+  heroSub: 'В штате Helyot 35 специалистов — постоянные договоры, инструмент компании, оплачиваемые сертификаты и самый стабильный поток работы в Лимасоле. Мы нанимаем не чтобы закрыть вакансию, а чтобы собрать команду.',
+  crumbHome: 'Главная', crumbSelf: 'Вакансии', homeHref: '/ru',
+  heroCta: 'Смотреть вакансии',
+  lifeLabel: 'РАБОТА В HELYOT',
+  lifeTitle: 'Стабильно. Хороший инструмент. Без ерунды.',
+  openLabel: 'ОТКРЫТЫЕ ВАКАНСИИ',
+  openTitle: 'Сейчас ищем',
+  openMeta: (n: number) => `${n} ${n === 1 ? 'вакансия' : n < 5 ? 'вакансии' : 'вакансий'} · Лимасол, Кипр · Только оформление в штат`,
+  lookingFor: 'Что мы ищем',
+  applyTitle: 'Откликнуться на вакансию',
+  phName: 'Ваше имя и фамилия', phPhone: '+357 97 499 231',
+  upload: 'Приложить резюме (PDF или DOCX)',
+  send: 'Отправить отклик',
+  applied: '✓ Отклик получен. Свяжемся с вами в течение 2 рабочих дней.',
+  specLabel: 'НЕТ ВАШЕЙ ПРОФЕССИИ?',
+  specTitle: 'Не нашли свою специальность?',
+  specBody: 'Мы нанимаем в течение всего года по мере роста команды. Если вы опытный сантехник, столяр, штукатур или координатор проектов — пришлите резюме, мы сохраним его. Как только откроется подходящая позиция, позвоним вам первому.',
+  specName: 'Ваше имя', specPhone: 'Телефон / WhatsApp',
+  specTrade: 'Ваша специальность (сантехник, столяр…)',
+  specSend: 'Отправить резюме',
+  specDone: '✓ Получено. Мы свяжемся с вами.',
+  fileErr: 'Загрузите файл только в формате PDF или DOCX.',
+};
+---
+
+<BaseLayout lang={lang} title={c.metaTitle} description={c.metaDesc}>
+<Header lang={lang}/>
+<main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+
+<style>
+:root{--expo:cubic-bezier(0.16,1,0.3,1);--gold:#E8B86D;}
+.ar,.ar-l,.ar-r{/* initial state via JS */}
+
+/* Job accordion */
+.job-item { border-top:1px solid rgba(255,255,255,.07); }
+.job-item:last-child { border-bottom:1px solid rgba(255,255,255,.07); }
+.job-summary {
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:1rem;
+  align-items:center;
+  padding:1.5rem 0;
+  cursor:pointer;
+  list-style:none;
+  user-select:none;
+}
+.job-summary::-webkit-details-marker { display:none; }
+.job-chevron { flex-shrink:0;transition:transform .28s var(--expo);color:rgba(255,255,255,.20); }
+.job-item[open] .job-chevron { transform:rotate(180deg); }
+.job-item[open] > .job-summary .job-title { color:#F0F0F6; }
+.job-body { padding:0 0 2rem; }
+
+/* Form inputs */
+.cv-input {
+  background:#0B0B18;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:4px;
+  padding:.6rem 1rem;
+  font-size:0.84rem;
+  color:#F0F0F6;
+  outline:none; /* keyboard focus handled by global :focus-visible */
+  transition:border-color .2s;
+  font-family:inherit;
+  width:100%;
+}
+.cv-input::placeholder { color:#8288A5; }
+.cv-input:focus { border-color:rgba(232,184,109,.35); }
+
+  @media(max-width:767px){
+    .job-summary{grid-template-columns:1fr auto!important;}
+    .cv-input{font-size:16px!important;}/* prevent iOS zoom */
+    .form-row-grid{grid-template-columns:1fr!important;}
+  }
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  p[style*='.6rem'], span[style*='.6rem'] { font-size: 0.72rem !important; }
+}
+</style>
+
+
+<!-- ══ HERO ═══════════════════════════════════════════════════════════════ -->
+<CineHero
+  lang={lang}
+  photo="/images/projects/city-office.webp"
+  index={c.heroIndex}
+  eyebrow={c.heroEyebrow}
+  titleHtml={c.heroTitle}
+  subtitle={c.heroSub}
+  breadcrumb={[{ label: c.crumbHome, href: c.homeHref }, { label: c.crumbSelf }]}
+  cta={{ label: c.heroCta, href: '#vacancies' }}
+/>
+
+
+<!-- ══ LIFE AT HELYOT ════════════════════════════════════════════════════ -->
+<section style="background:#06060A;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;" id="culture-grid">
+
+      <!-- Left -->
+      <div class="ar">
+        <p style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.22em;color:var(--gold);margin-bottom:.6rem;">{c.lifeLabel}</p>
+        <h2 style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:clamp(1.5rem,2.8vw,2.1rem);letter-spacing:-.02em;margin-bottom:1.5rem;">{c.lifeTitle}</h2>
+        <div>
+          {culture.map((item, i) => (
+            <div style={`display:flex;align-items:flex-start;gap:1rem;padding:.875rem 0;${i > 0 ? 'border-top:1px solid rgba(255,255,255,.04)' : ''}`}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:.2rem;">
+                <circle cx="7" cy="7" r="6.5" stroke="rgba(232,184,109,.25)"/>
+                <path d="M4.5 7L6.5 9L9.5 5" stroke="#E8B86D" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p style="font-size:0.9rem;color:#8288A5;line-height:1.7;">{item}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Right: perks grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid rgba(255,255,255,.07);border-radius:4px;overflow:hidden;">
+        {perks.map((p, i) => (
+          <div class="ar" data-delay={String(i * 55)} style={`padding:1.375rem;transition:background .15s;${i % 2 !== 0 ? 'border-left:1px solid rgba(255,255,255,.07)' : ''}${i >= 2 ? ';border-top:1px solid rgba(255,255,255,.07)' : ''}`} onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+            <p style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(232,184,109,.35);margin-bottom:.5rem;">{p.n}</p>
+            <p style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:0.84rem;color:#B8B8CC;margin-bottom:.35rem;">{p.title}</p>
+            <p style="font-size:0.72rem;color:#8288A5;line-height:1.6;">{p.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ OPEN POSITIONS ════════════════════════════════════════════════════ -->
+<section id="vacancies" style="background:#08080E;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;">
+  <div style="max-width:960px;margin:0 auto;padding:0 2rem;">
+
+    <div class="ar" style="margin-bottom:3.5rem;">
+      <p style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.22em;color:var(--gold);margin-bottom:.5rem;">{c.openLabel}</p>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:clamp(1.5rem,2.8vw,2.1rem);letter-spacing:-.02em;">{c.openTitle}</h2>
+      <p style="font-size:0.84rem;color:#8288A5;margin-top:.5rem;">{c.openMeta(careers.length)}</p>
+    </div>
+
+    <!-- Job listings -->
+    {careers.map((job, ji) => (
+      <details class="job-item ar" data-delay={String(ji * 60)}>
+        <summary class="job-summary">
+          <div>
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.375rem;">
+              <h3 class="job-title" style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:1.1rem;color:#8288A5;letter-spacing:-.01em;transition:color .2s;">{en ? job.titleEn : job.titleRu}</h3>
+              <span style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;padding:.2rem .7rem;border-radius:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#8288A5;">{job.schedule}</span>
+            </div>
+            {(en ? job.salaryEn : job.salaryRu) && (
+              <p style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:.9rem;color:var(--gold);">{en ? job.salaryEn : job.salaryRu}</p>
+            )}
+          </div>
+          <svg class="job-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </summary>
+
+        <div class="job-body">
+          <!-- Description -->
+          <p style="font-size:0.9rem;color:#8288A5;line-height:1.8;margin-bottom:1.5rem;max-width:640px;">{en ? job.descriptionEn : job.descriptionRu}</p>
+
+          <!-- Requirements -->
+          <div style="margin-bottom:2rem;">
+            <p style="font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:#8288A5;margin-bottom:.875rem;">{c.lookingFor}</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;" id={`req-${job.id}`}>
+              {(en ? job.requirementsEn : job.requirementsRu).map(req => (
+                <div style="display:flex;align-items:flex-start;gap:.625rem;">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;margin-top:.25rem;">
+                    <circle cx="6" cy="6" r="5.5" stroke="rgba(232,184,109,.25)"/>
+                    <path d="M3.5 6L5.5 8L8.5 4" stroke="#E8B86D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span style="font-size:0.78rem;color:#8288A5;line-height:1.5;">{req}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Apply form -->
+          <div style="background:#0A0A16;border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:1.5rem;">
+            <p style="font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:#8288A5;margin-bottom:1.125rem;">{c.applyTitle}</p>
+            <form class="career-apply-form" data-job={job.id} novalidate>
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none;" />
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;" class="form-row-grid">
+                <input type="text" name="name" required placeholder={c.phName} class="cv-input" />
+                <input type="tel" name="phone" required placeholder={c.phPhone} class="cv-input" />
+              </div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;" class="form-submit-row">
+                <label style="cursor:pointer;display:block;">
+                  <input type="file" name="resume" accept=".pdf,.docx" style="display:none;" />
+                  <span class="cv-input file-label" style="display:flex;align-items:center;gap:.625rem;cursor:pointer;color:#8288A5;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(232,184,109,.5)" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span class="file-name">{c.upload}</span>
+                  </span>
+                </label>
+                <button type="submit" style="font-size:0.9rem;padding:.65rem 1.5rem;white-space:nowrap;flex-shrink:0;font-family:'Jost Variable',system-ui,sans-serif;font-weight:400;text-transform:lowercase;background:transparent;border:1px solid #E8B86D;color:#E8B86D;border-radius:4px;cursor:pointer;transition:background .2s,color .2s;" onmouseover="this.style.background='rgba(232,184,109,.09)';this.style.color='#F3D5A0'" onmouseout="this.style.background='transparent';this.style.color='#E8B86D'">
+                  {c.send}
+                </button>
+              </div>
+            </form>
+            <p class="career-success" style="display:none;font-size:0.84rem;color:#6EDB85;margin-top:.875rem;font-weight:500;">
+              {c.applied}
+            </p>
+          </div>
+        </div>
+      </details>
+    ))}
+
+  </div>
+</section>
+
+
+<!-- ══ SPECULATIVE APPLICATION ══════════════════════════════════════════ -->
+<section style="background:#06060A;border-top:1px solid rgba(255,255,255,.07);padding:4rem 0;">
+  <div style="max-width:960px;margin:0 auto;padding:0 2rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;" id="spec-grid">
+
+      <div class="ar">
+        <p style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.22em;color:var(--gold);margin-bottom:.6rem;">{c.specLabel}</p>
+        <h2 style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:clamp(1.3rem,2.3vw,1.8rem);letter-spacing:-.02em;margin-bottom:.75rem;">{c.specTitle}</h2>
+        <p style="font-size:0.84rem;color:#8288A5;line-height:1.75;max-width:400px;">
+          {c.specBody}
+        </p>
+      </div>
+
+      <div class="ar" data-delay="80" style="background:#0E0E1A;border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:1.5rem;">
+        <form id="spec-form" novalidate>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none;" />
+          <div style="display:flex;flex-direction:column;gap:.625rem;">
+            <input type="text" name="name" required placeholder={c.specName} class="cv-input" />
+            <input type="tel" name="phone" required placeholder={c.specPhone} class="cv-input" />
+            <input type="text" name="trade" placeholder={c.specTrade} class="cv-input" />
+            <button type="submit" style="font-size:0.9rem;padding:.7rem 1.5rem;font-family:'Jost Variable',system-ui,sans-serif;font-weight:400;text-transform:lowercase;background:transparent;border:1px solid #E8B86D;color:#E8B86D;border-radius:4px;cursor:pointer;transition:background .2s,color .2s;" onmouseover="this.style.background='rgba(232,184,109,.09)';this.style.color='#F3D5A0'" onmouseout="this.style.background='transparent';this.style.color='#E8B86D'">
+              {c.specSend}
+            </button>
+          </div>
+          <p id="spec-success" style="display:none;font-size:0.78rem;color:#6EDB85;margin-top:.75rem;font-weight:500;">{c.specDone}</p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</main>
+<Footer lang={lang}/><CookieConsent lang={lang}/><FloatingContactBar lang={lang}/>
+</BaseLayout>
+
+<script is:inline define:vars={{ UPLOAD_LABEL: c.upload, FILE_ERR: c.fileErr }}>
+(function() {
+  var EXPO = 'cubic-bezier(0.16,1,0.3,1)';
+
+  /* ── Scroll reveal ── */
+  function initReveal() {
+    var items = document.querySelectorAll('.ar');
+    items.forEach(function(el) {
+      el.style.opacity   = '0';
+      el.style.transform = 'translateY(18px)';
+      el.style.transition = 'opacity 0.6s '+EXPO+', transform 0.6s '+EXPO;
+    });
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var delay = parseInt(el.dataset.delay || '0');
+        setTimeout(function() {
+          el.style.opacity   = '1';
+          el.style.transform = 'none';
+        }, delay);
+        io.unobserve(el);
+      });
+    }, { threshold: 0.05 });
+    items.forEach(function(el) { io.observe(el); });
+  }
+
+  /* ── Responsive grids ── */
+  function fixGrids() {
+    var w = window.innerWidth;
+    var hg = document.getElementById('hero-grid');
+    if (hg) hg.style.gridTemplateColumns = w < 900 ? '1fr' : '1fr 1fr';
+    var cg = document.getElementById('culture-grid');
+    if (cg) cg.style.gridTemplateColumns = w < 900 ? '1fr' : '1fr 1fr';
+    var sg = document.getElementById('spec-grid');
+    if (sg) sg.style.gridTemplateColumns = w < 768 ? '1fr' : '1fr 1fr';
+
+    /* Requirements grid: 1 col on mobile */
+    document.querySelectorAll('[id^="req-"]').forEach(function(el) {
+      el.style.gridTemplateColumns = w < 640 ? '1fr' : '1fr 1fr';
+    });
+    /* Form rows */
+    document.querySelectorAll('.form-row-grid').forEach(function(el) {
+      el.style.gridTemplateColumns = w < 640 ? '1fr' : '1fr 1fr';
+    });
+    document.querySelectorAll('.form-submit-row').forEach(function(el) {
+      el.style.gridTemplateColumns = w < 640 ? '1fr' : '1fr auto';
+    });
+  }
+
+  /* ── Job application forms ── */
+  function initForms() {
+    document.querySelectorAll('.career-apply-form').forEach(function(form) {
+      var fileInput = form.querySelector('[type="file"]');
+      var fileName  = form.querySelector('.file-name');
+
+      if (fileInput && fileName) {
+        fileInput.addEventListener('change', function() {
+          var name = fileInput.files && fileInput.files[0] && fileInput.files[0].name;
+          if (name) fileName.textContent = name;
+        });
+      }
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (form.querySelector('[name="_gotcha"]').value) return;
+
+        var nameVal  = form.querySelector('[name="name"]').value.trim();
+        var phoneVal = form.querySelector('[name="phone"]').value.trim();
+        if (!nameVal || phoneVal.length < 8) { form.reportValidity(); return; }
+
+        var file = fileInput && fileInput.files && fileInput.files[0];
+        if (file) {
+          var ext = '.' + file.name.split('.').pop().toLowerCase();
+          if (ext !== '.pdf' && ext !== '.docx') { alert(FILE_ERR); return; }
+        }
+
+        var fd = new FormData(form);
+        fd.append('type', 'career');
+        try { fetch('/.netlify/functions/send-lead', { method:'POST', body:fd }); } catch(err) {}
+
+        form.reset();
+        if (fileName) fileName.textContent = UPLOAD_LABEL;
+        var success = form.parentElement.querySelector('.career-success');
+        if (success) { success.style.display = 'block'; setTimeout(function() { success.style.display = 'none'; }, 8000); }
+      });
+    });
+
+    /* Speculative form */
+    var specForm = document.getElementById('spec-form');
+    if (specForm) {
+      specForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var fd = new FormData(specForm);
+        fd.append('type', 'speculative');
+        try { fetch('/.netlify/functions/send-lead', { method:'POST', body:fd }); } catch(err) {}
+        specForm.reset();
+        var s = document.getElementById('spec-success');
+        if (s) { s.style.display = 'block'; setTimeout(function() { s.style.display = 'none'; }, 6000); }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { initReveal(); fixGrids(); initForms(); });
+  } else {
+    initReveal(); fixGrids(); initForms();
+  }
+  window.addEventListener('resize', fixGrids);
+})();
+</script>

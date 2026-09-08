@@ -1,0 +1,610 @@
+---
+/**
+ * ESTIMATE CALCULATOR
+ *
+ * Compact by design: one card, controls in rows, result column beside them.
+ * The earlier version stacked a full-height display heading above a two-column
+ * layout and ran to roughly 800px before anyone saw a number.
+ *
+ * It shows a breakdown rather than a single figure, because one number reads as
+ * a quote and invites disbelief, while lines invite a conversation. Timeline and
+ * payment stages come from the same data the service and process pages publish,
+ * so the calculator cannot drift away from the rest of the site.
+ *
+ * The result is never gated. Everything is visible before any contact is asked
+ * for; the CTA hands the parameters to the enquiry form so nothing is retyped.
+ */
+import {
+  setupCost, shellRate, levelRatio, bathroomCost, kitchenCost,
+  floorRate, areaRange, areaBands, extraServices, paymentStages, timelineRange,
+  scopeFactors, scopeWeeks,
+} from '../../lib/calculatorData';
+import { matrixLocations } from '../../lib/citiesData';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+
+const types = en
+  ? [{ k: 'apartment', l: 'Apartment' }, { k: 'villa', l: 'Villa' }, { k: 'office', l: 'Office' }]
+  : [{ k: 'apartment', l: 'Квартира' }, { k: 'villa', l: 'Вилла' }, { k: 'office', l: 'Офис' }];
+
+const levels = en
+  ? [{ k: 'economy', l: 'Essential' }, { k: 'standard', l: 'Standard' }, { k: 'premium', l: 'Premium' }]
+  : [{ k: 'economy', l: 'Базовый' }, { k: 'standard', l: 'Стандарт' }, { k: 'premium', l: 'Премиум' }];
+
+const extras = Object.entries(extraServices).map(([k, v]) => ({
+  k, l: en ? v.labelEn : v.labelRu, pct: v.costPct, types: v.types ?? null,
+}));
+
+const locations = matrixLocations.map(l => ({
+  slug: l.slug, name: en ? l.nameEn : l.nameRu, f: l.priceFactor,
+}));
+
+const c = en ? {
+  index: 'Estimate', eyebrow: 'Budget planner',
+  title: 'Price it before you call.',
+  scope: 'Work', level: 'Finish', type: 'Property', area: 'Area', where: 'Area of Cyprus',
+  scopeCosmetic: 'Cosmetic', scopeFull: 'Full renovation',
+  scopeHint: {
+    cosmetic: 'Preparation, patching and painting throughout, wet rooms refreshed. Nothing structural, no rewire.',
+    full: 'Strip-out to handover: services replaced, wet rooms rebuilt, every trade included.',
+  },
+  baths: 'Bathrooms', kitchens: 'Kitchens', extrasT: 'Not in the base scope',
+  rangeLbl: 'Estimated range', perSqm: 'per m²', sqm: 'm²', weeks: 'weeks on site',
+  breakdownT: 'How it is made up',
+  bSetup: 'Mobilisation', bShell: 'Works and finishes',
+  bBath: 'Bathrooms', bKitchen: 'Kitchens', bExtras: 'Options selected',
+  bSetupC: 'Protection and waste', bShellC: 'Preparation and painting',
+  payT: 'How it would be paid',
+  note: 'Labour, standard materials and waste removal included. Sanitary ware, tiles and flooring you buy yourself are fitted at no extra labour cost. The fixed price is set in writing after a free site visit.',
+  cta: 'Get this priced exactly', share: 'Copy link to this estimate', copied: 'Link copied',
+} : {
+  index: 'Расчёт', eyebrow: 'Планирование бюджета',
+  title: 'Посчитайте до звонка.',
+  scope: 'Объём', level: 'Отделка', type: 'Объект', area: 'Площадь', where: 'Район',
+  scopeCosmetic: 'Косметический', scopeFull: 'Под ключ',
+  scopeHint: {
+    cosmetic: 'Подготовка, шпаклёвка и покраска везде, мокрые зоны освежаются. Без конструктива и замены проводки.',
+    full: 'От демонтажа до сдачи: инженерия заменена, санузлы собраны заново, все работы включены.',
+  },
+  baths: 'Санузлы', kitchens: 'Кухни', extrasT: 'Не входит в базовый объём',
+  rangeLbl: 'Ориентировочный диапазон', perSqm: 'за м²', sqm: 'м²', weeks: 'недель на объекте',
+  breakdownT: 'Из чего складывается',
+  bSetup: 'Мобилизация', bShell: 'Работы и отделка',
+  bBath: 'Санузлы', bKitchen: 'Кухни', bExtras: 'Выбранные опции',
+  bSetupC: 'Защита и вывоз', bShellC: 'Подготовка и покраска',
+  payT: 'Как это оплачивается',
+  note: 'Работа, стандартные материалы и вывоз мусора включены. Сантехнику, плитку и полы, купленные вами, монтируем без доплаты за работу. Фиксированная цена определяется письменно после бесплатного выезда.',
+  cta: 'Посчитать точно', share: 'Скопировать ссылку на расчёт', copied: 'Ссылка скопирована',
+};
+
+const locale = en ? 'en-GB' : 'ru-RU';
+const contactHref = en ? '/en/contact#booking' : '/ru/kontakty#booking';
+const model = {
+  setupCost, shellRate, levelRatio, bathroomCost, kitchenCost,
+  floorRate, areaRange, areaBands: areaBands.map(([s, k]) => [s === Infinity ? 1e9 : s, k]),
+  extras: Object.fromEntries(Object.entries(extraServices).map(([k, v]) => [k, v.costPct])),
+  timelineRange, scopeFactors, scopeWeeks,
+};
+const payLabels = paymentStages.map(p => ({ pct: p.pct, l: en ? p.en : p.ru }));
+
+/* Server-rendered default so the section is not blank in the served HTML.
+   The estimate was only ever produced by the client script, so crawlers and
+   answer engines saw an em dash where the figure should be — on the one block
+   of the page that answers "how much". Mirrors the client render() exactly for
+   the default state (apartment, standard, full cycle, 80 m², 1 bath, 1 kitchen)
+   so nothing changes visually when the script takes over. */
+const D = { type: 'apartment', level: 'standard', scope: 'full', area: 80, baths: 1, kitchens: 1 };
+const _bands = areaBands.map(([sz, k]) => [sz === Infinity ? 1e9 : sz, k]);
+function _effArea(a: number) {
+  let left = a, out = 0;
+  for (const [size, k] of _bands) {
+    const take = Math.min(left, size); out += take * k; left -= take;
+    if (left <= 0) break;
+  }
+  return out;
+}
+const _sc = scopeFactors[D.scope];
+const _core =
+  setupCost[D.type] * _sc.setup +
+  _effArea(D.area) * shellRate[D.type] * levelRatio[D.level] * _sc.shell +
+  D.baths * bathroomCost[D.level] * _sc.wet +
+  D.kitchens * kitchenCost[D.level] * _sc.wet;
+const _total = Math.max(_core, D.area * floorRate[D.type] * _sc.floor);
+const _k = scopeWeeks[D.scope];
+const [_lo, _hi] = timelineRange[D.type].map(v => Math.max(1, Math.round(v * _k)));
+const _r = areaRange[D.type];
+const _t = Math.min(1, Math.max(0, (D.area - _r.min) / (_r.max - _r.min)));
+const _mid = _lo + (_hi - _lo) * Math.min(1, Math.max(0, _t));
+const _span = Math.max(2, Math.round((_hi - _lo) * 0.35));
+const _fmt = (n: number) => '€' + Math.round(n).toLocaleString(locale);
+const defaultTotal = `${_fmt(_total * 0.88)} – ${_fmt(_total * 1.12)}`;
+const defaultSqm   = `${_fmt(_total / D.area)} ${c.perSqm ?? ''}`.trim();
+const defaultWeeks = `${Math.max(_lo, Math.round(_mid - _span / 2))}–${Math.min(_hi, Math.round(_mid + _span / 2))}`;
+
+---
+
+<section id="calculator" class="ec">
+  <div class="container-wide">
+
+    <div class="ec-top">
+      <p class="cine-label" data-reveal>
+        <span class="cine-label__index">{c.index}</span>{c.eyebrow}
+      </p>
+      <h2 class="ec-title" data-reveal>{c.title}</h2>
+    </div>
+
+    <div class="ec-card">
+      <!-- ── Controls ── -->
+      <div class="ec-controls">
+
+        <div class="ec-row">
+          <span class="ec-key">{c.scope}</span>
+          <div class="ec-seg ec-seg--2" role="radiogroup" aria-label={c.scope}>
+            <label class="ec-opt">
+              <input type="radio" name="ec-scope" value="cosmetic" />
+              <span>{c.scopeCosmetic}</span>
+            </label>
+            <label class="ec-opt">
+              <input type="radio" name="ec-scope" value="full" checked />
+              <span>{c.scopeFull}</span>
+            </label>
+          </div>
+        </div>
+        <p class="ec-hint" id="ec-hint"></p>
+
+        <div class="ec-row">
+          <span class="ec-key">{c.type}</span>
+          <div class="ec-seg" role="radiogroup" aria-label={c.type}>
+            {types.map((t, i) => (
+              <label class="ec-opt">
+                <input type="radio" name="ec-type" value={t.k} checked={i === 0} />
+                <span>{t.l}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div class="ec-row">
+          <span class="ec-key">{c.level}</span>
+          <div class="ec-seg" role="radiogroup" aria-label={c.level}>
+            {levels.map(l => (
+              <label class="ec-opt">
+                <input type="radio" name="ec-level" value={l.k} checked={l.k === 'standard'} />
+                <span>{l.l}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div class="ec-row ec-row--area">
+          <label class="ec-key" for="ec-area">{c.area}</label>
+          <div class="ec-slider">
+            <output id="ec-area-out" for="ec-area">80 {c.sqm}</output>
+            <input id="ec-area" type="range" min="30" max="250" step="5" value="80" />
+            <span class="ec-slider-ends"><i id="ec-min">30</i><i id="ec-max">250</i></span>
+          </div>
+        </div>
+
+        <div class="ec-row ec-row--pair">
+          <span class="ec-key">{c.baths}</span>
+          <div class="ec-seg ec-seg--n" role="radiogroup" aria-label={c.baths}>
+            {[1, 2, 3, 4].map(n => (
+              <label class="ec-opt">
+                <input type="radio" name="ec-bath" value={String(n)} checked={n === 1} />
+                <span>{n}</span>
+              </label>
+            ))}
+          </div>
+          <span class="ec-key">{c.kitchens}</span>
+          <div class="ec-seg ec-seg--n" role="radiogroup" aria-label={c.kitchens}>
+            {[0, 1, 2].map(n => (
+              <label class="ec-opt">
+                <input type="radio" name="ec-kitchen" value={String(n)} checked={n === 1} />
+                <span>{n}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div class="ec-row">
+          <label class="ec-key" for="ec-loc">{c.where}</label>
+          <select id="ec-loc" class="ec-select">
+            {locations.map((l, i) => (
+              <option value={l.slug} data-f={l.f} selected={i === 0}>{l.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div class="ec-row ec-row--stack">
+          <span class="ec-key">{c.extrasT}</span>
+          <div class="ec-chips">
+            {extras.map(x => (
+              <label class="ec-chip" data-for={x.types ? x.types.join(',') : ''}>
+                <input type="checkbox" name="ec-extra" value={x.k} data-pct={x.pct} />
+                <span>{x.l}<em>+{x.pct}%</em></span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Result ── -->
+      <aside class="ec-out" aria-live="polite">
+        <p class="ec-key">{c.rangeLbl}</p>
+        <p class="ec-total" id="ec-total">{defaultTotal}</p>
+        <p class="ec-meta">
+          <span id="ec-sqm"></span>
+          <span class="ec-dot" aria-hidden="true"></span>
+          <span id="ec-weeks"></span>
+        </p>
+
+        <details class="ec-det">
+          <summary>{c.breakdownT}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <dl class="ec-lines" id="ec-lines"></dl>
+        </details>
+
+        <details class="ec-det">
+          <summary>{c.payT}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <dl class="ec-lines" id="ec-pay"></dl>
+        </details>
+
+        <p class="ec-note">{c.note}</p>
+
+        <a href={contactHref} class="ec-cta" id="ec-cta">{c.cta}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <button type="button" class="ec-share" id="ec-share" data-copied={c.copied}>{c.share}</button>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ model, locale, payLabels, contactHref, labels: c }}>
+(function () {
+  const root = document.getElementById('calculator');
+  if (!root) return;
+
+  const $  = s => root.querySelector(s);
+  const areaEl = $('#ec-area'), areaOut = $('#ec-area-out'), locEl = $('#ec-loc');
+  const fmt = n => '€' + Math.round(n).toLocaleString(locale);
+
+  const pick = n => root.querySelector(`input[name="${n}"]:checked`)?.value;
+
+  function effectiveArea(a) {
+    let left = a, out = 0;
+    for (const [size, k] of model.areaBands) {
+      const take = Math.min(left, size); out += take * k; left -= take;
+      if (left <= 0) break;
+    }
+    return out;
+  }
+
+  /* Mirrors weeksFor() in calculatorData — kept inside the published range. */
+  function weeksFor(type, area, level, scope) {
+    const k = model.scopeWeeks[scope];
+    const [lo, hi] = model.timelineRange[type].map(v => Math.max(1, Math.round(v * k)));
+    const r = model.areaRange[type];
+    const t = Math.min(1, Math.max(0, (area - r.min) / (r.max - r.min)));
+    const lift = level === 'premium' ? 0.15 : level === 'economy' ? -0.1 : 0;
+    const mid = lo + (hi - lo) * Math.min(1, Math.max(0, t + lift));
+    const span = Math.max(2, Math.round((hi - lo) * 0.35));
+    return [Math.max(lo, Math.round(mid - span / 2)), Math.min(hi, Math.round(mid + span / 2))];
+  }
+
+  /** Area range and available options both depend on property type. */
+  function syncType(type) {
+    const r = model.areaRange[type];
+    areaEl.min = r.min; areaEl.max = r.max;
+    $('#ec-min').textContent = r.min; $('#ec-max').textContent = r.max;
+    if (+areaEl.value < r.min || +areaEl.value > r.max) areaEl.value = r.def;
+    root.querySelectorAll('.ec-chip[data-for]').forEach(el => {
+      const only = el.dataset.for;
+      const ok = !only || only.split(',').includes(type);
+      el.hidden = !ok;
+      if (!ok) el.querySelector('input').checked = false;
+    });
+  }
+
+  function render() {
+    const type  = pick('ec-type')  || 'apartment';
+    const level = pick('ec-level') || 'standard';
+    const scope = pick('ec-scope') || 'full';
+    const sc = model.scopeFactors[scope];
+    syncType(type);
+    $('#ec-hint').textContent = labels.scopeHint[scope];
+
+    const area  = +areaEl.value;
+    const baths = +(pick('ec-bath') || 1);
+    const kitch = +(pick('ec-kitchen') || 1);
+    const factor = +(locEl.selectedOptions[0]?.dataset.f || 1);
+
+    const setup = model.setupCost[type] * sc.setup;
+    const shell = effectiveArea(area) * model.shellRate[type] * model.levelRatio[level] * sc.shell;
+    const bath  = baths * model.bathroomCost[level] * sc.wet;
+    const kit   = kitch * model.kitchenCost[level] * sc.wet;
+    const core  = setup + shell + bath + kit;
+
+    let pct = 0;
+    const chosen = [];
+    root.querySelectorAll('input[name="ec-extra"]:checked').forEach(el => {
+      if (el.closest('.ec-chip').hidden) return;
+      pct += +el.dataset.pct; chosen.push(el.value);
+    });
+    const extrasCost = core * (pct / 100);
+
+    const subtotal = core + extrasCost;
+    const total = Math.max(subtotal, area * model.floorRate[type] * sc.floor) * factor;
+    const [w1, w2] = weeksFor(type, area, level, scope);
+
+    areaOut.textContent = area + ' ' + labels.sqm;
+    $('#ec-total').textContent = fmt(total * 0.88) + ' – ' + fmt(total * 1.12);
+    $('#ec-sqm').textContent   = fmt(total / area) + ' ' + labels.perSqm;
+    $('#ec-weeks').textContent = w1 + '–' + w2 + ' ' + labels.weeks;
+
+    const line = (k, v) => v > 0
+      ? `<div><dt>${k}</dt><dd>${fmt(v * factor)}</dd></div>` : '';
+    // Cosmetic work is a different job, so the lines are named differently.
+    $('#ec-lines').innerHTML =
+      line(scope === 'cosmetic' ? labels.bSetupC : labels.bSetup, setup) +
+      line(scope === 'cosmetic' ? labels.bShellC : labels.bShell, shell) +
+      line(labels.bBath, bath) + line(labels.bKitchen, kit) +
+      line(labels.bExtras, extrasCost);
+
+    $('#ec-pay').innerHTML = payLabels
+      .map(p => `<div><dt>${p.l}<i>${p.pct}%</i></dt><dd>${fmt(total * p.pct / 100)}</dd></div>`)
+      .join('');
+
+    // Hand the parameters to the enquiry form so nothing is typed twice.
+    const q = new URLSearchParams({
+      scope, type, level, area: String(area), baths: String(baths),
+      kitchens: String(kitch), loc: locEl.value,
+    });
+    if (chosen.length) q.set('extras', chosen.join(','));
+    $('#ec-cta').href = contactHref.split('#')[0] + '?' + q + '#booking';
+    root.dataset.query = q.toString();
+  }
+
+  /** Restore a shared estimate from the URL. */
+  (function restore() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('type')) return;
+    const set = (name, val) => {
+      const el = root.querySelector(`input[name="${name}"][value="${val}"]`);
+      if (el) el.checked = true;
+    };
+    set('ec-scope', q.get('scope') || 'full');
+    set('ec-type', q.get('type')); set('ec-level', q.get('level'));
+    set('ec-bath', q.get('baths')); set('ec-kitchen', q.get('kitchens'));
+    if (q.get('area')) areaEl.value = q.get('area');
+    if (q.get('loc')) locEl.value = q.get('loc');
+    (q.get('extras') || '').split(',').filter(Boolean).forEach(k => {
+      const el = root.querySelector(`input[name="ec-extra"][value="${k}"]`);
+      if (el) el.checked = true;
+    });
+  })();
+
+  $('#ec-share').addEventListener('click', function () {
+    const url = location.origin + location.pathname + '?' + root.dataset.query + '#calculator';
+    navigator.clipboard?.writeText(url);
+    const was = this.textContent;
+    this.textContent = this.dataset.copied;
+    setTimeout(() => { this.textContent = was; }, 2000);
+  });
+
+  root.addEventListener('input', render);
+  render();
+})();
+</script>
+
+<style>
+.ec {
+  padding: 3rem 0;
+  background: #06060A;
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.ec-top { margin-bottom: 1.3rem; }
+.ec-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: clamp(1.25rem, 2vw, 1.6rem); color: #F0F0F6;
+  margin: .7rem 0 0; letter-spacing: -.01em;
+}
+
+.ec-card {
+  display: grid; grid-template-columns: 1.35fr 1fr;
+  border: 1px solid rgba(255,255,255,.1); border-radius: 4px; overflow: hidden;
+}
+.ec-controls { padding: 1.1rem 1.4rem; display: flex; flex-direction: column; }
+
+.ec-row {
+  display: grid; grid-template-columns: 8.5rem 1fr;
+  gap: 1rem; align-items: center; padding: .6rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.ec-row:last-child { border-bottom: none; }
+.ec-row--pair { grid-template-columns: 8.5rem 1fr 5.5rem 1fr; }
+.ec-row--stack { grid-template-columns: 1fr; gap: .7rem; align-items: start; }
+
+.ec-key {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; text-transform: lowercase; letter-spacing: .03em; color: #8288A5;
+}
+
+/* Segmented control — outline only, gold when chosen */
+.ec-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .35rem; }
+.ec-seg--n { grid-auto-columns: 2.4rem; justify-content: start; }
+.ec-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ec-opt span {
+  display: block; text-align: center; cursor: pointer;
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: 0.84rem;
+  padding: .5rem .4rem; border-radius: 4px;
+  border: 1px solid rgba(255,255,255,.12); color: #B8B8CC;
+  transition: border-color .16s, color .16s, background .16s;
+}
+.ec-opt input:checked + span { border-color: #E8B86D; color: #E8B86D; background: rgba(232,184,109,.07); }
+.ec-opt input:focus-visible + span { outline: 2px solid #E8B86D; outline-offset: 2px; }
+.ec-opt span:hover { border-color: rgba(255,255,255,.26); color: #F0F0F6; }
+
+/* Area is the control people reach for first, so it gets its own row, a large
+   readout and a track you can actually hit — the old 2px line with a default
+   thumb read as decoration. */
+.ec-row--area { align-items: start; }
+.ec-slider { display: block; }
+.ec-slider output {
+  display: block; margin-bottom: .5rem;
+  font-family: 'Spectral', Georgia, serif; font-size: 1.7rem; line-height: 1;
+  color: #E8B86D; font-variant-numeric: tabular-nums;
+}
+.ec-slider input {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 22px; background: transparent; cursor: pointer;
+}
+.ec-slider input::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 2px; background: rgba(255,255,255,.14);
+}
+.ec-slider input::-moz-range-track {
+  height: 4px; border-radius: 2px; background: rgba(255,255,255,.14);
+}
+.ec-slider input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; margin-top: -8px; border-radius: 50%;
+  background: #E8B86D; border: 3px solid #06060A;
+  box-shadow: 0 0 0 1px #E8B86D; transition: transform .12s;
+}
+.ec-slider input::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #E8B86D; border: 3px solid #06060A; box-shadow: 0 0 0 1px #E8B86D;
+}
+.ec-slider input:active::-webkit-slider-thumb { transform: scale(1.15); }
+.ec-slider input:focus-visible { outline: 2px solid #E8B86D; outline-offset: 4px; }
+.ec-slider-ends {
+  display: flex; justify-content: space-between; margin-top: .1rem;
+  font-size: 0.72rem; color: #8288A5; font-variant-numeric: tabular-nums;
+}
+.ec-slider-ends i { font-style: normal; }
+
+.ec-hint {
+  margin: -.2rem 0 .5rem; font-size: .78rem; line-height: 1.5; color: #8288A5;
+  padding-bottom: .7rem; border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.ec-seg--2 { grid-auto-columns: 1fr; }
+
+.ec-select {
+  width: 100%; background: transparent; color: #B8B8CC;
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: 0.84rem;
+  border: 1px solid rgba(255,255,255,.12); border-radius: 4px;
+  padding: .5rem .7rem; cursor: pointer;
+}
+.ec-select:focus { outline: none; border-color: rgba(232,184,109,.5); }
+.ec-select option { background: #0E0E1A; }
+
+.ec-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ec-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ec-chip[hidden] { display: none; }
+.ec-chip span {
+  display: inline-flex; align-items: baseline; gap: .45rem; cursor: pointer;
+  padding: .45rem .75rem; border-radius: 4px;
+  border: 1px solid rgba(255,255,255,.1); color: #B8B8CC; font-size: 0.84rem;
+  transition: border-color .16s, color .16s, background .16s;
+}
+.ec-chip span em {
+  font-style: normal; font-size: 0.72rem; color: #8288A5; font-variant-numeric: tabular-nums;
+}
+.ec-chip input:checked + span { border-color: rgba(232,184,109,.5); color: #F0F0F6; background: rgba(232,184,109,.06); }
+.ec-chip input:checked + span em { color: #E8B86D; }
+.ec-chip input:focus-visible + span { outline: 2px solid #E8B86D; outline-offset: 2px; }
+
+/* ── Result column ── */
+.ec-out {
+  padding: 1.1rem 1.4rem;
+  border-left: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.015);
+}
+.ec-total {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: clamp(1.3rem, 2.2vw, 1.8rem); line-height: 1.1;
+  color: #F0F0F6; margin: .5rem 0 .5rem; font-variant-numeric: tabular-nums;
+}
+.ec-meta {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  font-size: 0.78rem; color: #8288A5; margin: 0 0 .9rem; font-variant-numeric: tabular-nums;
+}
+.ec-dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(232,184,109,.5); }
+
+.ec-det { border-top: 1px solid rgba(255,255,255,.08); }
+.ec-det summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .6rem 0; cursor: pointer; list-style: none;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; text-transform: lowercase; color: #B8B8CC; transition: color .15s;
+}
+.ec-det summary::-webkit-details-marker { display: none; }
+.ec-det summary:hover { color: #F0F0F6; }
+.ec-det[open] summary { color: #E8B86D; }
+.ec-det summary svg { flex-shrink: 0; opacity: .4; transition: transform .22s; }
+.ec-det[open] summary svg { transform: rotate(180deg); }
+
+/* The breakdown rows are written with innerHTML at runtime, so Astro never
+   stamps them with the scope attribute and scoped selectors miss them
+   entirely — which is why the labels and values were stacking instead of
+   sitting on one row. :global() is required here, not optional. */
+.ec-lines { margin: 0 0 .8rem; padding: 0; }
+.ec-lines :global(div) {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: .8rem; padding: .3rem 0; flex-wrap: nowrap;
+}
+.ec-lines :global(dt) {
+  font-size: 0.78rem; color: #8288A5; margin: 0;
+  display: flex; align-items: baseline; gap: .4rem; min-width: 0;
+}
+.ec-lines :global(dt i) { font-style: normal; font-size: .72rem; color: #8288A5; }
+.ec-lines :global(dd) {
+  margin: 0; font-family: 'Spectral', Georgia, serif; font-size: 0.9rem;
+  color: #B8B8CC; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+.ec-note {
+  font-size: 0.72rem; line-height: 1.6; color: #8288A5;
+  margin: .8rem 0 1rem; padding-top: .8rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.ec-cta {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .9rem; text-transform: lowercase; color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px; padding: .55rem 1.2rem;
+  transition: background .2s ease, color .2s ease;
+}
+.ec-cta svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.ec-cta:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.ec-cta:hover svg { transform: translateX(3px); }
+.ec-share {
+  display: block; margin-top: .8rem; padding: 0; cursor: pointer;
+  background: none; border: none; text-align: left;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .78rem; text-transform: lowercase; color: #8288A5;
+  transition: color .15s;
+}
+.ec-share:hover { color: #E8B86D; }
+
+@media (max-width: 900px) {
+  .ec { padding: 3rem 0; }
+  .ec-card { grid-template-columns: 1fr; }
+  .ec-out { border-left: none; border-top: 1px solid rgba(255,255,255,.1); }
+  .ec-controls, .ec-out { padding: 1.3rem 1.2rem; }
+  .ec-row { grid-template-columns: 1fr; gap: .55rem; align-items: start; }
+  .ec-row--pair { grid-template-columns: 1fr 1fr; gap: .55rem 1rem; }
+  .ec-row--pair .ec-key:nth-of-type(1) { grid-column: 1; }
+  .ec-seg--n { grid-auto-columns: 2.6rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ec-cta svg, .ec-det summary svg { transition: none; }
+}
+</style>

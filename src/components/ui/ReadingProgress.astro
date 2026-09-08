@@ -1,0 +1,162 @@
+---
+/**
+ * READING PROGRESS + CONTENTS.
+ *
+ * Two things long guides need and this blog had neither of: a sense of how much
+ * is left, and a way to jump to the section you came for. The bar is driven by
+ * scroll position over the article element, not the whole document, so the
+ * footer does not count as "still reading".
+ */
+import { type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Headings from post.render(); only depth 2 and 3 are listed. */
+  headings?: { depth: number; slug: string; text: string }[];
+}
+const { lang, headings = [] } = Astro.props;
+const en = lang === 'en';
+
+const items = headings.filter(h => h.depth === 2 || h.depth === 3);
+const label = en ? 'Reading progress' : 'Прогресс чтения';
+const tocLabel = en ? 'In this article' : 'В этой статье';
+---
+
+<div class="rp-bar" role="progressbar" aria-label={label}
+     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="rp-bar">
+  <span class="rp-fill" id="rp-fill"></span>
+</div>
+
+{items.length >= 3 && (
+  <nav class="toc" aria-label={tocLabel}>
+    <div class="toc-head">
+      <span class="toc-key">{tocLabel}</span>
+      <span class="toc-count">{items.length}</span>
+    </div>
+    <ol class="toc-list">
+      {items.map(h => (
+        <li class={h.depth === 3 ? 'toc-sub' : ''}>
+          <a href={`#${h.slug}`}>
+            <span class="toc-txt">{h.text}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<script is:inline>
+(function () {
+  var bar = document.getElementById('rp-bar');
+  var fill = document.getElementById('rp-fill');
+  var article = document.querySelector('.prose-article');
+  if (!bar || !fill || !article) return;
+
+  var ticking = false;
+  function update() {
+    ticking = false;
+    var rect = article.getBoundingClientRect();
+    var total = rect.height - window.innerHeight;
+    // Short articles never scroll past a screen; treat them as complete.
+    var pct = total <= 0 ? 100 : Math.min(100, Math.max(0, (-rect.top / total) * 100));
+    fill.style.transform = 'scaleX(' + (pct / 100) + ')';
+    bar.setAttribute('aria-valuenow', String(Math.round(pct)));
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  update();
+
+  // Highlight the section currently on screen.
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc-list a'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var a = byId[e.target.id];
+      if (a && e.isIntersecting) {
+        links.forEach(function (x) { x.classList.remove('on'); });
+        a.classList.add('on');
+      }
+    });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  Object.keys(byId).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) io.observe(el);
+  });
+})();
+</script>
+
+<style>
+.rp-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px;
+  background: transparent; z-index: 60; pointer-events: none;
+}
+.rp-fill {
+  display: block; height: 100%; width: 100%;
+  background: #E8B86D; transform: scaleX(0); transform-origin: left center;
+  will-change: transform;
+}
+
+/* Contents panel — a boxed index rather than a bare bulleted list. Two columns
+   where there is room, so a nineteen-heading guide does not open with a wall of
+   links before the reader reaches a single sentence. */
+.toc {
+  margin: 0 0 2.8rem;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 4px;
+  background: rgba(255,255,255,.015);
+  overflow: hidden;
+}
+.toc-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  padding: .9rem 1.3rem;
+  border-bottom: 1px solid rgba(232,184,109,.28);
+}
+.toc-key {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.78rem; text-transform: lowercase; letter-spacing: .05em; color: #E8B86D;
+}
+.toc-count {
+  font-family: 'Spectral', Georgia, serif; font-size: .9rem;
+  color: #8288A5; font-variant-numeric: tabular-nums;
+}
+
+.toc-list {
+  list-style: none; margin: 0; padding: .7rem 1.3rem 1rem;
+  counter-reset: toc;
+  columns: 2; column-gap: 2.4rem;
+}
+.toc-list li { counter-increment: toc; break-inside: avoid; }
+.toc-list a {
+  display: flex; align-items: baseline; gap: .7rem;
+  padding: .42rem 0;
+  font-size: .9rem; line-height: 1.5; color: #9DA0B8; text-decoration: none;
+  transition: color .15s;
+}
+.toc-list a::before {
+  content: counter(toc, decimal-leading-zero);
+  flex-shrink: 0;
+  font-family: 'Spectral', Georgia, serif; font-size: .78rem;
+  color: rgba(232,184,109,.55); font-variant-numeric: tabular-nums;
+}
+.toc-list a:hover { color: #E8B86D; }
+.toc-list a:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; border-radius: 2px; }
+.toc-list a.on { color: #E8B86D; }
+.toc-list a.on::before { color: #E8B86D; }
+.toc-sub a { padding-left: 1.5rem; }
+.toc-sub .toc-txt { color: inherit; opacity: .85; }
+
+@media (max-width: 720px) {
+  .toc-list { columns: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-fill { transition: none; }
+}
+</style>

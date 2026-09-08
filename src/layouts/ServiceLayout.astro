@@ -1,0 +1,35 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { t, getLangFromUrl, type Lang } from '../i18n/ui';
+
+interface Props {
+  title:       string;
+  description?: string;
+  ogImage?:    string;
+  lang?:       Lang;
+  serviceName: string;
+  priceFrom?:  number;
+}
+
+const { title, description, ogImage, lang: langProp, serviceName, priceFrom } = Astro.props;
+const lang: Lang = langProp ?? getLangFromUrl(Astro.url);
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type':    'Service',
+  name:       serviceName,
+  description,
+  provider:   {
+    '@type':  'LocalBusiness',
+    name:     t(lang, 'site.name'),
+    telephone: t(lang, 'site.phone'),
+    address:  { '@type': 'PostalAddress', addressLocality: 'Limassol', addressCountry: 'CY' },
+  },
+  areaServed:  { '@type': 'City', name: 'Limassol' },
+  ...(priceFrom ? { offers: { '@type': 'Offer', price: priceFrom, priceCurrency: 'EUR' } } : {}),
+};
+---
+
+<BaseLayout lang={lang} title={title} description={description} ogImage={ogImage} schema={serviceSchema}>
+  <slot />
+</BaseLayout>

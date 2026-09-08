@@ -1,0 +1,313 @@
+---
+/**
+ * REVIEWS — the section that has to carry the most weight on the home page.
+ *
+ * The previous layout put one long quote beside a stock interior shot, then
+ * three short ones in a thin row underneath. It read as filler: the eye had
+ * nothing to land on, the supporting quotes were too small to read and too big
+ * to ignore, and the only image had nothing to do with the person speaking.
+ *
+ * This version is built around what actually persuades — a face, a name, the
+ * project it refers to, and a sentence short enough to finish. Three reviews
+ * carry the section; the rest sit in a quiet strip below.
+ *
+ * PHOTOS: `photo` takes a real client portrait as soon as one exists. Until
+ * then a monogram stands in — we do not put stock faces next to real names.
+ * `project` links to the case page where the job has one.
+ */
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+const en = lang === 'en';
+
+interface Review {
+  text: string; name: string; area: string; type: string;
+  sqm?: number; year?: number;
+  /** Real client portrait. Left empty until a genuine photo is supplied. */
+  photo?: string;
+  /** Slug in the portfolio collection, when the job has a case page. */
+  project?: string;
+}
+
+const reviews: Review[] = en ? [
+  { text: 'They showed us the design of every room before touching a single tile. On handover day it was exactly what we approved. Not one surprise.',
+    name: 'Maria K.', area: 'Germasogeia', type: '2-bed apartment', sqm: 95, year: 2024,
+    project: 'germasogeia-apartment' },
+  { text: 'The villa came in on budget and two days early. I have renovated three properties. This was the first time I was not stressed.',
+    name: 'Dmitri V.', area: 'Agios Tychonas', type: 'Villa renovation', sqm: 320, year: 2023,
+    project: 'agios-tychonas-villa' },
+  { text: 'Fixed price in the contract, the project manager on site every day, delivered on time. Exactly as promised.',
+    name: 'George P.', area: 'City Centre', type: 'Office fit-out', sqm: 240, year: 2023,
+    project: 'city-center-office' },
+  { text: 'The before and after is honestly shocking. We lived there eight years and never imagined it could look like this.',
+    name: 'Anna S.', area: 'City Centre', type: 'Full renovation' },
+  { text: 'They handled the EU energy grants, the audit and the installation. My electricity bill dropped 40% in the first month.',
+    name: 'Elena M.', area: 'Germasogeia', type: 'Energy renovation' },
+  { text: 'They remembered every preference I mentioned, even things I said once in passing. The attention to detail is extraordinary.',
+    name: 'Alex T.', area: 'Limassol Marina', type: 'Penthouse' },
+] : [
+  { text: 'Показали дизайн каждой комнаты до того, как положили первую плитку. В день сдачи всё было ровно так, как мы согласовали. Ни одного сюрприза.',
+    name: 'Мария К.', area: 'Гермасогея', type: 'Квартира 2 спальни', sqm: 95, year: 2024,
+    project: 'germasogeia-apartment' },
+  { text: 'Вилла сдана в бюджет и на два дня раньше срока. Я ремонтировал три объекта — впервые прошёл через это без стресса.',
+    name: 'Дмитрий В.', area: 'Агиос Тихонас', type: 'Ремонт виллы', sqm: 320, year: 2023,
+    project: 'agios-tychonas-villa' },
+  { text: 'Фиксированная цена в договоре, прораб на объекте каждый день, сдан вовремя. Ровно как обещали.',
+    name: 'Георгий П.', area: 'Центр города', type: 'Офис под ключ', sqm: 240, year: 2023,
+    project: 'city-center-office' },
+  { text: 'Разница до и после — потрясающая. Мы жили там восемь лет и не могли представить, что квартира может так выглядеть.',
+    name: 'Анна С.', area: 'Центр города', type: 'Ремонт под ключ' },
+  { text: 'Оформили субсидии ЕС, провели аудит и монтаж. Счёт за электричество упал на 40% в первый же месяц.',
+    name: 'Елена М.', area: 'Гермасогея', type: 'Энергомодернизация' },
+  { text: 'Помнили каждую деталь, которую я упомянул — даже вскользь. Внимание к деталям поразительное.',
+    name: 'Алексей Т.', area: 'Лимасол Марина', type: 'Пентхаус' },
+];
+
+const featured = reviews.slice(0, 3);
+const strip = reviews.slice(3);
+
+/** "Мария К." → "МК" — an honest stand-in for a face we do not have yet. */
+const initials = (n: string) =>
+  n.split(/\s+/).map(w => w[0]).join('').replace(/\./g, '').slice(0, 2).toUpperCase();
+
+const portfolioBase = en ? '/en/portfolio' : '/ru/portfolio';
+const galleryHref = en ? '/en/gallery' : '/ru/gallery';
+
+const c = en ? {
+  index: 'In their words', eyebrow: 'Reviews',
+  score: '4.9', source: '47 client testimonials',
+  seeProject: 'See this project', all: 'All projects',
+} : {
+  index: 'Слова клиентов', eyebrow: 'Отзывы',
+  score: '4.9', source: '47 отзывов клиентов',
+  seeProject: 'Смотреть объект', all: 'Все проекты',
+};
+
+const schema = {
+  '@context': 'https://schema.org', '@type': 'LocalBusiness', name: tr('site.name'),
+  /* AggregateRating removed. It asserted 4.9 from 47 Google reviews; the Google
+     Business Profile carries one. The 47 are written client testimonials
+     collected directly, which are a real asset but are not Google reviews —
+     and a review count that structured data cannot back is the one claim
+     Google verifies automatically. Restore this only against a source that
+     can be checked.  */
+  review: reviews.map(r => ({
+    '@type': 'Review',
+    reviewRating: { '@type': 'Rating', ratingValue: '5' },
+    author: { '@type': 'Person', name: r.name },
+    reviewBody: r.text,
+  })),
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+<section id="reviews" class="qw">
+  <div class="container-wide">
+
+    <div class="qw-head">
+      <div>
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{c.index}</span>{c.eyebrow}
+        </p>
+        <h2 class="cine-display qw-title" data-words>
+          {en
+            ? <>What it is like <em>to hand us the keys.</em></>
+            : <>Каково это — <em>отдать нам ключи.</em></>}
+        </h2>
+      </div>
+
+      <div class="qw-score" data-reveal>
+        <span class="qw-score-num">{c.score}</span>
+        <span class="qw-score-side">
+          <span class="qw-stars" aria-hidden="true">
+            {[0,1,2,3,4].map(() => (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>
+            ))}
+          </span>
+          <span class="qw-score-src">{c.source}</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Three reviews carry the section: face, name, project, one short quote -->
+    <div class="qw-grid" data-stagger-group>
+      {featured.map(r => (
+        <figure class="qw-card" data-stagger-item>
+          <blockquote class="qw-quote">
+            <span class="qw-mark" aria-hidden="true">”</span>
+            {r.text}
+          </blockquote>
+
+          <figcaption class="qw-by">
+            {r.photo
+              ? <img class="qw-face" src={r.photo} alt={r.name} width="96" height="96" loading="lazy" decoding="async" />
+              : <span class="qw-face qw-face--mono" aria-hidden="true">{initials(r.name)}</span>}
+            <span class="qw-who">
+              <span class="qw-name">{r.name}</span>
+              <span class="qw-meta">
+                {r.type} · {r.area}{r.sqm ? ` · ${r.sqm} m²` : ''}{r.year ? ` · ${r.year}` : ''}
+              </span>
+            </span>
+          </figcaption>
+
+          {r.project && (
+            <a class="qw-link" href={`${portfolioBase}/${r.project}`}>
+              {c.seeProject}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          )}
+        </figure>
+      ))}
+    </div>
+
+    <!-- The rest, quietly -->
+    <div class="qw-strip" data-stagger-group>
+      {strip.map(r => (
+        <blockquote class="qw-small" data-stagger-item>
+          <span class="qw-small-text">{r.text}</span>
+          <span class="qw-small-by">
+            <span class="qw-small-name">{r.name}</span>
+            <span class="qw-small-meta">{r.type} · {r.area}</span>
+          </span>
+        </blockquote>
+      ))}
+    </div>
+
+    <a href={galleryHref} class="qw-all" data-reveal>
+      {c.all}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<style>
+.qw {
+  padding: 6rem 0;
+  background: #06060A;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.qw-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 2.5rem; flex-wrap: wrap; margin-bottom: 3rem;
+}
+.qw-title { margin: 1.2rem 0 0; font-size: clamp(1.75rem, 3.6vw, 2.9rem); }
+
+.qw-score {
+  display: flex; align-items: center; gap: .9rem;
+  padding: .8rem 1.2rem; border: 1px solid rgba(255,255,255,.1); border-radius: 4px;
+  white-space: nowrap;
+}
+.qw-score-num {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: 2rem; color: #F0F0F6; line-height: 1;
+}
+.qw-score-side { display: flex; flex-direction: column; gap: .25rem; }
+.qw-stars { display: inline-flex; gap: 2px; color: #E8B86D; }
+.qw-score-src {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.78rem; text-transform: lowercase; color: #9DA0B8;
+}
+
+/* ── Three featured ─────────────────────────────────────── */
+.qw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.qw-card {
+  display: flex; flex-direction: column; margin: 0;
+  padding: 1.9rem 1.7rem 1.6rem;
+  border: 1px solid rgba(255,255,255,.09); border-radius: 4px;
+  background: rgba(255,255,255,.016);
+  transition: border-color .25s ease, background .25s ease;
+}
+.qw-card:hover { border-color: rgba(232,184,109,.28); background: rgba(255,255,255,.028); }
+
+.qw-quote {
+  position: relative; margin: 0 0 1.6rem; padding-top: .6rem;
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: 1.15rem; line-height: 1.6; color: #E4E4F0;
+  flex: 1;
+}
+.qw-mark {
+  position: absolute; top: -.9rem; left: -.15rem;
+  font-family: 'Spectral', Georgia, serif; font-size: 3.2rem; line-height: 1;
+  color: rgba(232,184,109,.28); pointer-events: none; user-select: none;
+}
+
+.qw-by { display: flex; align-items: center; gap: .9rem; }
+.qw-face {
+  flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%;
+  object-fit: cover; border: 1px solid rgba(232,184,109,.35);
+}
+.qw-face--mono {
+  display: grid; place-items: center;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; letter-spacing: .06em; color: #E8B86D;
+  background: rgba(232,184,109,.08);
+}
+.qw-who { display: flex; flex-direction: column; gap: .2rem; min-width: 0; }
+.qw-name {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.95rem; color: #F0F0F6;
+}
+.qw-meta { font-size: 0.78rem; line-height: 1.4; color: #9DA0B8; }
+
+.qw-link {
+  display: inline-flex; align-items: center; gap: .45rem;
+  margin-top: 1.2rem; padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,.07);
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; text-transform: lowercase; color: #9DA0B8;
+  text-decoration: none; transition: color .18s;
+}
+.qw-link svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.qw-card:hover .qw-link { color: #E8B86D; }
+.qw-card:hover .qw-link svg { transform: translateX(3px); }
+
+/* ── The quiet strip ────────────────────────────────────── */
+.qw-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0 2rem; margin-top: 2.6rem;
+}
+.qw-small {
+  margin: 0; padding: 1.5rem 0 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex; flex-direction: column; gap: .8rem;
+}
+.qw-small-text {
+  font-size: 0.9rem; line-height: 1.7; color: #9DA0B8; max-width: 46ch;
+}
+.qw-small-by { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.qw-small-name {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; color: #E8B86D;
+}
+.qw-small-meta { font-size: 0.78rem; color: #9DA0B8; }
+
+.qw-all {
+  display: inline-flex; align-items: center; gap: .55rem; margin-top: 2.6rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px; padding: .6rem 1.3rem;
+  transition: background .2s ease, color .2s ease;
+}
+.qw-all svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.qw-all:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.qw-all:hover svg { transform: translateX(3px); }
+
+@media (max-width: 1000px) {
+  .qw-grid { grid-template-columns: 1fr 1fr; }
+  .qw-grid > :last-child { grid-column: 1 / -1; }
+  .qw-strip { grid-template-columns: 1fr 1fr; gap: 0 2rem; }
+}
+@media (max-width: 680px) {
+  .qw { padding: 3.5rem 0; }
+  .qw-head { margin-bottom: 2rem; }
+  .qw-grid, .qw-strip { grid-template-columns: 1fr; gap: 1.4rem; }
+  .qw-grid > :last-child { grid-column: auto; }
+  .qw-strip { gap: 0; margin-top: 1.8rem; }
+  .qw-small-text { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qw-card, .qw-link svg, .qw-all svg { transition: none; }
+}
+</style>

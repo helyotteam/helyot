@@ -1,0 +1,506 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../shared/Header.astro';
+import Footer from '../shared/Footer.astro';
+import CookieConsent from '../ui/CookieConsent.astro';
+import FloatingContactBar from '../ui/FloatingContactBar.astro';
+import { faqCategoriesEn, faqCategoriesRu } from '../../lib/faqData';
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+const tr = (k: string) => t(lang, k as any);
+const categories = en ? faqCategoriesEn : faqCategoriesRu;
+/* First question of each topic — always in the page's own language, instead
+   of a hardcoded English list that leaked onto /ru/faq. */
+const popularQuestions = categories.slice(0, 5).map(cat => cat.faqs[0].q);
+
+const c = en ? {
+  metaTitle: 'FAQ — Helyot Renovation | Limassol, Cyprus',
+  metaDesc: (n: number) => `${n} answers to the most common questions about renovation in Limassol — pricing, timeline, warranty, permits and more.`,
+  index: 'Frequently asked', eyebrow: 'Help centre',
+  lead: (n: number, t: number) => `${n} answers across ${t} topics — from fixed pricing and permits to what happens if something goes wrong.`,
+  ctaAsk: 'Ask us directly', ctaBrowse: 'Browse questions ↓',
+  searchLabel: (n: number) => `Search ${n} questions`,
+  searchPh: 'e.g. fixed price, timeline, permit…',
+  clear: 'Clear search', navLabel: 'FAQ categories', crumbHome: 'Home', homeHref: '/',
+  topics: 'Topics', questionsWord: (n: number) => `${n} questions`,
+  mostAsked: 'Most asked',
+  noQuestion: "Don't see your question?", askArrow: 'Ask us directly →',
+  stillLabel: 'STILL UNSURE?', stillTitle: 'Speak to us directly',
+  stillBody: 'Call, WhatsApp, or book a free site visit. We answer every question honestly — including the ones where the honest answer is "that\'s not something we can do well".',
+  callUs: 'Call us', waNow: 'Message us now', emailUs: 'Email',
+  stillHeadline: 'Ask us the awkward one.',
+  hours: 'Mon–Fri 08:00–18:00 · Sat 09:00–14:00 · typical reply in 15 minutes',
+} : {
+  metaTitle: 'Частые вопросы — Helyot, ремонт в Лимасоле',
+  metaDesc: (n: number) => `${n} честных ответов на частые вопросы о ремонте в Лимасоле — цены, сроки, гарантия, разрешения и другое.`,
+  index: 'Частые вопросы', eyebrow: 'Справочная',
+  lead: (n: number, t: number) => `${n} ответов по ${t} темам — от фиксированной цены и разрешений до того, что будет, если что-то пойдёт не так.`,
+  ctaAsk: 'Спросить напрямую', ctaBrowse: 'К вопросам ↓',
+  searchLabel: (n: number) => `Поиск по ${n} вопросам`,
+  searchPh: 'например: фиксированная цена, сроки, разрешение…',
+  clear: 'Очистить поиск', navLabel: 'Разделы вопросов', crumbHome: 'Главная', homeHref: '/ru',
+  topics: 'Разделы', questionsWord: (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'вопрос' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'вопроса' : 'вопросов')}`,
+  mostAsked: 'Спрашивают чаще всего',
+  noQuestion: 'Не нашли свой вопрос?', askArrow: 'Спросить напрямую →',
+  stillLabel: 'ОСТАЛИСЬ СОМНЕНИЯ?', stillTitle: 'Поговорите с нами напрямую',
+  stillBody: 'Позвоните, напишите в WhatsApp или закажите бесплатный выезд. Мы честно отвечаем на любой вопрос — включая те, где честный ответ звучит как «это мы делать хорошо не умеем».',
+  callUs: 'Позвонить', waNow: 'Написать сейчас', emailUs: 'Почта',
+  stillHeadline: 'Задайте неудобный вопрос.',
+  hours: 'Пн–Пт 08:00–18:00 · Сб 09:00–14:00 · обычно отвечаем за 15 минут',
+};
+
+
+
+const totalFaqs = categories.reduce((sum, c) => sum + c.faqs.length, 0);
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: categories.flatMap(cat => cat.faqs.map(f => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  }))),
+};
+---
+
+<BaseLayout lang={lang} title={c.metaTitle} description={c.metaDesc(totalFaqs)} schema={faqSchema}>
+<Header lang={lang}/>
+<main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+
+<style>
+:root{--expo:cubic-bezier(0.16,1,0.3,1);--gold:#E8B86D;}
+.ar{/* initial state via JS */}
+
+/* Accordion */
+.faq-item { border-top:1px solid rgba(255,255,255,.05); }
+.faq-item summary {
+  display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
+  padding:1.125rem 0;
+  cursor:pointer;list-style:none;
+  font-family:'Spectral',Georgia,serif;
+  font-weight:600;font-size:1.3rem;
+  color:#8888A8;line-height:1.5;
+  transition:color .2s;
+  user-select:none;
+}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item[open] > summary { color:#F0F0F6; }
+.faq-item summary:hover { color:#D0D0E8; }
+.faq-chevron { flex-shrink:0;transition:transform .25s var(--expo); }
+.faq-item[open] .faq-chevron { transform:rotate(180deg); }
+.faq-body {
+  padding-bottom:1.375rem;
+  font-size:1.26rem;color:#8288A5;line-height:1.8;
+  padding-right:2.5rem; max-width: 62ch;
+}
+
+/* Sidebar nav */
+.side-link {
+  display:block;padding:.45rem .875rem;font-size:.78rem;
+  color:#8288A5;border-radius:5px;text-decoration:none;
+  border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+  line-height:1.3;
+}
+.side-link:hover,.side-link.active {
+  color:#C0C0D0;
+  border-left-color:rgba(232,184,109,.45);
+  background:rgba(255,255,255,.025);
+}
+
+/* Search input clear */
+#faq-search::-webkit-search-cancel-button { display:none; }
+
+/* Popular question hover text colour */
+.pop-q:hover .pop-q-text { color:#B8B8CC !important; }
+
+  @media(max-width:767px){
+    .faq-item summary{font-size:1.02rem!important;padding:.875rem 0!important;}
+    .faq-body{font-size:1.02rem!important;padding-right:0!important;}
+    #faq-layout{grid-template-columns:1fr!important;}
+  }
+</style>
+
+
+<!-- ══ HERO ═══════════════════════════════════════════════════════════════ -->
+<section style="position:relative;background:#08080E;padding:5rem 0;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.07);">
+
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;" id="hero-grid">
+
+      <!-- Left -->
+      <div>
+        <nav aria-label="Breadcrumb" class="fq-bc">
+          <a href={c.homeHref}>{c.crumbHome}</a>
+          <span class="fq-bc-sep" aria-hidden="true">/</span>
+          <span aria-current="page">FAQ</span>
+        </nav>
+        <script type="application/ld+json" set:html={JSON.stringify({
+          '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: c.crumbHome, item: `https://helyot.com${c.homeHref}` },
+            { '@type': 'ListItem', position: 2, name: 'FAQ' },
+          ],
+        })} />
+        <p class="cine-label ar" style="margin-bottom:1.4rem;">
+          <span class="cine-label__index">{c.index}</span>{c.eyebrow}
+        </p>
+        <h1 class="cine-display ar" style="font-size:clamp(2.4rem,5vw,4rem);margin-bottom:1.25rem;">
+          {en ? <>Every question. <em>Answered honestly.</em></> : <>Любой вопрос. <em>Честный ответ.</em></>}
+        </h1>
+        <p class="ar" style="font-size:0.95rem;color:#8288A5;line-height:1.8;max-width:480px;">
+          {c.lead(totalFaqs, categories.length)}
+        </p>
+        <div class="ar" style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap;">
+          <a href="#booking" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.95rem;padding:.75rem 1.6rem;text-decoration:none;font-family:'Jost Variable',system-ui,sans-serif;font-weight:400;text-transform:lowercase;background:transparent;border:1px solid #E8B86D;color:#E8B86D;border-radius:4px;cursor:pointer;transition:background .2s,color .2s;" onmouseover="this.style.background='rgba(232,184,109,.09)';this.style.color='#F3D5A0'" onmouseout="this.style.background='transparent';this.style.color='#E8B86D'">
+            {c.ctaAsk}
+          </a>
+          <a href="#faq-body" style="display:inline-flex;align-items:center;gap:.5rem;border:1px solid rgba(255,255,255,.12);color:#9090A8;font-size:0.9rem;padding:.875rem 1.75rem;border-radius:4px;text-decoration:none;transition:border-color .2s,color .2s;" onmouseover="this.style.borderColor='rgba(255,255,255,.28)';this.style.color='#F0F0F6'" onmouseout="this.style.borderColor='rgba(255,255,255,.11)';this.style.color='#9090A8'">
+            {c.ctaBrowse}
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: search + popular questions -->
+      <div class="ar" data-delay="100" style="display:flex;flex-direction:column;gap:1.5rem;">
+
+        <!-- Search bar -->
+        <div>
+          <p style="font-family:'Jost Variable',system-ui,sans-serif;font-size:0.72rem;text-transform:lowercase;letter-spacing:.05em;color:#8288A5;margin:0 0 .75rem;">{c.searchLabel(totalFaqs)}</p>
+          <div style="position:relative;">
+            <svg style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;flex-shrink:0;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8288A5" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input
+              id="faq-search"
+              type="search"
+              placeholder={c.searchPh}
+              autocomplete="off"
+              style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:.8rem 2.75rem .8rem 2.75rem;font-size:0.9rem;color:#F0F0F6;outline:none;transition:border-color .2s;font-family:inherit;"
+              onfocus="this.style.borderColor='rgba(232,184,109,.45)'"
+              onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+            />
+            <button id="faq-clear" aria-label={c.clear} style="display:none;position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8288A5;padding:.25rem;line-height:1;" onclick="document.getElementById('faq-search').value='';document.getElementById('faq-search').dispatchEvent(new Event('input'));this.style.display='none';">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <p id="faq-count" style="font-size:.72rem;color:#8288A5;margin:.5rem 0 0;min-height:1em;transition:color .2s;"></p>
+        </div>
+
+        <!-- Popular questions -->
+        <div>
+          <p style="font-family:'Jost Variable',system-ui,sans-serif;font-size:0.72rem;text-transform:lowercase;letter-spacing:.05em;color:#8288A5;margin:0 0 .625rem;">{c.mostAsked}</p>
+          <div style="display:flex;flex-direction:column;">
+            {popularQuestions.map(q => (
+              <button
+                class="pop-q"
+                data-q={q}
+                style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;width:100%;background:none;border:none;border-bottom:1px solid rgba(255,255,255,.05);padding:.75rem 0;cursor:pointer;text-align:left;transition:padding-left .2s;"
+                onmouseover="this.style.paddingLeft='.375rem'"
+                onmouseout="this.style.paddingLeft='0'"
+              >
+                <span style="font-size:0.84rem;color:#8288A5;line-height:1.4;transition:color .2s;" class="pop-q-text">{q}</span>
+                <svg style="flex-shrink:0;color:#8288A5;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ FAQ BODY ════════════════════════════════════════════════════════════ -->
+<section id="faq-body" style="background:#08080E;padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:5rem;align-items:start;" id="faq-layout">
+
+      <!-- Sticky sidebar -->
+      <nav style="position:sticky;top:80px;" aria-label={c.navLabel}>
+        <p style="font-family:'Jost Variable',system-ui,sans-serif;font-size:0.72rem;text-transform:lowercase;letter-spacing:.05em;color:#8288A5;margin-bottom:.875rem;padding-left:.875rem;">{c.topics}</p>
+        {categories.map(cat => (
+          <a href={`#faq-${cat.slug}`} class="side-link" data-target={cat.slug}>{cat.label}</a>
+        ))}
+        <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.05);">
+          <p style="font-size:0.72rem;color:#8288A5;line-height:1.6;padding-left:.875rem;">{c.noQuestion}</p>
+          <a href="#booking" style="display:block;margin-top:.625rem;font-size:0.72rem;font-weight:600;color:var(--gold);text-decoration:none;padding-left:.875rem;" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">{c.askArrow}</a>
+        </div>
+      </nav>
+
+      <!-- FAQ content -->
+      <div>
+        {categories.map((cat, ci) => (
+          <div id={`faq-${cat.slug}`} class="faq-category" style="margin-bottom:4.5rem;" data-slug={cat.slug}>
+
+            <!-- Category header -->
+            <div class="ar" style="display:flex;align-items:baseline;gap:1rem;margin-bottom:1.75rem;padding-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,.07);">
+              <span style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:1.6rem;color:rgba(232,184,109,.12);line-height:1;flex-shrink:0;">0{ci+1}</span>
+              <div>
+                <h2 style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:1.15rem;color:#D0D0E0;letter-spacing:-.015em;">{cat.label}</h2>
+                <p style="font-size:0.72rem;color:#8288A5;margin-top:.2rem;">{c.questionsWord(cat.faqs.length)}</p>
+              </div>
+            </div>
+
+            <!-- Accordions -->
+            <div>
+              {cat.faqs.map((faq, fi) => (
+                <details class="faq-item ar" data-delay={String(fi * 35)}>
+                  <summary>
+                    <span style="flex:1;">{faq.q}</span>
+                    <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4">
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </summary>
+                  <div class="faq-body">{faq.a}</div>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ STILL HAVE A QUESTION ══════════════════════════════════════════════
+     Contact channels, not a booking form: someone on the FAQ came for an
+     answer, not to schedule a site visit. ════════════════════════════════ -->
+<section class="fq-contact">
+  <div class="container-wide">
+    <div class="fq-contact-grid" id="contact-strip">
+
+      <div class="ar">
+        <p class="cine-label"><span class="cine-label__index">{c.stillLabel}</span>{c.stillTitle}</p>
+        <h2 class="cine-display fq-contact-h2">{c.stillHeadline}</h2>
+        <p class="fq-contact-body">{c.stillBody}</p>
+      </div>
+
+      <div class="ar fq-channels" data-delay="80">
+        <a href={`tel:${tr('site.phone').replace(/\s/g,'')}`} class="fq-ch">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          <span><i>{c.callUs}</i><b>{tr('site.phone')}</b></span>
+        </a>
+
+        <a href={`https://wa.me/${tr('site.whatsapp')}`} target="_blank" rel="noopener noreferrer" class="fq-ch fq-ch--wa">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+          <span><i>WhatsApp</i><b>{c.waNow}</b></span>
+        </a>
+
+        <a href={`mailto:${tr('site.email')}`} class="fq-ch">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span><i>{c.emailUs}</i><b>{tr('site.email')}</b></span>
+        </a>
+
+        <p class="fq-hours">{c.hours}</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+</main>
+<Footer lang={lang}/><CookieConsent lang={lang}/><FloatingContactBar lang={lang}/>
+</BaseLayout>
+
+<script is:inline>
+(function() {
+  var EXPO = 'cubic-bezier(0.16,1,0.3,1)';
+
+  /* ── Scroll reveal ── */
+  function initReveal() {
+    var items = document.querySelectorAll('.ar');
+    items.forEach(function(el) {
+      el.style.opacity   = '0';
+      el.style.transform = 'translateY(18px)';
+      el.style.transition = 'opacity 0.6s '+EXPO+', transform 0.6s '+EXPO;
+    });
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var delay = parseInt(el.dataset.delay || '0');
+        setTimeout(function() {
+          el.style.opacity   = '1';
+          el.style.transform = 'none';
+        }, delay);
+        io.unobserve(el);
+      });
+    }, { threshold: 0.05 });
+    items.forEach(function(el) { io.observe(el); });
+  }
+
+  /* ── Responsive grids ── */
+  function fixGrids() {
+    var w = window.innerWidth;
+    var hg = document.getElementById('hero-grid');
+    if (hg) hg.style.gridTemplateColumns = w < 900 ? '1fr' : '1fr 1fr';
+    var fl = document.getElementById('faq-layout');
+    if (fl) fl.style.gridTemplateColumns = w < 960 ? '1fr' : '200px 1fr';
+    var cs = document.getElementById('contact-strip');
+    if (cs) cs.style.gridTemplateColumns = w < 768 ? '1fr' : '1fr 1fr';
+
+    /* Hide sidebar on mobile */
+    var sidebar = fl && fl.querySelector('nav');
+    if (sidebar) sidebar.style.display = w < 960 ? 'none' : '';
+  }
+
+  /* ── Active sidebar link on scroll ── */
+  function initSidebarHighlight() {
+    var links  = document.querySelectorAll('.side-link');
+    var cats   = document.querySelectorAll('.faq-category');
+    if (!links.length || !cats.length) return;
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var slug = entry.target.dataset.slug;
+        links.forEach(function(l) {
+          l.classList.toggle('active', l.dataset.target === slug);
+        });
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    cats.forEach(function(c) { io.observe(c); });
+  }
+
+  /* ── FAQ Search ── */
+  function initSearch() {
+    var input   = document.getElementById('faq-search');
+    var clearBtn= document.getElementById('faq-clear');
+    var countEl = document.getElementById('faq-count');
+    if (!input) return;
+
+    function runSearch() {
+      var q = input.value.trim().toLowerCase();
+      var allItems  = document.querySelectorAll('.faq-item');
+      var allCats   = document.querySelectorAll('.faq-category');
+      clearBtn.style.display = q ? 'block' : 'none';
+
+      if (!q) {
+        allItems.forEach(function(el) { el.style.display = ''; });
+        allCats.forEach(function(el)  { el.style.display = ''; });
+        countEl.textContent = '';
+        return;
+      }
+
+      var total = 0;
+      allItems.forEach(function(el) {
+        var text = (el.querySelector('summary') || el).textContent.toLowerCase();
+        var match = text.includes(q);
+        el.style.display = match ? '' : 'none';
+        if (match) { total++; el.open = true; }
+      });
+
+      allCats.forEach(function(cat) {
+        var visible = Array.from(cat.querySelectorAll('.faq-item')).some(function(el) { return el.style.display !== 'none'; });
+        cat.style.display = visible ? '' : 'none';
+      });
+
+      if (total === 0) {
+        countEl.textContent = 'No results — try different words';
+        countEl.style.color = '#663333';
+      } else {
+        countEl.textContent = total + (total === 1 ? ' result' : ' results');
+        countEl.style.color = 'rgba(232,184,109,.55)';
+      }
+    }
+
+    input.addEventListener('input', runSearch);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { input.value = ''; runSearch(); input.blur(); }
+    });
+  }
+
+  /* ── Popular question jump ── */
+  function initPopularQ() {
+    document.querySelectorAll('.pop-q').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var target = btn.getAttribute('data-q').toLowerCase();
+        var allItems = document.querySelectorAll('.faq-item');
+        var found = null;
+        allItems.forEach(function(el) {
+          var text = (el.querySelector('summary span') || el.querySelector('summary') || el).textContent.toLowerCase().trim();
+          if (!found && text.includes(target.substring(0, 20))) found = el;
+        });
+        if (found) {
+          found.open = true;
+          found.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          found.style.transition = 'background .3s';
+          found.style.background = 'rgba(232,184,109,0.06)';
+          setTimeout(function() { found.style.background = ''; }, 1400);
+        } else {
+          /* fallback: put query in search box */
+          var words = target.split(' ').slice(0, 2).join(' ');
+          var si = document.getElementById('faq-search');
+          if (si) { si.value = words; si.dispatchEvent(new Event('input')); si.focus(); }
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      initReveal(); fixGrids(); initSidebarHighlight(); initSearch(); initPopularQ();
+    });
+  } else {
+    initReveal(); fixGrids(); initSidebarHighlight(); initSearch(); initPopularQ();
+  }
+  window.addEventListener('resize', fixGrids);
+})();
+</script>
+
+<style>
+/* Small and set above the headline block, like every other hero */
+.fq-bc {
+  display: flex; align-items: center; gap: .3rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; letter-spacing: .02em; color: #8288A5;
+  margin-bottom: 2.2rem; flex-wrap: wrap;
+}
+.fq-bc a { color: #8288A5; text-decoration: none; transition: color .15s; }
+.fq-bc a:hover { color: #9DA0B8; }
+.fq-bc [aria-current="page"] { color: #8288A5; }
+.fq-bc-sep { color: #8288A5; }
+
+.fq-contact { background:#06060A; border-top:1px solid rgba(255,255,255,.07); padding:5rem 0; }
+.fq-contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:3.5rem; align-items:center; }
+.fq-contact-h2 { margin:1rem 0 .9rem; font-size:clamp(1.7rem,3vw,2.4rem); }
+.fq-contact-body { font-size:.9rem; color:#9DA0B8; line-height:1.75; max-width:44ch; }
+
+.fq-channels { display:flex; flex-direction:column; gap:.7rem; }
+.fq-ch {
+  display:flex; align-items:center; gap:1rem;
+  border:1px solid rgba(255,255,255,.09); border-radius:4px;
+  padding:1rem 1.3rem; text-decoration:none; color:#E8B86D;
+  transition:border-color .2s ease, background .2s ease;
+}
+.fq-ch:hover { border-color:rgba(232,184,109,.4); background:rgba(232,184,109,.05); }
+.fq-ch--wa { color:#6EDB85; }
+.fq-ch--wa:hover { border-color:rgba(110,219,133,.4); background:rgba(110,219,133,.05); }
+.fq-ch span { display:flex; flex-direction:column; gap:.15rem; min-width:0; }
+.fq-ch i {
+  font-style:normal; font-family:'Jost Variable',system-ui,sans-serif;
+  font-size:0.72rem; letter-spacing:.14em; text-transform:lowercase; color:#8288A5;
+}
+.fq-ch b {
+  font-family:'Spectral',Georgia,serif; font-weight:400; font-size:0.95rem; color:#E4E4EE;
+  overflow-wrap:anywhere;
+}
+.fq-hours {
+  font-family:'Jost Variable',system-ui,sans-serif;
+  font-size:0.72rem; color:#8288A5; line-height:1.6; margin:.4rem 0 0;
+}
+@media (max-width:860px){ .fq-contact-grid { grid-template-columns:1fr; gap:2rem; } }
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .fq-bc, .fq-bc a, .fq-bc-sep, .fq-bc span { font-size: 0.78rem; }
+  .fq-bc a { padding: .45rem 0; }
+  nav[aria-label] > p { font-size: 0.78rem !important; }
+}
+</style>

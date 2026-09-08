@@ -1,0 +1,40 @@
+---
+interface Props {
+  variant?: 'default' | 'sm' | 'dark' | 'accent' | 'brand';
+  class?:   string;
+  hover?:   boolean;
+  reveal?:  boolean;
+  as?:      string;
+  href?:    string;
+}
+
+const {
+  variant = 'default',
+  class:   className = '',
+  hover    = true,
+  reveal   = false,
+  as:      tag = 'div',
+  href,
+} = Astro.props;
+
+const variantClass = {
+  default: 'glass-card',
+  sm:      'glass-card-sm',
+  dark:    'glass-card-dark',
+  accent:  'glass-card-accent',
+  brand:   'glass-card-brand',
+}[variant];
+
+const Tag = href ? 'a' : tag;
+const classes = [variantClass, hover ? '' : 'hover:transform-none', reveal ? 'reveal' : '', className].filter(Boolean).join(' ');
+---
+
+{href ? (
+  <a href={href} class={classes}><slot /></a>
+) : tag === 'article' ? (
+  <article class={classes}><slot /></article>
+) : tag === 'section' ? (
+  <section class={classes}><slot /></section>
+) : (
+  <div class={classes}><slot /></div>
+)}

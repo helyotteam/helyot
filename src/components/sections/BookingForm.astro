@@ -1,0 +1,534 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+const en = lang === 'en';
+
+const timeSlots = ['09:00','11:00','13:00','15:00','17:00'];
+
+const allServices = [
+  { slug:'apartment-renovation',  en:'Apartment Renovation',      ru:'Ремонт квартиры' },
+  { slug:'villa-renovation',      en:'Villa Renovation',           ru:'Ремонт виллы' },
+  { slug:'kitchen-renovation',    en:'Kitchen & Dining',           ru:'Кухня и столовая' },
+  { slug:'bathroom-renovation',   en:'Bathroom & Wet Rooms',       ru:'Ванная и санузлы' },
+  { slug:'office-fit-out',        en:'Office Fit-Out',             ru:'Офисный ремонт' },
+  { slug:'pool-renovation',       en:'Swimming Pool',              ru:'Ремонт бассейна' },
+  { slug:'energy-modernization',  en:'Energy Modernisation',       ru:'Энергомодернизация' },
+  { slug:'smart-home',            en:'Smart Home',                 ru:'Умный дом' },
+  { slug:'flooring',              en:'Flooring',                   ru:'Напольные покрытия' },
+  { slug:'facade',                en:'Facade & Exterior',          ru:'Фасад' },
+  { slug:'other',                 en:'Other / Not Sure Yet',       ru:'Другое / Пока не знаю' },
+];
+
+const steps = en ? [
+  { n:'01', t:'We call you back within 15 minutes' },
+  { n:'02', t:'Free site visit — usually within 48 hours' },
+  { n:'03', t:'Itemised fixed-price quote — typically within a week' },
+] : [
+  { n:'01', t:'Перезвоним в течение 15 минут' },
+  { n:'02', t:'Бесплатный выезд — обычно в течение 48 часов' },
+  { n:'03', t:'Постатейная смета с фиксированной ценой — обычно в течение недели' },
+];
+
+const guarantees = en
+  ? ['Visit and quote are free', 'Itemised, fixed price', 'Your details stay with us']
+  : ['Выезд и смета бесплатны', 'Постатейная фиксированная цена', 'Данные остаются у нас'];
+---
+
+<style>
+  .bk-wrap {
+    position: relative;
+    overflow: hidden;
+    background: #08080E;
+    border-top: 1px solid rgba(255,255,255,.07);
+    padding: 6.5rem 0;
+  }
+
+  .bk-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+
+  /* Two-column layout */
+  .bk-cols {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* ── Left info panel ──────────────────────────── */
+  .bk-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4.25rem;
+  }
+
+  .bk-guarantees {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .875rem;
+  }
+  .bk-guarantee {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .8rem 0;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  .bk-guarantees { grid-template-columns: 1fr !important; gap: 0 !important; }
+  .bk-guarantee:last-child { border-bottom: 1px solid rgba(255,255,255,.07); }
+  .bk-g-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    background: rgba(232,184,109,.08);
+    border: 1px solid rgba(232,184,109,.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: .1rem;
+  }
+
+  .bk-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .bk-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: .875rem 0;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  .bk-step:first-child { border-top: none; padding-top: 0; }
+  .bk-step-n {
+    font-family: 'Spectral','Georgia',system-ui;
+    font-size: .65rem;
+    font-weight: 500;
+    color: #E8B86D;
+    letter-spacing: .1em;
+    min-width: 1.75rem;
+    margin-top: .1rem;
+    flex-shrink: 0;
+  }
+
+  /* Bottom rating block */
+  .bk-rating {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius:4px;
+  }
+
+  /* ── Right form panel ─────────────────────────── */
+  .bk-form-wrap {
+    background: transparent;
+    border-left: 1px solid rgba(255,255,255,.08);
+    padding: 0 0 0 3.5rem;
+  }
+
+  .bk-form-title {
+    font-family: 'Spectral','Georgia',system-ui;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: #F5F6FA;
+    margin: 0 0 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(232,184,109,.25);
+  }
+
+  .bk-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.125rem;
+  }
+
+  .bk-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .bk-field {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+  .bk-label {
+    font-size: .72rem;
+    font-weight: 600;
+    color: #9DA0B8;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .bk-input {
+    width: 100%;
+    padding: .7rem 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,.18);
+    border-radius: 0;
+    color: #F5F6FA;
+    font-size: .95rem;
+    font-family: 'Inter', system-ui;
+    outline: none;
+    transition: border-color .2s;
+    box-sizing: border-box;
+  }
+  .bk-input:focus {
+    border-bottom-color: #E8B86D;
+  }
+  .bk-input::placeholder { color: rgba(255,255,255,.28); }
+  .bk-input option { background: #14141F; color: #F5F6FA; }
+
+  /* Date picker icon */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: .5;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: .8; }
+  input[type="date"] { color-scheme: dark; }
+
+  /* Time slots */
+  .bk-slots {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: .375rem;
+  }
+  .bk-slot-label { cursor: pointer; }
+  .bk-slot-btn {
+    display: block;
+    text-align: center;
+    padding: .55rem .25rem;
+    border-radius: 2px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.14);
+    color: #9DA0B8;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+    font-variant-numeric: tabular-nums;
+  }
+  .bk-slot-label:hover .bk-slot-btn {
+    background: rgba(232,184,109,.08);
+    border-color: rgba(232,184,109,.28);
+    color: #E8B86D;
+  }
+  input[type="radio"]:checked + .bk-slot-btn {
+    background: rgba(232,184,109,.15);
+    border-color: rgba(232,184,109,.45);
+    color: #E8B86D;
+  }
+
+  /* Divider */
+  .bk-divider {
+    height: 1px;
+    background: rgba(255,255,255,.07);
+    margin: .25rem 0;
+  }
+
+  /* GDPR */
+  .bk-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    cursor: pointer;
+  }
+  .bk-consent input {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    margin-top: .15rem;
+    accent-color: #E8B86D;
+    cursor: pointer;
+  }
+
+  /* Submit — outline gold, fills on hover */
+  .bk-submit {
+    width: 100%;
+    padding: 1rem;
+    border-radius:3px;
+    background: #E8B86D;
+    color: #14100A;
+    font-family: 'Inter', system-ui;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    box-shadow: 0 8px 36px rgba(232,184,109,.25);
+    transition: background .18s, box-shadow .18s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .bk-submit:hover {
+    background: #F0C67E;
+    box-shadow: 0 12px 44px rgba(232,184,109,.38);
+    transform: translateY(-1px);
+  }
+  .bk-submit:active { transform: scale(.98); }
+  .bk-submit:disabled { opacity: .4; cursor: default; transform: none; }
+
+  /* Success */
+  #bf-success {
+    display: none;
+    background: rgba(34,197,94,.08);
+    border: 1px solid rgba(34,197,94,.2);
+    color: #4ade80;
+    border-radius:4px;
+    padding: .875rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  /* ── Responsive ───────────────────────────────── */
+  @media (max-width: 900px) {
+    .bk-cols { grid-template-columns: 1fr; gap: 2.4rem; }
+    .bk-info { gap: 2rem; }
+    .bk-wrap { padding: 4rem 0; }
+    .bk-form-wrap { border-left: none; padding: 0; border-top: 1px solid rgba(255,255,255,.08); }
+    .bk-form-title { padding-top: 1.6rem; }
+  }
+  @media (max-width: 600px) {
+    .bk-row { grid-template-columns: 1fr; }
+    .bk-inner { padding: 0 1rem; }
+    .bk-slots { grid-template-columns: repeat(5, 1fr); }
+    .bk-guarantees { grid-template-columns: 1fr; }
+    /* Less reading, more form: trim the lead-in copy so the fields land first */
+    .bk-info { gap: 1.25rem; }
+    .bk-info-desc, .bk-hide-mobile { display: none !important; }
+  @media (max-width: 400px) {
+    .bk-slots { grid-template-columns: repeat(3, 1fr); }
+    .bk-slot-btn { font-size: 0.72rem; }
+  }
+  }
+
+/* Mobile legibility: these labels sit at 9–11px, unreadable on a phone. */
+@media (max-width: 700px) {
+  .bk-step-n { font-size: 0.72rem; }
+  .bk-slot-btn { font-size: 0.78rem; }
+}
+</style>
+
+<section id="booking" class="bk-wrap">
+
+  <!-- ambient glow -->
+  <div aria-hidden="true" style="position:absolute;inset:0;background:
+      radial-gradient(ellipse 60% 50% at 18% 0%,  rgba(232,184,109,.08) 0%, transparent 60%);
+      pointer-events:none;"></div>
+
+  <div class="bk-inner" style="position:relative;">
+
+    <div class="bk-cols">
+
+      <!-- ── LEFT ────────────────────────────────── -->
+      <div class="bk-info">
+
+        <!-- Heading -->
+        <div>
+          <p class="cine-label" style="margin-bottom:1rem;">
+            <span class="cine-label__index">{en ? 'Next step' : 'Следующий шаг'}</span>
+            {en ? 'Free consultation' : 'Бесплатная консультация'}
+          </p>
+          <h2 class="cine-display" style="font-size:clamp(2rem,4.2vw,3.4rem);margin:0 0 1.2rem;" data-words>
+            {en
+              ? <>Start with a <em>free site visit.</em></>
+              : <>Начните с <em>бесплатного замера.</em></>}
+          </h2>
+          <p class="bk-info-desc" style="font-size:.9rem;color:#9DA0B8;line-height:1.7;">
+            {en
+              ? 'We visit within 48 hours and send a fixed-price quote.'
+              : 'Приезжаем в течение 48 часов и присылаем смету с фиксированной ценой.'}
+          </p>
+        </div>
+
+        <!-- Guarantees — quick trust badges (desktop/tablet only — kept off mobile so the form arrives first) -->
+        <div class="bk-guarantees bk-hide-mobile">
+          {guarantees.map(g => (
+            <div class="bk-guarantee">
+              <span class="bk-g-icon">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8B86D" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+              </span>
+              <span style="font-size:0.84rem;color:#9DA0B8;font-weight:500;">{g}</span>
+            </div>
+          ))}
+        </div>
+
+        <!-- What happens next (desktop/tablet only — kept off mobile so the form arrives first) -->
+        <div class="bk-hide-mobile">
+          <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#9DA0B8;margin-bottom:.5rem;">
+            {en ? 'WHAT HAPPENS NEXT' : 'ЧТО ПРОИСХОДИТ ДАЛЬШЕ'}
+          </p>
+          <div class="bk-steps">
+            {steps.map(s => (
+              <div class="bk-step">
+                <span class="bk-step-n">{s.n}</span>
+                <span style="font-size:0.9rem;color:#9DA0B8;line-height:1.6;">{s.t}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── RIGHT: Form ─────────────────────────── -->
+      <div class="bk-form-wrap">
+
+        <p class="bk-form-title">
+          {en ? 'Request a free quote' : 'Запросить бесплатную смету'}
+        </p>
+
+        <form id="booking-form" class="bk-form" novalidate>
+
+          <!-- Service -->
+          <div class="bk-field">
+            <label for="bf-service" class="bk-label">{en ? 'Service' : 'Услуга'}</label>
+            <select id="bf-service" name="service" required class="bk-input">
+              <option value="" disabled selected>{en ? 'Select a service…' : 'Выберите услугу…'}</option>
+              {allServices.map(s => <option value={s.slug}>{en ? s.en : s.ru}</option>)}
+            </select>
+          </div>
+
+          <!-- Name + Phone -->
+          <div class="bk-row">
+            <div class="bk-field">
+              <label for="bf-name" class="bk-label">{en ? 'Your name' : 'Имя'} *</label>
+              <input id="bf-name" type="text" name="name" required
+                     autocomplete="name" placeholder={en ? 'John Smith' : 'Иван Иванов'}
+                     class="bk-input" />
+            </div>
+            <div class="bk-field">
+              <label for="bf-phone" class="bk-label">{en ? 'Phone / WhatsApp' : 'Телефон / WhatsApp'} *</label>
+              <input id="bf-phone" type="tel" name="phone" required
+                     autocomplete="tel" placeholder="+357 97 499 231"
+                     class="bk-input" />
+            </div>
+          </div>
+
+          <!-- Date -->
+          <div class="bk-field">
+            <label for="bf-date" class="bk-label">{en ? 'Preferred visit date' : 'Удобная дата визита'}</label>
+            <input id="bf-date" type="date" name="date" class="bk-input" />
+          </div>
+
+          <!-- Time slots -->
+          <div class="bk-field">
+            <label class="bk-label">{en ? 'Preferred time' : 'Удобное время'}</label>
+            <div class="bk-slots">
+              {timeSlots.map(slot => (
+                <label class="bk-slot-label">
+                  <input type="radio" name="time" value={slot} class="sr-only" />
+                  <span class="bk-slot-btn">{slot}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div class="bk-divider"></div>
+
+          <!-- GDPR -->
+          <label class="bk-consent">
+            <input type="checkbox" id="bk-consent" required />
+            <span style="font-size:.78rem;color:#9DA0B8;line-height:1.6;">
+              {en
+                ? <>I agree to the processing of my personal data per the <a href="/en/privacy" target="_blank" rel="noopener noreferrer" style="color:#E8B86D;text-decoration:underline;">Privacy Policy</a>.</>
+                : <>Согласен(а) на обработку персональных данных согласно <a href="/ru/privacy" target="_blank" rel="noopener noreferrer" style="color:#E8B86D;text-decoration:underline;">Политике конфиденциальности</a>.</>
+              }
+            </span>
+          </label>
+
+          <!-- Success -->
+          <div id="bf-success">{tr('booking.success')}</div>
+
+          <!-- Submit -->
+          <button type="submit" class="bk-submit" id="bk-submit">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            {tr('booking.submit')}
+          </button>
+
+          <p style="text-align:center;font-size:.72rem;color:#9DA0B8;margin-top:-.25rem;">
+            {en ? 'No spam. Your data stays private.' : 'Без спама. Данные в безопасности.'}
+          </p>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { validatePhone } from '../../lib/utils';
+  import { sendLead }      from '../../lib/webhook';
+
+  // Date — weekdays only, min tomorrow
+  const dateInput = document.getElementById('bf-date') as HTMLInputElement;
+  if (dateInput) {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+    dateInput.min = d.toISOString().split('T')[0];
+    dateInput.addEventListener('change', () => {
+      const day = new Date(dateInput.value).getDay();
+      dateInput.setCustomValidity(day === 0 || day === 6 ? 'Weekdays only' : '');
+    });
+  }
+
+  // Responsive rows
+  function fixRows() {
+    const w = window.innerWidth;
+    document.querySelectorAll<HTMLElement>('.bk-row').forEach(r => {
+      r.style.gridTemplateColumns = w < 600 ? '1fr' : '1fr 1fr';
+    });
+  }
+  fixRows();
+  window.addEventListener('resize', fixRows);
+
+  // Submit
+  const form      = document.getElementById('booking-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('bk-submit')   as HTMLButtonElement;
+  const successEl = document.getElementById('bf-success');
+  const submitBtnHTML = submitBtn?.innerHTML ?? '';
+
+  form?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const name  = form.querySelector<HTMLInputElement>('#bf-name')?.value.trim()  ?? '';
+    const phone = form.querySelector<HTMLInputElement>('#bf-phone')?.value.trim() ?? '';
+    if (!name || !validatePhone(phone)) { form.reportValidity(); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '…';
+
+    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    await sendLead({ type: 'booking', ...data });
+
+    form.reset();
+    submitBtn.disabled = false;
+    submitBtn.textContent = '✓ Sent';
+    submitBtn.style.background = '#6EDB85';
+
+    if (successEl) successEl.style.display = 'block';
+
+    setTimeout(() => {
+      submitBtn.style.background = '';
+      submitBtn.innerHTML = submitBtnHTML;
+      if (successEl) successEl.style.display = 'none';
+    }, 4000);
+  });
+</script>

@@ -1,0 +1,177 @@
+/* ═══════════════════════════════════════════════════════════════
+   Helyot Dark Glass / Morphism Design System
+   Dark, architectural, premium — inspired by Higharc.com
+   ══════════════════════════════════════════════════════════════ */
+
+/* ─── Core dark glass card ────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(14,14,26,0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.3);
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+.glass-card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 24px 48px rgba(0,0,0,0.4);
+  border-color: rgba(232,184,109,0.20);
+  transform: translateY(-4px);
+}
+
+/* ─── Variants ─────────────────────────────────────────────────────────────── */
+.glass-card-sm {
+  background: rgba(20,20,35,0.90);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.3);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.glass-card-sm:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 12px 24px rgba(0,0,0,0.4);
+  border-color: rgba(232,184,109,0.18);
+  transform: translateY(-2px);
+}
+
+/* Dark variant (same as core) */
+.glass-card-dark {
+  background: rgba(14,14,26,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+}
+
+/* Gold-tinted variant */
+.glass-card-terra {
+  background: rgba(14,14,26,0.85);
+  border: 1px solid rgba(232,184,109,0.20);
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(232,184,109,0.06), 0 8px 24px rgba(232,184,109,0.08);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.glass-card-terra:hover {
+  box-shadow: 0 4px 8px rgba(232,184,109,0.10), 0 20px 40px rgba(232,184,109,0.12);
+  transform: translateY(-3px);
+}
+
+/* Brand-tinted variant */
+.glass-card-brand {
+  background: rgba(20,20,35,0.80);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.25);
+}
+
+/* ─── Dark glass (simple) ──────────────────────────────────────────────────── */
+.glass-dark {
+  background: rgba(14,14,26,0.80);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+}
+
+/* ─── Nav bar (dark) ──────────────────────────────────────────────────────── */
+.glass-nav {
+  background: rgba(8,8,14,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+}
+
+/* ─── Modal ────────────────────────────────────────────────────────────────── */
+.glass-modal {
+  background: rgba(14,14,26,0.97);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 28px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5), 0 32px 64px rgba(0,0,0,0.6);
+}
+
+/* ─── Input dark ───────────────────────────────────────────────────────────── */
+.glass-input {
+  background: rgba(14,14,26,0.90);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(232,184,109,0.5);
+  box-shadow: 0 0 0 3px rgba(232,184,109,0.10);
+}
+
+/* ─── Stat card ────────────────────────────────────────────────────────────── */
+.stat-card {
+  background: rgba(20,20,35,0.90);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* ─── Service icon chip ────────────────────────────────────────────────────── */
+.service-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: rgba(232,184,109,0.10);
+  border: 1px solid rgba(232,184,109,0.20);
+  transition: transform 0.2s ease;
+}
+.glass-card:hover .service-icon { transform: scale(1.1) rotate(-2deg); }
+
+/* ─── Divider (dark) ───────────────────────────────────────────────────────── */
+.loft-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 20%, rgba(255,255,255,0.07) 80%, transparent 100%);
+  margin: 4rem 0;
+}
+.loft-divider::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  width: 6px;
+  height: 6px;
+  background: #C09050;
+  border-radius: 50%;
+}
+
+/* ─── Animated underline ───────────────────────────────────────────────────── */
+.link-underline { position: relative; text-decoration: none; }
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -2px;
+  width: 0; height: 1.5px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+.link-underline:hover::after { width: 100%; }
+
+/* ─── Reveal overlay on cards ──────────────────────────────────────────────── */
+.card-overlay { position: relative; overflow: hidden; }
+.card-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(8,8,14,0.75) 100%);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.card-overlay:hover::after { opacity: 0.9; }
+
+/* ─── Before/after slider ──────────────────────────────────────────────────── */
+.ba-container { position: relative; overflow: hidden; border-radius: 20px; cursor: col-resize; user-select: none; }
+.ba-after     { position: absolute; inset: 0; overflow: hidden; }
+.ba-handle    { position: absolute; top: 0; bottom: 0; width: 3px; background: rgba(232,184,109,0.8); box-shadow: 0 0 12px rgba(232,184,109,0.4); cursor: col-resize; display: flex; align-items: center; justify-content: center; }
+.ba-handle-circle { width: 40px; height: 40px; border-radius: 50%; background: #E8B86D; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(232,184,109,0.4); font-size: 14px; color: #08080E; }

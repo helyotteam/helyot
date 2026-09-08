@@ -1,0 +1,254 @@
+---
+/**
+ * PROJECT ENQUIRY — open-ended form for the contact page.
+ * BookingForm asks you to pick a service and a visit slot, which is wrong
+ * for someone who landed on "Contact" and just wants to describe a job.
+ * Same endpoint, softer questions: only name and phone are required.
+ */
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+const tr = (k: string) => t(lang, k as any);
+
+const c = en ? {
+  index: 'Tell us about it', eyebrow: 'Project enquiry',
+  title: `Describe the job. <em>We'll take it from there.</em>`,
+  body: 'No dropdowns to guess at. Write what you have in mind — a room, a whole flat, or just a question about whether something is possible. We read every message.',
+  name: 'Your name', namePh: 'How should we address you?',
+  phone: 'Phone or WhatsApp', phonePh: '+357 …',
+  email: 'Email (optional)', emailPh: 'so we can send the quote in writing',
+  msg: 'What are you planning?',
+  msgPh: 'For example: 95 m² two-bed in Germasogeia, need the bathroom and kitchen redone before the summer season. Building has no lift.',
+  consent: 'I agree to the processing of my personal data per the',
+  privacy: '/en/privacy',
+  submit: 'Send enquiry',
+  sending: 'Sending…',
+  done: 'Got it. We will reply within 15 minutes during working hours.',
+  err: 'Please add your name and a phone number we can reach you on.',
+  note: 'No spam, no partner agencies. Your details stay with us.',
+  fromCalc: 'From the calculator:',
+  cType: { apartment: 'apartment', villa: 'villa', office: 'office' },
+  cLevel: { economy: 'essential finish', standard: 'standard finish', premium: 'premium finish' },
+  cBaths: 'bathrooms', cKitchens: 'kitchens', cSqm: 'm\u00B2',
+} : {
+  index: 'Расскажите о задаче', eyebrow: 'Заявка на проект',
+  title: `Опишите задачу. <em>Дальше — наша работа.</em>`,
+  body: 'Никаких списков, в которых надо угадывать. Напишите, что задумали — комнату, всю квартиру или просто вопрос, возможно ли это. Мы читаем каждое сообщение.',
+  name: 'Ваше имя', namePh: 'Как к вам обращаться?',
+  phone: 'Телефон или WhatsApp', phonePh: '+357 …',
+  email: 'Почта (необязательно)', emailPh: 'чтобы прислать смету письменно',
+  msg: 'Что планируете?',
+  msgPh: 'Например: двушка 95 м² в Гермасогее, нужно переделать санузел и кухню до начала сезона. В доме нет лифта.',
+  consent: 'Согласен на обработку персональных данных согласно',
+  privacy: '/ru/privacy',
+  submit: 'Отправить заявку',
+  sending: 'Отправляем…',
+  done: 'Получили. Ответим в течение 15 минут в рабочее время.',
+  err: 'Укажите имя и телефон, по которому с вами связаться.',
+  note: 'Без спама и передачи партнёрам. Ваши данные остаются у нас.',
+  fromCalc: 'Из калькулятора:',
+  cType: { apartment: 'квартира', villa: 'вилла', office: 'офис' },
+  cLevel: { economy: 'базовая отделка', standard: 'стандартная отделка', premium: 'премиальная отделка' },
+  cBaths: 'санузлов', cKitchens: 'кухонь', cSqm: 'м\u00B2',
+};
+---
+
+<section id="booking" class="pe-section">
+  <div class="container-wide">
+    <div class="pe-grid">
+
+      <div class="pe-intro">
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{c.index}</span>{c.eyebrow}
+        </p>
+        <h2 class="cine-display pe-title" data-words set:html={c.title} />
+        <p class="pe-body" data-reveal>{c.body}</p>
+
+        <div class="pe-direct" data-reveal>
+          <a href={`tel:${tr('site.phone').replace(/\s/g,'')}`} class="pe-direct-link">{tr('site.phone')}</a>
+          <span class="pe-direct-sep" aria-hidden="true"></span>
+          <a href={`https://wa.me/${tr('site.whatsapp')}`} target="_blank" rel="noopener noreferrer" class="pe-direct-link">WhatsApp</a>
+        </div>
+      </div>
+
+      <form class="pe-form" id="pe-form" novalidate data-reveal>
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="pe-hp" />
+        <input type="hidden" name="estimate" id="pe-estimate" />
+
+        <div class="pe-pair">
+          <label class="pe-field">
+            <span class="pe-label">{c.name} *</span>
+            <input type="text" name="name" required autocomplete="name" placeholder={c.namePh} class="pe-input" />
+          </label>
+
+          <label class="pe-field">
+            <span class="pe-label">{c.phone} *</span>
+            <input type="tel" name="phone" required autocomplete="tel" placeholder={c.phonePh} class="pe-input" />
+          </label>
+        </div>
+
+        <label class="pe-field">
+          <span class="pe-label">{c.email}</span>
+          <input type="email" name="email" autocomplete="email" placeholder={c.emailPh} class="pe-input" />
+        </label>
+
+        <label class="pe-field">
+          <span class="pe-label">{c.msg}</span>
+          <textarea name="message" rows="3" placeholder={c.msgPh} class="pe-input pe-textarea"></textarea>
+        </label>
+
+        <label class="pe-consent">
+          <input type="checkbox" name="consent" required />
+          <span>{c.consent} <a href={c.privacy}>{en ? 'Privacy Policy' : 'Политике конфиденциальности'}</a>.</span>
+        </label>
+
+        <p class="pe-error" id="pe-error" hidden>{c.err}</p>
+
+        <div class="pe-actions">
+          <button type="submit" class="pe-submit" data-label={c.submit} data-sending={c.sending}>{c.submit}</button>
+          <p class="pe-note">{c.note}</p>
+        </div>
+        <p class="pe-done" id="pe-done" hidden>{c.done}</p>
+      </form>
+
+    </div>
+  </div>
+</section>
+
+<style>
+.pe-section {
+  background: #06060A;
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: 6rem 0;
+}
+.pe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+.pe-title { margin: 1.1rem 0 1.1rem; font-size: clamp(1.8rem, 3.2vw, 2.7rem); }
+.pe-body { font-size: 0.95rem; line-height: 1.8; color: #9DA0B8; max-width: 46ch; margin: 0; }
+
+.pe-direct { display: flex; align-items: center; gap: 1.2rem; margin-top: 2rem; }
+.pe-direct-link {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.02rem; color: #E8B86D;
+  text-decoration: none; border-bottom: 1px solid rgba(232,184,109,.35);
+  padding-bottom: .15rem; transition: border-color .2s;
+}
+.pe-direct-link:hover { border-color: #E8B86D; }
+.pe-direct-sep { width: 1px; height: 14px; background: rgba(255,255,255,.16); }
+
+/* ── Form ── */
+.pe-form { display: flex; flex-direction: column; gap: .95rem; }
+/* Name and phone share a row so the form column ends level with the intro
+   copy beside it instead of running a screen and a half longer. */
+.pe-pair { display: grid; grid-template-columns: 1fr 1fr; gap: .95rem; }
+.pe-hp { position: absolute; left: -9999px; }
+.pe-field { display: flex; flex-direction: column; gap: .45rem; }
+.pe-label {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .78rem; letter-spacing: .04em; text-transform: lowercase; color: #8E91AB;
+}
+.pe-input {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 4px;
+  padding: .7rem .95rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .95rem; color: #F0F0F6;
+  transition: border-color .2s ease;
+}
+.pe-input::placeholder { color: #8288A5; }
+.pe-input:focus { outline: none; border-color: rgba(232,184,109,.55); }
+.pe-textarea { resize: vertical; line-height: 1.6; min-height: 5.2rem; }
+
+.pe-consent {
+  display: flex; align-items: flex-start; gap: .7rem;
+  font-size: 0.78rem; color: #8E91AB; line-height: 1.6; cursor: pointer;
+}
+.pe-consent input { margin-top: .2rem; accent-color: #E8B86D; width: 1rem; height: 1rem; flex-shrink: 0; }
+.pe-consent a { color: #E8B86D; }
+
+.pe-actions { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+.pe-submit {
+  flex-shrink: 0;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .95rem; font-weight: 400; letter-spacing: .02em; text-transform: lowercase;
+  color: #E8B86D; background: transparent;
+  border: 1px solid #E8B86D; border-radius: 4px;
+  padding: .75rem 1.8rem; cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+.pe-submit:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.pe-submit[disabled] { opacity: .55; cursor: default; }
+
+.pe-note  { font-size: 0.72rem; line-height: 1.5; color: #8288A5; margin: 0; max-width: 26ch; }
+.pe-error { font-size: 0.84rem; color: #E88D6D; margin: 0; }
+.pe-done  { font-size: 0.9rem; color: #6EDB85; margin: 0; }
+
+@media (max-width: 900px) {
+  .pe-section { padding: 4rem 0; }
+  .pe-grid { grid-template-columns: 1fr; gap: 2.4rem; }
+}
+@media (max-width: 520px) {
+  .pe-pair { grid-template-columns: 1fr; }
+  .pe-note { max-width: none; }
+}
+</style>
+
+<script is:inline define:vars={{ peCalcLabels: { fromCalc: c.fromCalc, cType: c.cType, cLevel: c.cLevel, cBaths: c.cBaths, cKitchens: c.cKitchens, cSqm: c.cSqm } }}>
+window.__peCalcLabels = peCalcLabels;
+
+(function () {
+  var form = document.getElementById('pe-form');
+  if (!form) return;
+
+  /* The calculator hands its parameters over in the query string so nobody has
+     to describe the same property twice. We write a readable sentence into the
+     message box (still editable) and keep the raw values in a hidden field so
+     the lead arrives with the exact configuration. */
+  (function prefill() {
+    var q = new URLSearchParams(location.search);
+    if (!q.get('type')) return;
+    var L = window.__peCalcLabels || {};
+    var bits = [];
+    if (L.cType && L.cType[q.get('type')]) bits.push(L.cType[q.get('type')]);
+    if (q.get('area')) bits.push(q.get('area') + ' ' + (L.cSqm || 'm\u00B2'));
+    if (L.cLevel && L.cLevel[q.get('level')]) bits.push(L.cLevel[q.get('level')]);
+    if (q.get('baths')) bits.push(L.cBaths + ': ' + q.get('baths'));
+    if (q.get('kitchens')) bits.push(L.cKitchens + ': ' + q.get('kitchens'));
+    var msg = form.querySelector('[name="message"]');
+    if (msg && !msg.value) msg.value = (L.fromCalc || '') + ' ' + bits.join(', ') + '.';
+    var hidden = document.getElementById('pe-estimate');
+    if (hidden) hidden.value = q.toString();
+  })();
+  var err  = document.getElementById('pe-error');
+  var done = document.getElementById('pe-done');
+  var btn  = form.querySelector('.pe-submit');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.querySelector('[name="_gotcha"]').value) return;
+
+    var name  = form.querySelector('[name="name"]').value.trim();
+    var phone = form.querySelector('[name="phone"]').value.trim();
+    var ok    = form.querySelector('[name="consent"]').checked;
+    if (!name || phone.length < 8 || !ok) { err.hidden = false; return; }
+    err.hidden = true;
+
+    btn.disabled = true;
+    btn.textContent = btn.dataset.sending;
+
+    var fd = new FormData(form);
+    fd.append('type', 'enquiry');
+    fd.append('page', window.location.pathname);
+
+    fetch('/.netlify/functions/send-lead', { method: 'POST', body: fd })
+      .catch(function () {})
+      .then(function () {
+        form.reset();
+        btn.disabled = false;
+        btn.textContent = btn.dataset.label;
+        done.hidden = false;
+        setTimeout(function () { done.hidden = true; }, 10000);
+      });
+  });
+})();
+</script>

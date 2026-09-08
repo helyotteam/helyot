@@ -1,0 +1,954 @@
+---
+/**
+ * SERVICES INDEX — shared by /en/services and /ru/uslugi.
+ *
+ * Rebuilt in the site's editorial language: no glass cards, no per-category
+ * accent colours, no pill badges, no blur blobs. Rows and hairlines, Spectral
+ * for display, Jost lowercase for UI, 4px radius everywhere.
+ *
+ * The catalogue rows are also written to be quotable by answer engines: each
+ * row states the service, what it starts from and how long it takes in one
+ * scannable line, and the page ships ItemList + Service structured data.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../shared/Header.astro';
+import Footer from '../shared/Footer.astro';
+import CineHero from '../shared/CineHero.astro';
+import BookingForm from '../sections/BookingForm.astro';
+import CookieConsent from '../ui/CookieConsent.astro';
+import FloatingContactBar from '../ui/FloatingContactBar.astro';
+import { services } from '../../lib/servicesData';
+import { locations } from '../../lib/citiesData';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+const svcHref = (slug: string) => en ? `/en/services/${slug}` : `/ru/uslugi/${slug}`;
+const hubHref = (slug: string) => en ? `/en/renovation/${slug}` : `/ru/remont/${slug}`;
+
+const categories = en ? [
+  { key: 'spaces',     label: 'Residential',        desc: 'Apartments, villas, kitchens, bathrooms and outdoor space.' },
+  { key: 'commercial', label: 'Commercial',         desc: 'Offices, hotels, retail and restaurant fit-outs.' },
+  { key: 'specialist', label: 'Design & specialist', desc: 'Interior design, energy modernisation and smart home.' },
+  { key: 'trades',     label: 'Trades & works',     desc: 'Flooring, painting, electrics, plumbing and more.' },
+] : [
+  { key: 'spaces',     label: 'Жильё',              desc: 'Квартиры, виллы, кухни, санузлы и внешние зоны.' },
+  { key: 'commercial', label: 'Коммерция',          desc: 'Офисы, отели, магазины и рестораны под ключ.' },
+  { key: 'specialist', label: 'Проект и спецработы', desc: 'Дизайн интерьера, энергомодернизация, умный дом.' },
+  { key: 'trades',     label: 'Виды работ',         desc: 'Полы, покраска, электрика, сантехника и другое.' },
+];
+
+const featured = en ? [
+  { slug: 'apartment-renovation', photo: '/images/projects/germasogeia-apt.webp',
+    title: 'Apartment renovation', tag: 'most requested', price: 'from €170/m²',
+    desc: 'Full gut-out to finished handover. Every trade in-house, one fixed price, 5-year warranty.' },
+  { slug: 'villa-renovation', photo: '/images/projects/agios-villa.webp',
+    title: 'Villa renovation', tag: 'premium', price: 'from €190/m²',
+    desc: 'Structural works, interior, pool and terrace — coordinated by one project manager.' },
+  { slug: 'bathroom-renovation', photo: '/images/projects/spa-bathroom.webp',
+    title: 'Bathrooms & wet rooms', tag: 'fast turnaround', price: 'from €2,000',
+    desc: '10-year waterproofing guarantee. Any tile format. Steam rooms and hammams a speciality.' },
+] : [
+  { slug: 'apartment-renovation', photo: '/images/projects/germasogeia-apt.webp',
+    title: 'Ремонт квартир', tag: 'заказывают чаще всего', price: 'от €170/м²',
+    desc: 'От полного демонтажа до сдачи. Все работы штатной бригадой, одна фиксированная цена, гарантия 5 лет.' },
+  { slug: 'villa-renovation', photo: '/images/projects/agios-villa.webp',
+    title: 'Ремонт вилл', tag: 'премиум', price: 'от €190/м²',
+    desc: 'Конструктив, интерьер, бассейн и терраса — всё ведёт один прораб.' },
+  { slug: 'bathroom-renovation', photo: '/images/projects/spa-bathroom.webp',
+    title: 'Санузлы и мокрые зоны', tag: 'быстрый срок', price: 'от €2 000',
+    desc: 'Гарантия на гидроизоляцию 10 лет. Плитка любого формата. Хаммамы и парные — наша специализация.' },
+];
+
+const prices = en ? [
+  { service: 'Apartment renovation',  from: '€170',    unit: '/m²',   note: '80 m² typical ≈ €28,000' },
+  { service: 'Villa renovation',      from: '€190',    unit: '/m²',   note: '250 m² typical ≈ €72,000' },
+  { service: 'Bathroom renovation',   from: '€2,000',  unit: 'per room', note: 'Strip-out to finished' },
+  { service: 'Kitchen renovation',    from: '€5,000',  unit: 'per room', note: 'Cabinetry, services and tiling' },
+  { service: 'Office fit-out',        from: '€150',    unit: '/m²',   note: 'Open plan including services' },
+  { service: 'Flooring',              from: '€20',     unit: '/m²',   note: 'Porcelain, wood or vinyl' },
+  { service: 'Painting & plastering', from: '€11',     unit: '/m²',   note: 'Primer plus two coats' },
+  { service: 'Energy renovation',     from: 'Grant',   unit: '',      note: 'Up to €6,000 EU subsidy' },
+] : [
+  { service: 'Ремонт квартиры',       from: '€170',    unit: '/м²',   note: '80 м² обычно ≈ €28 000' },
+  { service: 'Ремонт виллы',          from: '€190',    unit: '/м²',   note: '250 м² обычно ≈ €72 000' },
+  { service: 'Ремонт санузла',        from: '€2 000',  unit: 'за помещение', note: 'От демонтажа до отделки' },
+  { service: 'Ремонт кухни',          from: '€5 000',  unit: 'за помещение', note: 'Мебель, инженерия и плитка' },
+  { service: 'Отделка офиса',         from: '€150',    unit: '/м²',   note: 'Open space с инженерией' },
+  { service: 'Полы',                  from: '€20',     unit: '/м²',   note: 'Керамогранит, дерево, винил' },
+  { service: 'Штукатурка и покраска', from: '€11',     unit: '/м²',   note: 'Грунт плюс два слоя' },
+  { service: 'Энергомодернизация',    from: 'Субсидия', unit: '',     note: 'До €6 000 от ЕС' },
+];
+
+const why = en ? [
+  { n: '01', title: 'Fixed price, always',   body: 'The figure you sign is the figure you pay. No variation goes ahead without your written approval.' },
+  { n: '02', title: '35 in-house specialists', body: 'Every trade employed directly — plastering, electrics, plumbing, tiling, carpentry. No subcontractors.' },
+  { n: '03', title: 'Free site visit in 48h', body: 'We come to your property, measure it and give you an honest assessment of scope and cost. No obligation.' },
+  { n: '04', title: '5-year warranty',       body: 'A written structural warranty handed over on the final day, plus 10 years on wet-room waterproofing.' },
+] : [
+  { n: '01', title: 'Фиксированная цена',    body: 'Сумма, под которой вы подписались, — это сумма, которую вы платите. Ни одно изменение не идёт в работу без вашего письменного согласия.' },
+  { n: '02', title: '35 штатных специалистов', body: 'Все работы — своими сотрудниками: штукатурка, электрика, сантехника, плитка, столярка. Субподряда нет.' },
+  { n: '03', title: 'Бесплатный выезд за 48ч', body: 'Приезжаем на объект, делаем замеры и честно оцениваем объём и стоимость. Без обязательств.' },
+  { n: '04', title: 'Гарантия 5 лет',        body: 'Письменная гарантия на конструктив передаётся в день сдачи, плюс 10 лет на гидроизоляцию мокрых зон.' },
+];
+
+/* Pricing detail. The section used to be one sentence and a table of starting
+   figures — which answers "how much" and none of the questions that actually
+   stop someone from enquiring: what is inside that number, what is not, what
+   makes it move, and when the money is due. */
+const priceIncl = en ? [
+  'Labour by our own specialists, no subcontractors',
+  'Standard materials — plaster, primer, adhesives, fixings, consumables',
+  'Site protection, daily clean-down and waste removal',
+  'Project management and a named site foreman',
+  'Snagging and any corrections in the five days after handover',
+] : [
+  'Работа наших штатных специалистов, без субподряда',
+  'Стандартные материалы — штукатурка, грунт, клеи, крепёж, расходники',
+  'Защита объекта, ежедневная уборка и вывоз мусора',
+  'Ведение проекта и назначенный прораб',
+  'Приёмка и устранение замечаний в течение пяти дней после сдачи',
+];
+const priceExcl = en ? [
+  'Finishes you choose yourself — tiles, sanitary ware, flooring, kitchens. We fit anything you supply at no labour surcharge, or buy it at the trade price we pay.',
+  'Municipal permit fees, passed on at cost with the receipt.',
+  'Structural engineering where a wall is load-bearing — quoted separately once the survey is in.',
+  'Furniture, appliances and decorative lighting.',
+] : [
+  'Отделочные материалы вашего выбора — плитка, сантехника, полы, кухни. Монтируем всё, что вы купили, без наценки за работу, либо закупаем по своей цене поставщика.',
+  'Пошлины муниципалитета — передаём по факту с квитанцией.',
+  'Расчёт конструктива, если стена несущая, — считается отдельно после обследования.',
+  'Мебель, техника и декоративный свет.',
+];
+const priceDrivers = en ? [
+  { k: 'Condition',  v: 'Sound surfaces, or damp, cracks and old wiring that has to come out first.' },
+  { k: 'Level',      v: 'Standard, mid or premium specification — the same room can differ by half again.' },
+  { k: 'Access',     v: 'Ground floor with parking, or a fifth floor with no lift and a narrow stair.' },
+  { k: 'Occupied',   v: 'An empty property, or a home lived in throughout, worked room by room.' },
+  { k: 'Services',   v: 'Keeping the existing electrics and plumbing, or replacing both.' },
+  { k: 'Consents',   v: 'Cosmetic work, or layout changes that need municipal approval.' },
+] : [
+  { k: 'Состояние',  v: 'Крепкие поверхности — или сырость, трещины и старая проводка, которую сначала надо убрать.' },
+  { k: 'Уровень',    v: 'Базовый, стандарт или премиум — одно и то же помещение отличается в полтора раза.' },
+  { k: 'Доступ',     v: 'Первый этаж с парковкой — или пятый без лифта и с узкой лестницей.' },
+  { k: 'Проживание', v: 'Пустая квартира — или жилой дом, где работаем по помещениям.' },
+  { k: 'Инженерия',  v: 'Оставляем существующие электрику и сантехнику — или меняем обе.' },
+  { k: 'Согласования', v: 'Косметика — или перепланировка, которую надо согласовать с муниципалитетом.' },
+];
+const priceStages = en ? [
+  { n: '30%', t: 'On signing',            d: 'Start date locked, materials ordered.' },
+  { n: '30%', t: 'At structural stage',   d: 'Demolition, services and plastering complete.' },
+  { n: '30%', t: 'At second fix',         d: 'Tiling, flooring and joinery in place.' },
+  { n: '10%', t: 'After snagging',        d: 'Paid once the punch list is cleared, not before.' },
+] : [
+  { n: '30%', t: 'При подписании',   d: 'Дата старта зафиксирована, материалы заказаны.' },
+  { n: '30%', t: 'На конструктиве',  d: 'Демонтаж, инженерия и штукатурка закончены.' },
+  { n: '30%', t: 'На чистовой',      d: 'Плитка, полы и столярка на месте.' },
+  { n: '10%', t: 'После приёмки',    d: 'Платится, когда список замечаний закрыт, не раньше.' },
+];
+
+const c = en ? {
+  metaTitle: 'All Services — Renovation in Cyprus | Helyot',
+  metaDesc: (n: number) => `${n} renovation services in Limassol and across Cyprus — apartments, villas, offices, kitchens, bathrooms and specialist works. Fixed price, free site visit, 5-year warranty.`,
+  heroIndex: 'Renovation services', heroEyebrow: 'Limassol · Cyprus',
+  heroTitle: `Every trade. One firm. <em>Price fixed before we start.</em>`,
+  heroSub: (n: number) => `${n} services, from a full villa renovation to a single bathroom, delivered by 35 in-house specialists. One fixed-price contract, one project manager, a 5-year structural warranty on every job.`,
+  crumbHome: 'Home', crumbSelf: 'Services', homeHref: '/',
+  heroCta: (n: number) => `All ${n} services`, heroCta2: 'Free estimate',
+  mSvc: 'Services', mSpec: 'Specialists', mWar: 'Warranty', mWarVal: '5 yr',
+  popLabel: 'Most requested', popTitle: 'Where projects start', popHeadline: 'Three ways in.',
+  learnMore: 'Learn more', viewAll: 'Full catalogue',
+  dirLabel: 'Full catalogue', dirTitle: (n: number) => `${n} services, grouped by the kind of work.`,
+  dirSub: 'Every price is a starting point confirmed after a free site visit, and every timeline assumes our own team on site. Pick the closest match — we will tell you at the visit if a different one fits better.',
+  colWork: 'Service', colTime: 'Timeline', colFrom: 'From',
+  filterAll: 'all',
+  priceLabel: 'Pricing', priceTitle: 'What things start from',
+  priceNote: 'All prices include labour, standard materials and waste removal. Your fixed price is confirmed in writing after a free site visit.',
+  colService: 'Service', colFrom: 'From', colNote: 'Typical scope',
+  whyLabel: 'Why Helyot', whyTitle: 'What is different here',
+  whyProof: 'See it on finished projects',
+  whyProofNote: 'Four claims are easy to print. Every project below has the before shot next to the after one.',
+  locLabel: 'Coverage', locTitle: 'Where we work',
+  locSub: 'Based in Limassol, working across the government-controlled areas of the Republic of Cyprus. Every location below has its own page with local pricing and project examples.',
+  locCities: 'Cities', locDistricts: 'Limassol districts',
+  ctaLabel: 'Not sure where to start?', ctaTitle: `Tell us what you're planning. <em>We'll work out the rest.</em>`,
+  ctaSub: 'Free site visit · fixed quote in five days · no obligation until you sign',
+} : {
+  metaTitle: 'Все услуги — ремонт на Кипре | Helyot',
+  metaDesc: (n: number) => `${n} услуг по ремонту в Лимасоле и по всему Кипру — квартиры, виллы, офисы, кухни, санузлы и специальные работы. Фиксированная цена, бесплатный выезд, гарантия 5 лет.`,
+  heroIndex: 'Услуги по ремонту', heroEyebrow: 'Лимасол · Кипр',
+  heroTitle: `Все работы. Один подрядчик. <em>Цена фиксируется до старта.</em>`,
+  heroSub: (n: number) => `${n} услуг — от ремонта виллы под ключ до одного санузла — выполняют 35 штатных специалистов. Один договор с фиксированной ценой, один прораб, гарантия 5 лет на конструктив.`,
+  crumbHome: 'Главная', crumbSelf: 'Услуги', homeHref: '/ru',
+  heroCta: (n: number) => `Все ${n} услуг`, heroCta2: 'Бесплатная смета',
+  mSvc: 'Услуг', mSpec: 'Специалистов', mWar: 'Гарантия', mWarVal: '5 лет',
+  popLabel: 'Чаще всего', popTitle: 'С чего начинают', popHeadline: 'Три главных направления.',
+  learnMore: 'Подробнее', viewAll: 'Весь каталог',
+  dirLabel: 'Что мы делаем',
+  dirTitle: (_n: number) => `Найдите свою работу.`,
+  dirJump: 'Все услуги по типам работ',
+  dirNav: 'Перейти к разделу',
+  dirSub: 'Каждая цена — стартовая, точная сумма фиксируется после бесплатного выезда, и каждый срок указан при работе нашей бригадой. Выберите ближайшее — на выезде скажем, если подходит другое.',
+  colWork: 'Услуга', colTime: 'Срок', colFrom: 'От',
+  filterAll: 'все',
+  priceLabel: 'Цены', priceTitle: 'От чего стартуют цены',
+  priceInclKey: 'Входит в любую цену', priceExclKey: 'Считается отдельно',
+  priceDriversKey: 'Что двигает сумму', priceStagesKey: 'Как платится',
+  priceFig: 'Смета собирается по чертежу и замеру, а не по телефону.',
+  priceFoot: 'Стартовая цена — это нижняя граница по объекту в нормальном состоянии со стандартной отделкой. На выезде мы называем не «примерно столько же», а конкретную сумму по вашему объекту, и она уже не меняется.',
+  priceNote: 'Все цены включают работу, стандартные материалы и вывоз мусора. Ваша фиксированная цена подтверждается письменно после бесплатного выезда.',
+  colService: 'Услуга', colFrom: 'От', colNote: 'Типичный объём',
+  whyLabel: 'Почему Helyot', whyTitle: 'В чём здесь разница',
+  whyProof: 'Проверить на готовых объектах',
+  whyProofNote: 'Четыре обещания легко напечатать. У каждого проекта в галерее кадр «до» стоит рядом с кадром «после».',
+  locLabel: 'География', locTitle: 'Где мы работаем',
+  locSub: 'База в Лимасоле, работаем по подконтрольной правительству территории Республики Кипр. У каждой локации ниже есть своя страница с местными ценами и примерами проектов.',
+  locCities: 'Города', locDistricts: 'Районы Лимасола',
+  ctaLabel: 'Не знаете, с чего начать?', ctaTitle: `Расскажите, что задумали. <em>Остальное — наша забота.</em>`,
+  ctaSub: 'Бесплатный выезд · фиксированная смета за пять дней · без обязательств до подписания',
+};
+
+const byCategory = (key: string) => services.filter(s => s.category === key);
+const total = services.length;
+
+const listSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: c.metaTitle,
+  numberOfItems: total,
+  itemListElement: services.map((s, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Service',
+      name: en ? s.titleEn : s.titleRu,
+      description: en ? s.seoDescEn : s.seoDescRu,
+      url: `https://helyot.com${svcHref(s.slug)}`,
+      areaServed: { '@type': 'Country', name: 'Cyprus' },
+      provider: { '@type': 'LocalBusiness', name: 'Helyot' },
+    },
+  })),
+};
+---
+
+<BaseLayout lang={lang} title={c.metaTitle} description={c.metaDesc(total)}>
+<Header lang={lang}/>
+<script is:inline type="application/ld+json" set:html={JSON.stringify(listSchema)} />
+
+<main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+
+<CineHero
+  lang={lang}
+  photo="/images/projects/marina-penthouse.webp"
+  index={c.heroIndex}
+  eyebrow={c.heroEyebrow}
+  titleHtml={c.heroTitle}
+  subtitle={c.heroSub(total)}
+  breadcrumb={[{ label: c.crumbHome, href: c.homeHref }, { label: c.crumbSelf }]}
+  cta={{ label: c.heroCta(total), href: '#all-services' }}
+  ctaSecondary={{ label: c.heroCta2, href: '#booking' }}
+  meta={[
+    { label: c.mSvc,  value: String(total) },
+    { label: c.mSpec, value: '35' },
+    { label: c.mWar,  value: c.mWarVal },
+  ]}
+/>
+
+<!-- ══ FEATURED ════════════════════════════════════════════ -->
+<section class="sx-sec sx-sec--alt">
+  <div class="container-wide">
+    <div class="sx-head">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{c.popLabel}</span>{c.popTitle}</p>
+        <h2 class="cine-display sx-h2" data-words>{c.popHeadline}</h2>
+      </div>
+      <a href="#all-services" class="sx-link" data-reveal>{c.viewAll}</a>
+    </div>
+
+    <div class="sx-feat" data-stagger-group>
+      {featured.map(f => (
+        <a href={svcHref(f.slug)} class="sx-feat-item" data-stagger-item>
+          <span class="sx-feat-frame">
+            <img src={f.photo} alt={f.title} width="800" height="600" loading="lazy" decoding="async" />
+            <span class="sx-feat-tag">{f.tag}</span>
+          </span>
+          <span class="sx-feat-body">
+            <span class="sx-feat-top">
+              <span class="sx-feat-title">{f.title}</span>
+              <span class="sx-feat-price">{f.price}</span>
+            </span>
+            <span class="sx-feat-desc">{f.desc}</span>
+            <span class="sx-more">{c.learnMore}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ══ CATALOGUE ═══════════════════════════════════════════ -->
+<section id="all-services" class="sx-sec">
+  <div class="container-wide">
+    <div class="sx-cat-top">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{c.dirLabel}</span>{c.dirJump}</p>
+        <h2 class="cine-display sx-h2" data-words>{c.dirTitle(total)}</h2>
+      </div>
+      <p class="sx-sub" data-reveal>{c.dirSub}</p>
+    </div>
+
+    <nav class="sx-jump" aria-label={c.dirNav} data-reveal>
+      {categories.map(cat => (
+        <a href={`#cat-${cat.key}`}>
+          {cat.label}<i>{byCategory(cat.key).length}</i>
+        </a>
+      ))}
+    </nav>
+
+    {categories.map((cat, ci) => (
+      <div class="sx-group" id={`cat-${cat.key}`}>
+        <div class="sx-group-head">
+          <span class="sx-group-n" aria-hidden="true">{String(ci + 1).padStart(2, '0')}</span>
+          <div>
+            <h3 class="sx-group-title">{cat.label}</h3>
+            <p class="sx-group-desc">{cat.desc}</p>
+          </div>
+          <span class="sx-group-count">{byCategory(cat.key).length}</span>
+        </div>
+
+        <ul class="sx-cards">
+          {byCategory(cat.key).map(svc => (
+            <li>
+              <a href={svcHref(svc.slug)} class="sx-card">
+                <span class="sx-card-title">{en ? svc.titleEn : svc.titleRu}</span>
+                <span class="sx-card-sub">{en ? svc.heroSubEn : svc.heroSubRu}</span>
+                <span class="sx-card-foot">
+                  <span class="sx-card-price">{en ? svc.priceLabelEn : svc.priceLabelRu}</span>
+                  <span class="sx-card-time">{en ? svc.timelineEn : svc.timelineRu}</span>
+                  <svg class="sx-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<!-- ══ PRICES ══════════════════════════════════════════════ -->
+<section class="sx-sec sx-sec--alt">
+  <div class="container-wide">
+    <div class="sx-split">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{c.priceLabel}</span>{c.priceTitle}</p>
+        <h2 class="cine-display sx-h2" data-words>
+          {en ? <>Starting points, <em>not guesses.</em></> : <>Точка отсчёта, <em>а не догадки.</em></>}
+        </h2>
+        <p class="sx-lead" data-reveal>{c.priceNote}</p>
+      </div>
+
+      <div class="sx-tbl">
+        <div class="sx-tbl-head">
+          <span>{c.colService}</span><span>{c.colFrom}</span><span>{c.colNote}</span>
+        </div>
+        {prices.map(p => (
+          <div class="sx-tbl-row" data-reveal>
+            <p class="sx-tbl-svc">{p.service}</p>
+            <span class="sx-tbl-from">{p.from}<em>{p.unit}</em></span>
+            <p class="sx-tbl-note">{p.note}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="sx-price-detail">
+      <div class="sx-pd-panel sx-pd-panel--in" data-reveal>
+        <p class="sx-pd-key sx-pd-key--in">{c.priceInclKey}</p>
+        <ul class="sx-pd-list sx-pd-list--in">{priceIncl.map(x => <li>{x}</li>)}</ul>
+      </div>
+      <div class="sx-pd-panel" data-reveal>
+        <p class="sx-pd-key">{c.priceExclKey}</p>
+        <ul class="sx-pd-list">{priceExcl.map(x => <li>{x}</li>)}</ul>
+      </div>
+      <figure class="sx-pd-plate" data-reveal>
+        <img src="/images/blueprint.webp" alt="" width="800" height="450" loading="lazy" decoding="async" />
+        <figcaption>{c.priceFig}</figcaption>
+      </figure>
+    </div>
+
+    <div class="sx-pd-wide">
+      <div>
+        <p class="sx-pd-key" data-reveal>{c.priceDriversKey}</p>
+        <dl class="sx-drivers" data-stagger-group>
+          {priceDrivers.map((d, i) => (
+            <div data-stagger-item>
+              <dt><i aria-hidden="true">{String(i + 1).padStart(2, '0')}</i>{d.k}</dt>
+              <dd>{d.v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div class="sx-pay">
+        <p class="sx-pd-key" data-reveal>{c.priceStagesKey}</p>
+        <div class="sx-bar" data-reveal aria-hidden="true">
+          {priceStages.map(st => (
+            <span class="sx-bar-seg" style={`flex-grow:${parseInt(st.n)}`}><i>{st.n}</i></span>
+          ))}
+        </div>
+        <ol class="sx-stages" data-stagger-group>
+          {priceStages.map(st => (
+            <li data-stagger-item>
+              <span class="sx-stage-n">{st.n}</span>
+              <div><strong>{st.t}</strong><span>{st.d}</span></div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+
+    <p class="sx-pd-foot" data-reveal>{c.priceFoot}</p>
+  </div>
+
+</section>
+
+<!-- ══ WHY ═════════════════════════════════════════════════ -->
+<section class="sx-sec">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{c.whyLabel}</span>{c.whyTitle}</p>
+    <h2 class="cine-display sx-h2" data-words>
+      {en ? <>One firm, <em>accountable end to end.</em></> : <>Один подрядчик, <em>отвечающий за всё.</em></>}
+    </h2>
+    <div class="sx-why" data-stagger-group>
+      {why.map(w => (
+        <div class="sx-why-item" data-stagger-item>
+          <span class="sx-why-n" aria-hidden="true">{w.n}</span>
+          <h3>{w.title}</h3>
+          <p>{w.body}</p>
+        </div>
+      ))}
+    </div>
+
+    <!-- Proof. The four claims above are assertions; this is where a visitor
+         goes to check them against finished work. -->
+    <div class="sx-why-proof" data-reveal>
+      <p class="sx-why-proof-note">{c.whyProofNote}</p>
+      <a href={en ? '/en/gallery' : '/ru/gallery'} class="sx-proof-btn">
+        {c.whyProof}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ COVERAGE ════════════════════════════════════════════
+     The location links used to sit in the footer as a raw name dump on
+     every page. They belong here, on the page about what we do and where. -->
+<section id="coverage" class="sx-sec sx-sec--alt">
+  <div class="container-wide">
+    <div class="sx-split">
+      <div>
+        <p class="cine-label" data-reveal><span class="cine-label__index">{c.locLabel}</span>{c.locTitle}</p>
+        <h2 class="cine-display sx-h2" data-words>
+          {en ? <>Limassol first. <em>The island after.</em></> : <>Сначала Лимасол. <em>Дальше — остров.</em></>}
+        </h2>
+        <p class="sx-lead" data-reveal>{c.locSub}</p>
+      </div>
+
+      <div class="sx-loc">
+        <p class="sx-loc-key">{c.locCities}</p>
+        <div class="sx-loc-grid" data-reveal>
+          {locations.filter(l => l.type === 'city').map(l => (
+            <a href={hubHref(l.slug)}>{en ? l.nameEn : l.nameRu}</a>
+          ))}
+        </div>
+        <p class="sx-loc-key">{c.locDistricts}</p>
+        <div class="sx-loc-grid" data-reveal>
+          {locations.filter(l => l.type === 'district').map(l => (
+            <a href={hubHref(l.slug)}>{en ? l.nameEn : l.nameRu}</a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ═════════════════════════════════════════════════ -->
+<section class="sx-sec sx-cta-sec">
+  <div class="container-wide sx-cta">
+    <p class="cine-label" data-reveal><span class="cine-label__index">{c.ctaLabel}</span>{c.heroCta2}</p>
+    <h2 class="cine-display sx-h2" set:html={c.ctaTitle} data-words />
+    <p class="sx-sub" data-reveal>{c.ctaSub}</p>
+  </div>
+  <BookingForm lang={lang}/>
+</section>
+
+</main>
+<Footer lang={lang}/><CookieConsent lang={lang}/><FloatingContactBar lang={lang}/>
+</BaseLayout>
+
+<style>
+.sx-sec {
+  padding: 6rem 0;
+  background: #08080E;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.sx-sec--alt { background: #06060A; }
+.sx-h2 { margin: 1.1rem 0 0; font-size: clamp(1.7rem, 3.4vw, 2.7rem); }
+.sx-sub { font-size: 0.9rem; line-height: 1.8; color: #9DA0B8; max-width: 62ch; margin: 1.2rem 0 0; }
+.sx-lead { font-size: 0.9rem; line-height: 1.8; color: #9DA0B8; max-width: 46ch; margin: 1.4rem 0 0; }
+.sx-split { display: grid; grid-template-columns: 1fr 1.35fr; gap: 3.5rem; align-items: start; }
+
+.sx-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap; margin-bottom: 2.8rem;
+}
+.sx-link {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; color: #E8B86D;
+  text-decoration: none; border-bottom: 1px solid rgba(232,184,109,.35);
+  padding-bottom: .2rem; white-space: nowrap; transition: border-color .2s;
+}
+.sx-link:hover { border-color: #E8B86D; }
+.sx-more {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; text-transform: lowercase; color: #E8B86D;
+}
+.sx-more svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+
+/* ── Featured ───────────────────────────────────────────── */
+.sx-feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.2rem; }
+.sx-feat-item { display: block; text-decoration: none; }
+.sx-feat-frame {
+  position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden;
+  border-radius: 4px; border: 1px solid rgba(255,255,255,.08);
+}
+.sx-feat-frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .7s cubic-bezier(.16,1,.3,1);
+}
+.sx-feat-item:hover .sx-feat-frame img { transform: scale(1.04); }
+.sx-feat-item:hover .sx-more svg { transform: translateX(3px); }
+.sx-feat-tag {
+  position: absolute; top: .8rem; left: .8rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; letter-spacing: .1em; text-transform: lowercase;
+  padding: .22rem .7rem; border-radius: 3px;
+  background: rgba(8,8,14,.72); border: 1px solid rgba(232,184,109,.3);
+  color: #E8B86D; backdrop-filter: blur(6px);
+}
+.sx-feat-body { display: flex; flex-direction: column; gap: .55rem; padding-top: 1.1rem; }
+.sx-feat-top { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.sx-feat-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.15rem;
+  color: #F0F0F6; line-height: 1.3; transition: color .2s;
+}
+.sx-feat-item:hover .sx-feat-title { color: #E8B86D; }
+.sx-feat-price {
+  font-family: 'Spectral', Georgia, serif; font-size: .95rem;
+  color: #9DA0B8; white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.sx-feat-desc { font-size: 0.84rem; color: #8288A5; line-height: 1.7; max-width: 48ch; }
+
+/* ── Filter ─────────────────────────────────────────────── */
+.sx-filter { display: flex; flex-wrap: wrap; gap: .5rem; margin: 2.2rem 0 3.4rem; }
+.sx-tab {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; letter-spacing: .02em;
+  padding: .45rem 1.1rem; border-radius: 4px;
+  border: 1px solid rgba(255,255,255,.1); background: transparent;
+  color: #8288A5; cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.sx-tab:hover { color: #B8B8CC; border-color: rgba(255,255,255,.2); }
+.sx-tab.on { color: #E8B86D; border-color: #E8B86D; }
+
+/* ── Catalogue ──────────────────────────────────────────── */
+.sx-cat-top {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+  align-items: end; margin-bottom: 2rem;
+}
+.sx-cat-top .sx-sub { margin: 0; }
+
+.sx-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem 3.5rem; }
+.sx-cat { min-width: 0; }
+.sx-cat-head {
+  display: flex; align-items: baseline; gap: .9rem;
+  padding-bottom: .7rem; border-bottom: 1px solid rgba(232,184,109,.3);
+}
+.sx-cat-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.3rem;
+  color: rgba(232,184,109,.5); line-height: 1;
+}
+.sx-cat-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.2rem;
+  color: #F0F0F6; margin: 0;
+}
+.sx-cat-count {
+  margin-left: auto; font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.84rem; color: #8288A5;
+}
+.sx-cat-desc { font-size: .84rem; line-height: 1.6; color: #8288A5; margin: .7rem 0 .3rem; max-width: 46ch; }
+
+.sx-rows { list-style: none; margin: 0; padding: 0; }
+.sx-row {
+  display: grid; grid-template-columns: 1fr auto 1rem;
+  gap: .9rem; align-items: center;
+  padding: .8rem .2rem; text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  transition: padding-left .22s ease;
+}
+.sx-row:hover { padding-left: .5rem; }
+.sx-row-main { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.sx-row-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.02rem;
+  color: #E4E4F0; transition: color .18s;
+}
+.sx-row:hover .sx-row-title { color: #E8B86D; }
+.sx-row-time { font-size: 0.78rem; color: #8288A5; }
+.sx-row-price {
+  font-family: 'Spectral', Georgia, serif; font-size: .95rem; color: #B8B8CC;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.sx-row-arrow { color: #8288A5; transition: color .18s, transform .22s cubic-bezier(.16,1,.3,1); }
+.sx-row:hover .sx-row-arrow { color: #E8B86D; transform: translateX(3px); }
+
+/* ── Price table ────────────────────────────────────────── */
+.sx-tbl { border: 1px solid rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
+.sx-tbl-head, .sx-tbl-row {
+  display: grid; grid-template-columns: 1fr 8rem 1fr; gap: 1.5rem;
+  padding: .95rem 1.4rem; align-items: baseline;
+}
+.sx-tbl-head { background: rgba(255,255,255,.03); border-bottom: 1px solid rgba(255,255,255,.08); }
+.sx-tbl-head span {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .66rem; text-transform: lowercase; letter-spacing: .05em; color: #8288A5;
+}
+.sx-tbl-row + .sx-tbl-row { border-top: 1px solid rgba(255,255,255,.05); }
+.sx-tbl-row:hover { background: rgba(255,255,255,.02); }
+.sx-tbl-svc { font-size: 0.84rem; color: #B8B8CC; margin: 0; }
+.sx-tbl-from {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.02rem; color: #E8B86D;
+  font-variant-numeric: tabular-nums;
+}
+.sx-tbl-from em { font-style: normal; font-size: .72rem; color: #8288A5; margin-left: .2rem; }
+.sx-tbl-note { font-size: 0.78rem; line-height: 1.6; color: #8288A5; margin: 0; }
+
+/* ── Why ────────────────────────────────────────────────── */
+.sx-why-proof {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap;
+  margin-top: 3rem; padding-top: 1.8rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.sx-why-proof-note {
+  margin: 0; max-width: 46ch;
+  font-size: .95rem; line-height: 1.65; color: #9DA0B8;
+}
+.sx-proof-btn {
+  display: inline-flex; align-items: center; gap: .55rem; flex: none;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .95rem; text-transform: lowercase;
+  color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px;
+  padding: .7rem 1.4rem;
+  transition: background .2s ease, color .2s ease;
+}
+.sx-proof-btn svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.sx-proof-btn:hover { background: rgba(232,184,109,.08); color: #F3D5A0; }
+.sx-proof-btn:hover svg { transform: translateX(3px); }
+@media (max-width: 640px) {
+  .sx-why-proof { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+  .sx-proof-btn { width: 100%; justify-content: center; }
+}
+
+.sx-why { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 2.6rem; margin-top: 3rem; }
+.sx-why-item { padding-top: 1.6rem; border-top: 1px solid rgba(255,255,255,.1); }
+.sx-why-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.6rem;
+  color: rgba(232,184,109,.4); display: block; margin-bottom: .9rem;
+}
+.sx-why-item h3 {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.02rem;
+  color: #F0F0F6; margin: 0 0 .55rem;
+}
+.sx-why-item p { font-size: 0.84rem; line-height: 1.7; color: #8288A5; margin: 0; }
+
+/* ── Coverage ───────────────────────────────────────────── */
+.sx-loc-key {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; text-transform: lowercase; letter-spacing: .05em;
+  color: #8288A5; margin: 0 0 .7rem;
+}
+.sx-loc-key + .sx-loc-grid { margin-bottom: 2rem; }
+.sx-loc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.sx-loc-grid a {
+  padding: .7rem .2rem; font-size: 0.9rem; color: #B8B8CC; text-decoration: none;
+  border-top: 1px solid rgba(255,255,255,.07); transition: color .15s;
+}
+.sx-loc-grid a:hover { color: #E8B86D; }
+
+/* ── CTA ────────────────────────────────────────────────── */
+.sx-cta-sec { padding-bottom: 0; }
+.sx-cta { max-width: 46rem; margin-bottom: 3.5rem; }
+
+@media (max-width: 1000px) {
+  .sx-split { grid-template-columns: 1fr; gap: 2.2rem; }
+  .sx-lead { max-width: none; }
+  .sx-feat { grid-template-columns: 1fr; gap: 2rem; }
+  .sx-why { grid-template-columns: repeat(2, 1fr); gap: 0 2rem; }
+  .sx-cat-top { grid-template-columns: 1fr; gap: 1.2rem; }
+  .sx-cats { grid-template-columns: 1fr; gap: 2.4rem; }
+  .sx-row { grid-template-columns: 1fr auto; }
+  .sx-row-arrow { display: none; }
+  .sx-tbl-head { display: none; }
+  .sx-tbl-row { grid-template-columns: 1fr auto; gap: .3rem 1rem; }
+  .sx-tbl-note { grid-column: 1 / -1; }
+  .sx-loc-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .sx-sec { padding: 3.5rem 0; }
+  .sx-why { grid-template-columns: 1fr; }
+  .sx-loc-grid { grid-template-columns: 1fr; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .sx-feat-tag { font-size: 0.72rem; }
+  .sx-loc-key { font-size: 0.78rem; }
+  .sx-tbl-head span { font-size: 0.72rem; }
+}
+
+/* ══ CATALOGUE ═══════════════════════════════════════════════════════════════
+   The markup here used to be a search-and-filter "explorer": a rail, a search
+   box and a results pane. None of it was ever styled and no script was ever
+   written, so in the browser it was an 7,789px column of unstyled list items
+   with a white search field sitting on a dark page. Twenty-one services in
+   four groups are perfectly scannable without any of that, so this is a plain
+   catalogue: jump links, four groups, a card per service carrying the two
+   facts a visitor is actually choosing on — what it starts from and how long
+   it takes. No JavaScript, nothing to go stale. */
+
+.sx-jump {
+  display: flex; flex-wrap: wrap; gap: .6rem;
+  margin: 0 0 3.4rem; padding-bottom: 1.6rem;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+.sx-jump a {
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .92rem; color: #B8B8CC; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.12); border-radius: 4px;
+  padding: .55rem 1rem;
+  transition: border-color .25s ease, color .25s ease, background .25s ease;
+}
+.sx-jump a i {
+  font-style: normal; font-family: 'Spectral', Georgia, serif;
+  font-size: .85rem; color: rgba(232,184,109,.75); font-variant-numeric: tabular-nums;
+}
+.sx-jump a:hover { color: #F0F0F6; border-color: rgba(232,184,109,.45); background: rgba(232,184,109,.06); }
+
+.sx-group { margin-bottom: 4.2rem; scroll-margin-top: 6rem; }
+.sx-group:last-of-type { margin-bottom: 0; }
+.sx-group-head {
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 0 1.2rem; align-items: baseline;
+  padding-bottom: 1.3rem; margin-bottom: 1.8rem;
+  border-bottom: 1px solid rgba(232,184,109,.28);
+}
+.sx-group-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.6rem;
+  line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(232,184,109,.5);
+  font-variant-numeric: tabular-nums;
+}
+.sx-group-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem); color: #F0F0F6;
+  margin: 0 0 .35rem; line-height: 1.2;
+}
+.sx-group-desc { margin: 0; font-size: .95rem; line-height: 1.6; color: #8288A5; }
+.sx-group-count {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.1rem;
+  color: rgba(232,184,109,.7); font-variant-numeric: tabular-nums;
+}
+
+.sx-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+.sx-card {
+  display: flex; flex-direction: column; height: 100%;
+  padding: 1.4rem 1.4rem 1.2rem;
+  text-decoration: none;
+  background: #0E0E1A;
+  border: 1px solid rgba(255,255,255,.08); border-radius: 4px;
+  transition: border-color .3s ease, transform .3s cubic-bezier(.22,1,.36,1), background .3s ease;
+}
+.sx-card:hover {
+  border-color: rgba(232,184,109,.42); background: #12121F; transform: translateY(-3px);
+}
+.sx-card-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.16rem;
+  color: #F0F0F6; line-height: 1.25; margin-bottom: .5rem;
+  transition: color .2s ease;
+}
+.sx-card:hover .sx-card-title { color: #E8B86D; }
+.sx-card-sub { font-size: .9rem; line-height: 1.6; color: #8288A5; margin-bottom: 1.3rem; }
+.sx-card-foot {
+  display: grid; grid-template-columns: auto 1fr auto; gap: .4rem .9rem; align-items: baseline;
+  margin-top: auto; padding-top: .9rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.sx-card-price {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.05rem; color: #E8B86D;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.sx-card-time {
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .76rem;
+  color: #8288A5; text-transform: lowercase; line-height: 1.4;
+}
+.sx-card-arrow { color: rgba(232,184,109,.45); align-self: center; transition: transform .25s cubic-bezier(.22,1,.36,1), color .2s ease; }
+.sx-card:hover .sx-card-arrow { color: #E8B86D; transform: translateX(3px); }
+
+@media (max-width: 1000px) { .sx-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) {
+  .sx-cards { grid-template-columns: 1fr; }
+  .sx-group { margin-bottom: 3rem; }
+  .sx-jump { margin-bottom: 2.4rem; }
+}
+@media (prefers-reduced-motion: reduce) { .sx-card:hover { transform: none; } }
+
+
+/* ── Pricing detail ─────────────────────────────────────────────────────────
+   Three hundred words of bullet lists is a wall however true it is. The parts
+   that carry weight are now objects: the two lists sit in framed panels that
+   read as a pair, the payment split is drawn to scale from its own numbers
+   (30/30/30/10 as flex-grow, so the bar cannot drift from the copy beside it),
+   and the drawing anchors the section — it is the one photograph we own that
+   is literally about how a quote gets built. */
+
+.sx-price-detail {
+  display: grid; grid-template-columns: 1fr 1fr .82fr; gap: 1.6rem;
+  margin-top: 3.4rem; align-items: stretch;
+}
+.sx-pd-panel {
+  padding: 1.7rem 1.6rem;
+  background: #0E0E1A;
+  border: 1px solid rgba(255,255,255,.08); border-radius: 4px;
+}
+.sx-pd-panel--in { border-color: rgba(232,184,109,.3); background: #12121F; }
+.sx-pd-key {
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .76rem;
+  letter-spacing: .16em; text-transform: uppercase; color: #8288A5;
+  margin: 0 0 1.1rem; padding-bottom: .8rem;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.sx-pd-key--in { color: #E8B86D; border-bottom-color: rgba(232,184,109,.35); }
+.sx-pd-list { list-style: none; margin: 0; padding: 0; }
+.sx-pd-list li {
+  position: relative; padding-left: 1.4rem; margin-bottom: .85rem;
+  font-size: .93rem; line-height: 1.64; color: #9DA0B8;
+}
+.sx-pd-list li:last-child { margin-bottom: 0; }
+.sx-pd-list li::before {
+  content: ''; position: absolute; left: 0; top: .78em;
+  width: .6rem; height: 1px; background: #8288A5;
+}
+.sx-pd-list--in li::before {
+  top: .62em; width: .5rem; height: .5rem; border-radius: 50%; background: #E8B86D;
+}
+
+.sx-pd-plate { margin: 0; display: flex; flex-direction: column; }
+.sx-pd-plate img {
+  width: 100%; flex: 1 1 auto; min-height: 0; object-fit: cover;
+  border-radius: 4px; border: 1px solid rgba(255,255,255,.08);
+  filter: saturate(.75) brightness(.72) contrast(1.05);
+}
+.sx-pd-plate figcaption {
+  margin-top: .9rem; padding-left: 1rem;
+  border-left: 2px solid rgba(232,184,109,.5);
+  font-family: 'Spectral', Georgia, serif; font-size: .95rem; line-height: 1.5;
+  color: #B8B8CC;
+}
+
+.sx-pd-wide { display: grid; grid-template-columns: 1.1fr .9fr; gap: 3rem; margin-top: 3.4rem; }
+.sx-drivers { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; }
+.sx-drivers > div { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.09); }
+.sx-drivers dt {
+  display: flex; align-items: baseline; gap: .6rem;
+  font-family: 'Spectral', Georgia, serif; font-size: 1.04rem; color: #F0F0F6; margin-bottom: .35rem;
+}
+.sx-drivers dt i {
+  font-style: normal; font-size: .8rem; color: rgba(232,184,109,.65);
+  font-variant-numeric: tabular-nums;
+}
+.sx-drivers dd { margin: 0; font-size: .9rem; line-height: 1.6; color: #8288A5; }
+
+/* Payment split, drawn from the same numbers as the list below it. */
+.sx-bar { display: flex; gap: 3px; height: 3.1rem; margin-bottom: 1.6rem; }
+.sx-bar-seg {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  flex-basis: 0; border-radius: 3px;
+  background: rgba(232,184,109,.14);
+  border: 1px solid rgba(232,184,109,.32);
+}
+.sx-bar-seg:last-child { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.14); }
+.sx-bar-seg i {
+  font-style: normal; font-family: 'Spectral', Georgia, serif; font-size: 1rem;
+  color: #E8B86D; font-variant-numeric: tabular-nums;
+}
+.sx-bar-seg:last-child i { color: #8288A5; }
+
+.sx-stages { list-style: none; margin: 0; padding: 0; }
+.sx-stages li {
+  display: grid; grid-template-columns: 3.2rem 1fr; gap: 0 1rem; align-items: baseline;
+  padding: .9rem 0; border-top: 1px solid rgba(255,255,255,.08);
+}
+.sx-stages li:first-child { border-top: 0; padding-top: 0; }
+.sx-stage-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.35rem;
+  color: #E8B86D; font-variant-numeric: tabular-nums; line-height: 1;
+}
+.sx-stages strong {
+  display: block; font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: 1rem; color: #F0F0F6; margin-bottom: .2rem;
+}
+.sx-stages span { font-size: .88rem; line-height: 1.55; color: #8288A5; }
+
+.sx-pd-foot {
+  margin: 3rem 0 0; padding-top: 1.6rem; max-width: 78ch;
+  border-top: 1px solid rgba(232,184,109,.28);
+  font-size: 1rem; line-height: 1.75; color: #B8B8CC;
+}
+
+@media (max-width: 1100px) {
+  .sx-price-detail { grid-template-columns: 1fr 1fr; }
+  .sx-pd-plate { grid-column: 1 / -1; }
+  .sx-pd-plate img { aspect-ratio: 21 / 9; flex: none; }
+}
+@media (max-width: 900px) {
+  .sx-price-detail, .sx-pd-wide { grid-template-columns: 1fr; gap: 2.2rem; }
+  .sx-drivers { grid-template-columns: 1fr; }
+  .sx-bar { height: 2.6rem; }
+}
+
+</style>
+
+<script is:inline>
+(function () {
+  var tabs = document.querySelectorAll('.sx-tab');
+  var cats = document.querySelectorAll('.sx-cat');
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('on'); });
+      tab.classList.add('on');
+      var key = tab.dataset.cat;
+      cats.forEach(function (sec) {
+        sec.style.display = (key === 'all' || sec.dataset.section === key) ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>

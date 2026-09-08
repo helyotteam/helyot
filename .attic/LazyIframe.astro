@@ -1,0 +1,71 @@
+---
+interface Props {
+  src: string;
+  title: string;
+  width?: number;
+  height?: number;
+  placeholder?: string;
+  class?: string;
+}
+const { src, title, width = 600, height = 450, placeholder, class: className = '' } = Astro.props;
+const id = `iframe-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  class={`lazy-iframe-wrapper relative overflow-hidden bg-gray-100 ${className}`}
+  style={`aspect-ratio: ${width}/${height}`}
+  data-src={src}
+  data-iframe-id={id}
+>
+  <div class="lazy-iframe-placeholder absolute inset-0 flex items-center justify-center">
+    {placeholder
+      ? <img src={placeholder} alt={title} class="w-full h-full object-cover" loading="lazy" />
+      : <div class="text-center text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+          </svg>
+          <button
+            class="load-iframe-btn mt-2 text-sm text-brand-600 underline underline-offset-2 hover:no-underline"
+            data-target={id}
+          >Load map</button>
+        </div>
+    }
+  </div>
+  <iframe
+    id={id}
+    title={title}
+    width={width}
+    height={height}
+    style="display:none;width:100%;height:100%;border:0"
+    allowfullscreen
+    loading="lazy"
+  ></iframe>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLDivElement>('.lazy-iframe-wrapper').forEach((wrapper) => {
+    const src = wrapper.dataset.src;
+    const iframeId = wrapper.dataset.iframeId;
+    const iframe = document.getElementById(iframeId!) as HTMLIFrameElement | null;
+    const placeholder = wrapper.querySelector('.lazy-iframe-placeholder') as HTMLElement | null;
+
+    function loadIframe() {
+      if (!iframe || iframe.src) return;
+      iframe.src = src!;
+      iframe.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+    }
+
+    // Load on click of placeholder button
+    wrapper.querySelector('.load-iframe-btn')?.addEventListener('click', loadIframe);
+
+    // Intersection Observer — load when in view
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadIframe();
+        observer.disconnect();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(wrapper);
+  });
+</script>

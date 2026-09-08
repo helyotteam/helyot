@@ -1,0 +1,74 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+---
+
+<section id="payback" class="py-24 bg-gray-950/70">
+  <div class="container-wide max-w-3xl">
+    <div class="text-center mb-12 reveal">
+      <span class="section-eyebrow">ROI</span>
+      <h2 class="section-title">{tr('payback.title')}</h2>
+      <p class="section-subtitle mx-auto">{tr('payback.sub')}</p>
+    </div>
+
+    <div class="glass-card p-8 reveal" style="animation-delay: 0.1s">
+      <div class="grid sm:grid-cols-3 gap-6 mb-8">
+        <div>
+          <label for="pb-cost" class="form-label">{tr('payback.cost')}</label>
+          <input id="pb-cost" type="number" min="1000" max="500000" value="25000"
+            class="form-input glass-input" />
+        </div>
+        <div>
+          <label for="pb-rent" class="form-label">{tr('payback.rent')}</label>
+          <input id="pb-rent" type="number" min="100" max="20000" value="1500"
+            class="form-input glass-input" />
+        </div>
+        <div>
+          <label for="pb-increase" class="form-label">{tr('payback.increase')}</label>
+          <input id="pb-increase" type="number" min="0" max="100" value="25"
+            class="form-input glass-input" />
+        </div>
+      </div>
+
+      <button id="pb-calc" class="btn-primary w-full justify-center mb-6">
+        {lang === 'en' ? 'Calculate Payback' : 'Рассчитать окупаемость'}
+      </button>
+
+      <div id="pb-result" class="hidden glass-card-accent rounded-[4px] p-6 text-center">
+        <p class="text-gray-400 text-sm mb-1">{tr('payback.result')}</p>
+        <p id="pb-months" class="text-5xl font-display font-semibold text-gradient">—</p>
+        <p class="text-gray-400 text-sm mt-1">{tr('payback.months')}</p>
+        <div class="grid grid-cols-2 gap-4 mt-5">
+          <div class="glass-card-sm rounded-[4px] p-3">
+            <p class="text-xs text-gray-500 mb-0.5">{lang === 'en' ? 'Monthly gain' : 'Прирост аренды'}</p>
+            <p id="pb-monthly" class="text-lg font-semibold text-white">€0</p>
+          </div>
+          <div class="glass-card-sm rounded-[4px] p-3">
+            <p class="text-xs text-gray-500 mb-0.5">{lang === 'en' ? 'Annual ROI' : 'Годовая рентабельность'}</p>
+            <p id="pb-roi" class="text-lg font-semibold text-white">0%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.getElementById('pb-calc')?.addEventListener('click', () => {
+    const cost     = parseFloat((document.getElementById('pb-cost') as HTMLInputElement).value) || 0;
+    const rent     = parseFloat((document.getElementById('pb-rent') as HTMLInputElement).value) || 0;
+    const increase = parseFloat((document.getElementById('pb-increase') as HTMLInputElement).value) || 0;
+
+    const monthlyGain = rent * (increase / 100);
+    const months      = monthlyGain > 0 ? Math.ceil(cost / monthlyGain) : 0;
+    const roi         = monthlyGain > 0 ? ((monthlyGain * 12 / cost) * 100).toFixed(1) : '0';
+
+    const el = document.getElementById('pb-result');
+    el?.classList.remove('hidden');
+    document.getElementById('pb-months')!.textContent = months > 0 ? String(months) : '∞';
+    document.getElementById('pb-monthly')!.textContent = `€${monthlyGain.toFixed(0)}`;
+    document.getElementById('pb-roi')!.textContent = `${roi}%`;
+  });
+</script>

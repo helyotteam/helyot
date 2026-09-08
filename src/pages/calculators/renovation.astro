@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import CineHero from '../../components/shared/CineHero.astro';
+import EstimateCalculator from '../../components/sections/EstimateCalculator.astro';
+import BookingForm from '../../components/sections/BookingForm.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+import FloatingContactBar from '../../components/ui/FloatingContactBar.astro';
+
+const lang = 'en';
+---
+
+<BaseLayout lang={lang}
+  title="Renovation Cost Calculator — Cyprus | Helyot"
+  description="Estimate a renovation in Cyprus by property type, area, finish level and number of wet rooms. Breakdown, timeline and payment stages included.">
+  <Header lang={lang} />
+  <main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+    <CineHero
+      lang={lang}
+      compact={true}
+      index="Budget planner"
+      eyebrow="Calculator"
+      titleHtml={`Work out the budget <em>before you call.</em>`}
+      subtitle="Built from the same rates we quote from, and shown as a range because that is what an estimate is. The fixed price is set in writing after a free site visit."
+      breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Calculator' }]}
+    />
+    <EstimateCalculator lang={lang} />
+    <BookingForm lang={lang} />
+  </main>
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+  <FloatingContactBar lang={lang} />
+</BaseLayout>

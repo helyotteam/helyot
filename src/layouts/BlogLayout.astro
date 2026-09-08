@@ -1,0 +1,87 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { t, getLangFromUrl, type Lang } from '../i18n/ui';
+
+interface Props {
+  title:         string;
+  description?:  string;
+  publishedDate: string;
+  ogImage?:      string;
+  slug:          string;
+  lang?:         Lang;
+  minuteRead?:   number;
+  tags?:         string[];
+  author?:       string;
+  faq?:          { q: string; a: string }[];
+}
+
+const {
+  title, description, publishedDate, ogImage,
+  slug, lang: langProp, minuteRead, tags = [], author, faq = [],
+} = Astro.props;
+
+const lang: Lang = langProp ?? getLangFromUrl(Astro.url);
+// AMP mirror pages are only generated for the English blog collection
+
+const base = lang === 'en' ? 'https://helyot.com/en/blog' : 'https://helyot.com/ru/blog';
+
+/* Articles shipped Article + Organization and nothing else, while every
+   service page carried breadcrumbs. Search engines had no hierarchy for 43
+   pages. */
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: lang === 'en' ? 'Home' : 'Главная',
+      item: lang === 'en' ? 'https://helyot.com/' : 'https://helyot.com/ru' },
+    { '@type': 'ListItem', position: 2, name: lang === 'en' ? 'Journal' : 'Журнал', item: base },
+    { '@type': 'ListItem', position: 3, name: title, item: `${base}/${slug}` },
+  ],
+};
+
+/* Twelve articles already carry a real question-and-answer section. None of it
+   was labelled, so none of it could be quoted as an answer. */
+const faqSchema = faq.length ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map(f => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+} : null;
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type':    'Article',
+  headline:   title,
+  description,
+  datePublished: publishedDate,
+  image:      ogImage,
+  author:     { '@type': 'Organization', name: t(lang, 'site.name') },
+  publisher:  {
+    '@type':  'Organization',
+    name:     t(lang, 'site.name'),
+    logo:     { '@type': 'ImageObject', url: 'https://helyot.com/icons/icon-192x192.png' },
+  },
+  ...(minuteRead ? { timeRequired: `PT${minuteRead}M` } : {}),
+};
+
+const schemas = [articleSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])];
+---
+
+<BaseLayout
+  lang={lang}
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  ogType="article"
+  schema={schemas}
+>
+  <Fragment slot="head">
+    <meta property="article:published_time" content={publishedDate} />
+    {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+  </Fragment>
+
+  <slot />
+</BaseLayout>

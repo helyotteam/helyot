@@ -1,0 +1,208 @@
+---
+import { t, getLangFromUrl, getAlternatePath, locales, type Lang } from '../i18n/ui';
+import '../styles/global.css';
+import '../styles/glass.css';
+
+interface Props {
+  title?:       string;
+  description?: string;
+  ogImage?:     string;
+  ogType?:      'website' | 'article';
+  canonical?:   string;
+  lang?:        Lang;
+  noindex?:     boolean;
+  schema?:      object;
+  theme?:       'light' | 'dark';
+}
+
+const {
+  title,
+  description,
+  ogImage      = '/images/og/og-default.jpg',
+  ogType       = 'website',
+  canonical: canonicalProp,
+  lang:      langProp,
+  noindex    = false,
+  schema,
+  theme,
+} = Astro.props;
+
+const lang: Lang    = langProp ?? getLangFromUrl(Astro.url);
+const siteBase      = Astro.site?.href.replace(/\/$/, '') ?? 'https://helyot.com';
+const canonical     = canonicalProp ?? Astro.url.href.split('?')[0].replace(/\/$/, '');
+const _siteName     = t(lang, 'site.name');
+/* The brand suffix costs nine characters. Sixty-three titles were running past
+   the ~60 the SERP shows, so it is appended only when the result still fits;
+   a truncated title helps nobody, and the brand is on the page anyway. */
+const _withBrand    = title && !title.includes(_siteName) ? `${title} | ${_siteName}` : title;
+const pageTitle     = title
+  ? (_withBrand && _withBrand.length <= 60 ? _withBrand : title)
+  : t(lang, 'site.tagline');
+const pageDesc      = description ?? t(lang, 'site.description');
+const ogImageAbs    = ogImage.startsWith('http') ? ogImage : `${siteBase}/${ogImage.replace(/^\//, '')}`;
+const alternateLang: Lang = lang === 'en' ? 'ru' : 'en';
+const alternatePath = getAlternatePath(Astro.url, alternateLang);
+const currentPath   = getAlternatePath(Astro.url, lang);
+const alternateHref = `${siteBase}${alternatePath}`;
+const currentHref   = `${siteBase}${currentPath}`;
+
+/* Blog posts are different articles per language, not translations, so
+   getAlternatePath sends them to the other language's index. Annotating that
+   as an alternate is worse than omitting it: the pair is not reciprocal, and
+   Google discards non-reciprocal hreflang wholesale. */
+const hasTranslation = getAlternatePath(new URL(alternatePath, Astro.url), lang) === currentPath;
+
+/* x-default is the page to serve when no declared language matches. That is
+   the English version of THIS page — not the homepage, which is what every
+   one of the 377 pages used to point at. */
+const defaultHref = `${siteBase}${lang === 'en' ? currentPath : alternatePath}`;
+
+/* GA4 — set PUBLIC_GA_ID in the deploy env (e.g. Netlify). Empty/placeholder
+   means analytics never loads, so no broken request to a fake property. */
+const rawGaId = import.meta.env.PUBLIC_GA_ID ?? '';
+const GA_ID   = /^G-[A-Z0-9]{6,}$/.test(rawGaId) ? rawGaId : '';
+---
+
+<!doctype html>
+<html lang={lang} dir="ltr" data-theme={theme ?? 'dark'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDesc} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+
+    <link rel="canonical" href={canonical} />
+    {!noindex && (
+      <>
+        <link rel="alternate" hreflang={locales[lang].hreflang}          href={currentHref} />
+        {hasTranslation && (
+          <link rel="alternate" hreflang={locales[alternateLang].hreflang} href={alternateHref} />
+        )}
+        <link rel="alternate" hreflang="x-default"                        href={defaultHref} />
+      </>
+    )}
+
+    <!-- Open Graph -->
+    <meta property="og:type"               content={ogType} />
+    <meta property="og:title"              content={pageTitle} />
+    <meta property="og:description"        content={pageDesc} />
+    <meta property="og:image"              content={ogImageAbs} />
+    <meta property="og:image:width"        content="1200" />
+    <meta property="og:image:height"       content="630" />
+    <meta property="og:url"                content={canonical} />
+    <meta property="og:site_name"          content={t(lang, 'site.name')} />
+    <meta property="og:locale"             content={locales[lang].locale} />
+    <meta property="og:locale:alternate"   content={locales[alternateLang].locale} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content={pageTitle} />
+    <meta name="twitter:description" content={pageDesc} />
+    <meta name="twitter:image"       content={ogImageAbs} />
+
+    <!-- Favicon & PWA -->
+    <link rel="icon"             type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon"             type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180"      href="/icons/apple-touch-icon.png" />
+    <link rel="manifest"                              href="/manifest.json" />
+    <meta name="theme-color" content="#E8B86D" />
+    <meta name="apple-mobile-web-app-capable"          content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Fonts self-hosted via @fontsource — no external requests -->
+
+    <!-- GA4 — loads ONLY after explicit cookie consent (GDPR compliant), and
+         ONLY if PUBLIC_GA_ID is configured for this build -->
+    {GA_ID && (
+    <script is:inline define:vars={{ GA_ID }}>
+      /* Consent-mode default — deny everything until user accepts */
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent','default',{
+        analytics_storage:  'denied',
+        ad_storage:         'denied',
+        functionality_storage: 'denied',
+        personalization_storage: 'denied',
+        security_storage:   'granted'  /* strictly necessary */
+      });
+      /* Load GA4 only if user previously gave consent */
+      (function(){
+        try {
+          var c = JSON.parse(localStorage.getItem('cookie_consent')||'null');
+          var valid = c && c.expires && new Date(c.expires) > new Date();
+          if (valid && c.analytics) {
+            gtag('consent','update',{analytics_storage:'granted'});
+            /* Dynamically inject GA script — not before consent */
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+            document.head.appendChild(s);
+            gtag('js', new Date());
+            gtag('config', GA_ID, {anonymize_ip:true});
+          }
+        } catch(e){}
+      })();
+    </script>
+    )}
+
+    <!-- Service Worker registration.
+         NEVER on localhost. Registering it in dev meant the worker cached dev
+         pages, so edits stayed invisible behind stale HTML, and the moment the
+         dev server stopped every page turned into the offline fallback instead
+         of an honest connection error. On localhost we actively unregister any
+         worker left over from before and wipe its caches. -->
+    <script is:inline>
+      (function () {
+        if (!('serviceWorker' in navigator)) return;
+        var host = location.hostname;
+        var isLocal = host === 'localhost' || host === '127.0.0.1' || host === '[::1]'
+                   || host.endsWith('.local') || /^192\.168\./.test(host);
+
+        if (isLocal) {
+          navigator.serviceWorker.getRegistrations().then(function (rs) {
+            rs.forEach(function (r) { r.unregister(); });
+          }).catch(function () {});
+          if (window.caches && caches.keys) {
+            caches.keys().then(function (keys) {
+              keys.forEach(function (k) { caches.delete(k); });
+            }).catch(function () {});
+          }
+          return;
+        }
+
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      })();
+    </script>
+
+    <!-- Structured data -->
+    {schema && <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />}
+
+    <slot name="head" />
+  </head>
+  <body class="bg-[#08080E] text-[#F0F0F6] font-sans antialiased">
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+    <slot />
+
+    <!-- Film grain overlay — cinematic texture on every page -->
+    <div class="film-grain" aria-hidden="true"></div>
+
+    <!-- CINEMA engine: GSAP + ScrollTrigger + Lenis -->
+    <script>
+      import { initCinema } from '../scripts/cinema';
+      initCinema();
+    </script>
+    <noscript><style>.reveal{opacity:1 !important;transform:none !important;}.skip-to-content {
+  position: absolute; left: -9999px; top: 0; z-index: 999;
+  padding: .8rem 1.2rem; background: #E8B86D; color: #08080E;
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .95rem;
+  border-radius: 0 0 4px 0; text-decoration: none;
+}
+.skip-to-content:focus { left: 0; }
+</style></noscript>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import { t } from '../../i18n';
+
+export async function getStaticPaths() {
+  let posts: Awaited<ReturnType<typeof getCollection<'blog'>>> = [];
+  try { posts = await getCollection('blog'); } catch {}
+  return posts.map((post) => ({ params: { slug: post.slug } }));
+}
+
+const { slug } = Astro.params;
+const lang = 'en';
+const strings = t(lang);
+
+let post: Awaited<ReturnType<typeof getEntry<'blog', string>>> | undefined;
+try { post = await getEntry('blog', slug!); } catch {}
+
+if (!post) return Astro.redirect('/404');
+
+const { Content } = await post.render();
+const ampHref = `/amp/blog/${slug}`;
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogImage={post.data.ogImage}
+  ogType="article"
+  lang={lang}
+>
+  <Fragment slot="head">
+    <link rel="amphtml" href={ampHref} />
+    <meta property="article:published_time" content={post.data.publishedDate} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.data.title,
+      description: post.data.description,
+      datePublished: post.data.publishedDate,
+      image: post.data.ogImage,
+      author: { '@type': 'Organization', name: strings.site.name },
+      publisher: {
+        '@type': 'Organization',
+        name: strings.site.name,
+        logo: { '@type': 'ImageObject', url: 'https://renovation-limassol.com/images/logo.png' },
+      },
+    })} />
+  </Fragment>
+
+  <Header lang={lang} />
+
+  <article class="max-w-3xl mx-auto px-4 py-16" style="background:#0E1320;">
+    <header class="mb-10">
+      {post.data.ogImage && (
+        <img
+          src={post.data.ogImage}
+          alt={post.data.title}
+          width="720"
+          height="400"
+          loading="eager"
+          class="w-full rounded-2xl mb-8 object-cover"
+          style="max-height:400px"
+        />
+      )}
+      <h1 class="text-3xl md:text-4xl font-bold mb-4 text-[#F5F6FA]">{post.data.title}</h1>
+      <p class="text-[#7878A0] text-sm">
+        {strings.blog.publishedOn} {post.data.publishedDate}
+        {post.data.minuteRead && <span> · {post.data.minuteRead} {strings.blog.minuteRead}</span>}
+      </p>
+    </header>
+    <div class="prose prose-invert max-w-none">
+      <Content />
+    </div>
+  </article>
+
+  <Footer lang={lang} />
+</BaseLayout>

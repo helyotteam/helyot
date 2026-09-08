@@ -1,0 +1,251 @@
+---
+/**
+ * WHY HELYOT — editorial trust section.
+ * Counter strip (GSAP count-up) → straight-answer Q&A rows → результаты.
+ */
+import { type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const e = lang === 'en';
+
+const questions = e ? [
+  { q: 'Will the price change once work begins?',
+    a: 'No. It’s fixed in writing before a single wall comes down — and it stays that way through to the final invoice.' },
+  { q: 'Whose hands are actually on my project?',
+    a: 'You’ll know their faces by the end of week one — because it’s the same five or six people every day, not a rotating cast of borrowed crews. Walk onto your site any morning, unannounced, and you’ll recognise everyone standing in it.' },
+  { q: 'What happens if something fails after handover?',
+    a: 'A technician is on site within 48 hours of your message — no callout fee, no “we’ll need to check with the supplier first.” That’s the difference between a warranty that exists on paper and one with an actual phone number behind it.' },
+  { q: 'How long before someone actually picks up?',
+    a: 'About fifteen minutes, seven days a week. Not “within 1–3 business days” — that’s someone else’s voicemail.' },
+  { q: 'Who deals with permits and approvals?',
+    a: 'We do, start to finish. You’ll never stand in a queue at the municipality on our account.' },
+] : [
+  { q: 'Изменится ли цена после начала работ?',
+    a: 'Нет. Она фиксируется письменно до того, как снесена первая стена — и остаётся такой до финального счёта.' },
+  { q: 'Кто на самом деле работает на моём объекте?',
+    a: 'Вы запомните их в лицо уже к концу первой недели — потому что это одни и те же пять-шесть человек каждый день, а не сменные бригады со стороны. Зайдите на объект в любое утро без предупреждения — и узнаете каждого, кто там работает.' },
+  { q: 'А если что-то выйдет из строя после сдачи?',
+    a: 'Техник будет на месте в течение 48 часов после вашего сообщения — без платы за выезд и без «нужно уточнить у поставщика». Вот разница между гарантией на бумаге и гарантией, за которой стоит реальный номер телефона.' },
+  { q: 'Сколько ждать, если я позвоню?',
+    a: 'Около пятнадцати минут, семь дней в неделю. Не «в течение 1–3 рабочих дней» — это автоответчик у других.' },
+  { q: 'Кто занимается разрешениями и согласованиями?',
+    a: 'Мы — от начала до конца. Вам не придётся стоять в очереди в муниципалитете из-за нас.' },
+];
+
+const stats = e ? [
+  { to: 500, sfx: '+',   label: 'Projects completed' },
+  { to: 35,  sfx: '',    label: 'In-house specialists' },
+  { to: 5,   sfx: ' yr', label: 'Structural warranty' },
+  { to: 98,  sfx: '%',   label: 'On-time delivery' },
+  { to: 35,  sfx: '',    label: 'In-house specialists' },
+  { to: 4.9, sfx: '★',   label: 'Google rating' },
+] : [
+  { to: 500, sfx: '+',    label: 'Проектов сдано' },
+  { to: 35,  sfx: '',     label: 'Штатных специалистов' },
+  { to: 5,   sfx: ' лет', label: 'Гарантия конструктив' },
+  { to: 98,  sfx: '%',    label: 'Сдача в срок' },
+  { to: 35,  sfx: '',     label: 'Штатных специалистов' },
+  { to: 4.9, sfx: '★',    label: 'Рейтинг Google' },
+];
+
+/* Each figure links to the case it came from — a number with a page behind it
+   is worth more than three floating percentages. */
+const base = e ? '/en/portfolio' : '/ru/portfolio';
+const results = e ? [
+  { stat: '+32%',   label: 'value increase',      where: 'Agios Tychonas villa',   href: `${base}/agios-tychonas-villa` },
+  { stat: '+58%',   label: 'Airbnb income',       where: 'Germasogeia apartment',  href: `${base}/germasogeia-apartment` },
+  { stat: 'Day 42', label: 'delivered on schedule', where: 'City Centre HQ',       href: `${base}/city-center-office` },
+] : [
+  { stat: '+32%',    label: 'рост стоимости',     where: 'вилла Агиос Тихонас',    href: `${base}/agios-tychonas-villa` },
+  { stat: '+58%',    label: 'доход Airbnb',       where: 'квартира Гермасогея',    href: `${base}/germasogeia-apartment` },
+  { stat: 'День 42', label: 'сдан точно в срок',  where: 'офис в центре',          href: `${base}/city-center-office` },
+];
+
+/* Five real questions and answers were sitting on the most important page of
+   the site with no markup at all, while 322 other pages carried FAQPage. This
+   is the format answer engines quote verbatim; it costs nothing to label it. */
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: questions.map(q => ({
+    '@type': 'Question',
+    name: q.q,
+    acceptedAnswer: { '@type': 'Answer', text: q.a },
+  })),
+};
+
+const lead = e
+  ? 'Five questions we get asked before every contract. The answers are the same whether you ask them now or on site in week six — that is the whole point of putting them here.'
+  : 'Пять вопросов, которые задают перед каждым договором. Ответы одинаковы, спросите вы их сейчас или на объекте на шестой неделе, — ради этого они здесь и написаны.';
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<section id="why" class="tr-section">
+  <!-- Counter strip -->
+  <div class="tr-stats">
+    <div class="container-wide tr-stats-in">
+      {stats.map(s => (
+        <div class="tr-stat">
+          <span class="tr-stat-num"><span data-count-to={s.to} data-count-suffix={s.sfx}>{s.to}{s.sfx}</span></span>
+          <span class="tr-stat-lbl">{s.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="container-wide tr-main">
+    <div class="tr-grid">
+      <div class="tr-left">
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{e ? 'No small print' : 'Без мелкого шрифта'}</span>
+          {e ? 'Why Helyot' : 'Почему Helyot'}
+        </p>
+        <h2 class="cine-display tr-title" data-words>
+          {e
+            ? <>Straight answers <em>before you sign.</em></>
+            : <>Прямые ответы <em>до подписания.</em></>}
+        </h2>
+        <p class="tr-lead" data-reveal>{lead}</p>
+
+        <p class="tr-results-key">{e ? 'What came of it' : 'Что из этого вышло'}</p>
+        <div class="tr-results">
+          {results.map(r => (
+            <a class="tr-result" href={r.href} data-reveal>
+              <span class="tr-result-stat">{r.stat}</span>
+              <span class="tr-result-main">
+                <span class="tr-result-lbl">{r.label}</span>
+                <span class="tr-result-where">{r.where}</span>
+              </span>
+              <svg class="tr-result-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="tr-qa">
+        {questions.map((item, i) => (
+          <details class="tr-qa-item" open={i === 0}>
+            <summary>
+              <span class="tr-qa-n">{String(i + 1).padStart(2, '0')}</span>
+              {item.q}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <p>{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.tr-section {
+  background: #08080E;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.tr-stats {
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  background: #06060A;
+}
+.tr-stats-in {
+  display: flex; flex-wrap: wrap;
+  gap: 0;
+}
+.tr-stat {
+  flex: 1 1 auto;
+  display: flex; flex-direction: column; gap: .3rem;
+  padding: 1.6rem 2rem 1.6rem 0;
+  min-width: 130px;
+}
+.tr-stat-num {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 400; font-size: 1.9rem; letter-spacing: -.02em;
+  color: #E8B86D; font-variant-numeric: tabular-nums;
+}
+.tr-stat-lbl {
+  font-size: .64rem; letter-spacing: .2em; text-transform: uppercase; color: #8288A5;
+}
+
+.tr-main { padding: 6rem 0; }
+.tr-grid {
+  display: grid; grid-template-columns: 1fr 1.2fr;
+  gap: 5rem; align-items: start;
+}
+.tr-title { margin: 1.2rem 0 1.4rem; font-size: clamp(1.9rem, 3.6vw, 3rem); }
+
+.tr-lead {
+  font-size: 0.95rem; line-height: 1.8; color: #9DA0B8;
+  max-width: 44ch; margin: 0 0 2.4rem;
+}
+.tr-results-key {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; text-transform: lowercase; letter-spacing: .05em;
+  color: #8288A5; margin: 0 0 .2rem;
+}
+.tr-results { display: flex; flex-direction: column; }
+.tr-result {
+  display: grid; grid-template-columns: 5.5rem 1fr 1rem;
+  gap: 1.2rem; align-items: center;
+  padding: 1.1rem 0; text-decoration: none;
+  border-top: 1px solid rgba(255,255,255,.08);
+  transition: padding-left .25s ease;
+}
+.tr-result:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.tr-result:hover { padding-left: .5rem; }
+.tr-result-stat {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: 1.55rem; line-height: 1; color: #E8B86D;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.tr-result-main { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.tr-result-lbl { font-size: .9rem; color: #E4E4F0; line-height: 1.4; }
+.tr-result-where { font-size: .78rem; color: #8288A5; }
+.tr-result-arrow { color: #8288A5; transition: color .18s, transform .25s cubic-bezier(.16,1,.3,1); }
+.tr-result:hover .tr-result-arrow { color: #E8B86D; transform: translateX(3px); }
+.tr-result:hover .tr-result-lbl { color: #E8B86D; }
+
+/* Q&A */
+.tr-qa { display: flex; flex-direction: column; }
+.tr-qa-item { border-bottom: 1px solid rgba(255,255,255,.08); }
+.tr-qa-item:first-child { border-top: 1px solid rgba(255,255,255,.08); }
+.tr-qa-item summary {
+  display: flex; align-items: baseline; gap: 1.1rem;
+  padding: 1.35rem 0; cursor: pointer; list-style: none;
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 1.15rem; font-weight: 400; color: #B8B8CC;
+  transition: color .15s;
+}
+.tr-qa-item summary::-webkit-details-marker { display: none; }
+.tr-qa-item summary:hover { color: #F0F0F6; }
+.tr-qa-item[open] summary { color: #E8B86D; }
+.tr-qa-n {
+  font-size: 0.72rem; color: rgba(232,184,109,.6);
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.tr-qa-item summary svg {
+  margin-left: auto; flex-shrink: 0; opacity: .3;
+  transition: transform .25s; align-self: center;
+}
+.tr-qa-item[open] summary svg { transform: rotate(180deg); }
+.tr-qa-item p {
+  font-size: .9rem; line-height: 1.8; color: #9DA0B8;
+  margin: 0; padding: 0 0 1.5rem 2.4rem; max-width: 58ch;
+}
+
+@media (max-width: 900px) {
+  .tr-main { padding: 3.5rem 0; }
+  .tr-grid { grid-template-columns: 1fr; gap: 2.6rem; }
+  .tr-title { margin-bottom: 2rem; }
+  .tr-stat { padding: 1.1rem 1.2rem 1.1rem 0; min-width: 100px; }
+  .tr-stat-num { font-size: 1.4rem; }
+  .tr-qa-item p { padding-left: 0; }
+}
+
+/* Mobile legibility: these labels sit at 9–11px, unreadable on a phone. */
+@media (max-width: 700px) {
+  .tr-stat-lbl { font-size: 0.72rem; }
+  .tr-qa-n { font-size: 0.78rem; }
+}
+</style>

@@ -1,0 +1,565 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../shared/Header.astro';
+import Footer from '../shared/Footer.astro';
+import CineHero from '../shared/CineHero.astro';
+import BookingForm from '../sections/BookingForm.astro';
+import CookieConsent from '../ui/CookieConsent.astro';
+import FloatingContactBar from '../ui/FloatingContactBar.astro';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+const hubHref = (slug: string) => en ? `/en/renovation/${slug}` : `/ru/remont/${slug}`;
+const portfolioHref = (slug: string) => en ? `/en/portfolio/${slug}` : `/ru/portfolio/${slug}`;
+
+/* Featured — the four projects that open the page. */
+const featured = en ? [
+  { title:'Marina Penthouse', sub:'180 m² · Premium · 2024', area:'Limassol Marina', tag:'Apartment', slug:'limassol-marina-penthouse', room:'Living · Dining · 4 beds', img:'/images/projects/marina-penthouse.webp' },
+  { title:'Hillside Villa',   sub:'320 m² · Premium · 2023', area:'Agios Tychonas',  tag:'Villa',     slug:'agios-tychonas-villa',      room:'6 beds · Pool · Sea views', img:'/images/projects/agios-villa.webp' },
+  { title:'Spa Bathroom',     sub:'10 m² · Premium · 2024',  area:'Potamos',         tag:'Bathroom',  slug:'',                          room:'Hammam · Freestanding',    img:'/images/projects/spa-bathroom.webp' },
+  { title:'Tech HQ Fit-Out',  sub:'240 m² · Standard · 2023',area:'City Centre',     tag:'Office',    slug:'city-center-office',        room:'Open plan · 40 desks · AV',img:'/images/projects/city-office.webp' },
+] : [
+  { title:'Пентхаус в Марине', sub:'180 м² · премиум · 2024', area:'Limassol Marina', tag:'Квартира', slug:'limassol-marina-penthouse', room:'Гостиная · столовая · 4 спальни', img:'/images/projects/marina-penthouse.webp' },
+  { title:'Вилла на склоне',   sub:'320 м² · премиум · 2023', area:'Агиос Тихонас',   tag:'Вилла',    slug:'agios-tychonas-villa',      room:'6 спален · бассейн · вид на море', img:'/images/projects/agios-villa.webp' },
+  { title:'Ванная-спа',        sub:'10 м² · премиум · 2024',  area:'Потамос',         tag:'Санузел',  slug:'',                          room:'Хаммам · отдельная ванна',        img:'/images/projects/spa-bathroom.webp' },
+  { title:'Офис IT-компании',  sub:'240 м² · стандарт · 2023',area:'Центр города',    tag:'Офис',     slug:'city-center-office',        room:'Open space · 40 мест · AV',       img:'/images/projects/city-office.webp' },
+];
+
+const projects = (en ? [
+  { type:'apartment',finish:'premium', area:'Limassol Marina', sqm:180, dur:'14w',year:2024,budget:'€185,000',result:'+45% rental yield',    title:'Marina Penthouse',   desc:"Natural stone, smart home, chef's kitchen with panoramic sea views.",              tags:['Natural stone','Smart home','Custom joinery'],     img:'/images/projects/marina-penthouse.webp' },
+  { type:'villa',    finish:'premium', area:'Agios Tychonas',  sqm:320, dur:'20w',year:2023,budget:'€340,000',result:'+32% market value',    title:'Hillside Villa',     desc:'Infinity pool, natural stone floors, bespoke joinery. Sold 3 days after listing.',  tags:['Infinity pool','Natural stone','Terrace'],         img:'/images/projects/agios-villa.webp' },
+  { type:'apartment',finish:'standard',area:'Germasogeia',     sqm:95,  dur:'7w', year:2024,budget:'€52,000', result:'+58% Airbnb income',   title:'Germasogeia 2BR',    desc:'Holiday-let renovation. Engineered wood, kitchen island, LED lighting throughout.', tags:['Interior design','Engineered wood','Holiday-let'], img:'/images/projects/germasogeia-apt.webp' },
+  { type:'office',   finish:'standard',area:'City Centre',     sqm:240, dur:'6w', year:2023,budget:'€78,000', result:'Delivered on day 42',  title:'Tech HQ Fit-Out',    desc:'Open plan for 40 people. Acoustic ceiling, AV systems, smart lighting.',            tags:['Open plan','Smart lighting','AV systems'],         img:'/images/projects/city-office.webp' },
+  { type:'bathroom', finish:'premium', area:'Potamos',         sqm:10,  dur:'12d',year:2024,budget:'€22,000', result:'5★ client review',     title:'Hammam Spa Bath',    desc:'Hand-made Zellige mosaic, freestanding bath, heated travertine floor.',             tags:['Hammam','Zellige','Heated floor'],                 img:'/images/projects/spa-bathroom.webp' },
+  { type:'kitchen',  finish:'premium', area:'Agios Tychonas',  sqm:18,  dur:'3w', year:2024,budget:'€28,000', result:'Best kitchen I’ve had', title:'Gourmet Kitchen',    desc:'Calacatta quartz island, Miele suite, handleless lacquer cabinetry.',               tags:['Quartz island','Miele','Handleless'],              img:'/images/projects/agios-kitchen.webp' },
+  { type:'villa',    finish:'standard',area:'Potamos',         sqm:280, dur:'18w',year:2022,budget:'€210,000',result:'+28% resale value',    title:'Potamos Riverside',  desc:'Full renovation plus landscaping, pool deck and exterior facade overhaul.',         tags:['Pool deck','Landscaping','Facade'],                img:'/images/projects/potamos-villa.webp' },
+  { type:'apartment',finish:'economy', area:'Marina',          sqm:48,  dur:'4w', year:2024,budget:'€18,500', result:'40% above market rent', title:'Marina Studio',      desc:'Open-plan conversion from a 1-bed. SPC flooring, integrated kitchen.',              tags:['Layout redesign','SPC floor','Integrated'],        img:'/images/projects/marina-studio.webp' },
+  { type:'bathroom', finish:'standard',area:'City Centre',     sqm:7,   dur:'10d',year:2024,budget:'€8,500',  result:'Zero snagging items',   title:'City Centre Bath',   desc:'80×160 cm tile, walk-in shower, LED anti-fog mirror with demist.',                  tags:['80×160 tile','Walk-in','LED mirror'],              img:'/images/projects/city-bathroom.webp' },
+  { type:'villa',    finish:'premium', area:'Germasogeia',     sqm:210, dur:'16w',year:2023,budget:'€260,000',result:'Sold at asking price',  title:'Sea-View Villa',     desc:'Rooftop terrace, infinity pool, bioclimatic pergola. Sold in 3 days.',              tags:['Infinity pool','Rooftop','Bioclimatic'],           img:'/images/projects/germasogeia-villa.webp' },
+  { type:'kitchen',  finish:'standard',area:'Marina',          sqm:14,  dur:'2w', year:2024,budget:'€14,000', result:'Under budget by €1,200',title:'Minimalist Kitchen', desc:'Dark handleless cabinetry, Dekton worktop, fully integrated AEG.',                  tags:['Dekton','Handleless','Integrated AEG'],            img:'/images/projects/marina-kitchen.webp' },
+  { type:'bathroom', finish:'premium', area:'Potamos',         sqm:12,  dur:'14d',year:2023,budget:'€16,500', result:'5★ client review',          title:'Freestanding Bath',  desc:'Travertine floor, roll-top freestanding bath, infrared heated towel rail.',         tags:['Travertine','Freestanding','Infrared'],            img:'/images/projects/potamos-bath.webp' },
+] : [
+  { type:'apartment',finish:'премиум', area:'Limassol Marina', sqm:180, dur:'14 нед',year:2024,budget:'€185 000',result:'+45% к доходу с аренды', title:'Пентхаус в Марине',  desc:'Натуральный камень, умный дом, кухня шеф-повара с панорамой моря.',              tags:['Натуральный камень','Умный дом','Мебель на заказ'], img:'/images/projects/marina-penthouse.webp' },
+  { type:'villa',    finish:'премиум', area:'Агиос Тихонас',   sqm:320, dur:'20 нед',year:2023,budget:'€340 000',result:'+32% к стоимости',       title:'Вилла на склоне',    desc:'Бассейн-инфинити, полы из натурального камня, столярка на заказ. Продана через 3 дня.', tags:['Бассейн-инфинити','Натуральный камень','Терраса'], img:'/images/projects/agios-villa.webp' },
+  { type:'apartment',finish:'стандарт',area:'Гермасогея',      sqm:95,  dur:'7 нед', year:2024,budget:'€52 000', result:'+58% к доходу Airbnb',   title:'Двушка в Гермасогее',desc:'Ремонт под аренду. Инженерная доска, кухонный остров, LED-освещение.',           tags:['Дизайн интерьера','Инженерная доска','Под аренду'], img:'/images/projects/germasogeia-apt.webp' },
+  { type:'office',   finish:'стандарт',area:'Центр города',    sqm:240, dur:'6 нед', year:2023,budget:'€78 000', result:'Сдан на 42-й день',      title:'Офис IT-компании',   desc:'Open space на 40 человек. Акустический потолок, AV-системы, умный свет.',        tags:['Open space','Умный свет','AV-системы'],            img:'/images/projects/city-office.webp' },
+  { type:'bathroom', finish:'премиум', area:'Потамос',         sqm:10,  dur:'12 дн', year:2024,budget:'€22 000', result:'5★ отзыв клиента',      title:'Ванная-хаммам',      desc:'Мозаика Zellige ручной работы, отдельно стоящая ванна, тёплый травертин.',       tags:['Хаммам','Zellige','Тёплый пол'],                   img:'/images/projects/spa-bathroom.webp' },
+  { type:'kitchen',  finish:'премиум', area:'Агиос Тихонас',   sqm:18,  dur:'3 нед', year:2024,budget:'€28 000', result:'«Лучшая кухня, что у меня была»', title:'Кухня для гурмана', desc:'Остров из кварцита Calacatta, техника Miele, безручечные фасады.',       tags:['Остров из кварцита','Miele','Без ручек'],          img:'/images/projects/agios-kitchen.webp' },
+  { type:'villa',    finish:'стандарт',area:'Потамос',         sqm:280, dur:'18 нед',year:2022,budget:'€210 000',result:'+28% к цене перепродажи',title:'Вилла у реки',       desc:'Ремонт под ключ плюс ландшафт, зона у бассейна и обновление фасада.',            tags:['Зона у бассейна','Ландшафт','Фасад'],              img:'/images/projects/potamos-villa.webp' },
+  { type:'apartment',finish:'эконом',  area:'Марина',          sqm:48,  dur:'4 нед', year:2024,budget:'€18 500', result:'На 40% выше рынка аренды',title:'Студия в Марине',    desc:'Переделка однушки в студию. SPC-полы, встроенная кухня.',                        tags:['Перепланировка','SPC-полы','Встроенная техника'],  img:'/images/projects/marina-studio.webp' },
+  { type:'bathroom', finish:'стандарт',area:'Центр города',    sqm:7,   dur:'10 дн', year:2024,budget:'€8 500',  result:'Ноль замечаний при приёмке',title:'Санузел в центре', desc:'Плитка 80×160 см, душевая без поддона, LED-зеркало с подогревом.',              tags:['Плитка 80×160','Душевая','LED-зеркало'],           img:'/images/projects/city-bathroom.webp' },
+  { type:'villa',    finish:'премиум', area:'Гермасогея',      sqm:210, dur:'16 нед',year:2023,budget:'€260 000',result:'Продана по запрошенной цене',title:'Вилла с видом на море',desc:'Терраса на крыше, бассейн-инфинити, биоклиматическая пергола. Продана за 3 дня.', tags:['Бассейн-инфинити','Терраса на крыше','Пергола'],  img:'/images/projects/germasogeia-villa.webp' },
+  { type:'kitchen',  finish:'стандарт',area:'Марина',          sqm:14,  dur:'2 нед', year:2024,budget:'€14 000', result:'Дешевле сметы на €1 200', title:'Минималистичная кухня',desc:'Тёмные безручечные фасады, столешница Dekton, встроенная техника AEG.',        tags:['Dekton','Без ручек','Встроенная AEG'],             img:'/images/projects/marina-kitchen.webp' },
+  { type:'bathroom', finish:'премиум', area:'Потамос',         sqm:12,  dur:'14 дн', year:2023,budget:'€16 500', result:'5★ от клиента',            title:'Ванная с отдельной ванной',desc:'Травертин на полу, отдельно стоящая ванна, инфракрасный полотенцесушитель.', tags:['Травертин','Отдельная ванна','Инфракрасный'],     img:'/images/projects/potamos-bath.webp' },
+]);
+
+const tl: Record<string,string> = en
+  ? { apartment:'Apartment', villa:'Villa', kitchen:'Kitchen', bathroom:'Bathroom', office:'Office' }
+  : { apartment:'Квартира',  villa:'Вилла', kitchen:'Кухня',   bathroom:'Санузел',  office:'Офис' };
+
+const svcBase = en ? '/en/services' : '/ru/uslugi';
+const svcHref = (type: string) =>
+  type === 'apartment' ? `${svcBase}/apartment-renovation`
+  : type === 'villa'   ? `${svcBase}/villa-renovation`
+  : type === 'kitchen' ? `${svcBase}/kitchen-renovation`
+  : type === 'bathroom'? `${svcBase}/bathroom-renovation`
+  : type === 'office'  ? `${svcBase}/office-fit-out`
+  : svcBase;
+
+const quotes = en ? [
+  { name:'Maria K.',  area:'Germasogeia',    project:'2BR apartment',    text:'Helyot showed us detailed design plans before touching a single tile. When we walked in on handover day, it was exactly what we had approved.' },
+  { name:'Dmitri V.', area:'Agios Tychonas', project:'Villa renovation', text:'The villa came in on budget and two days ahead of schedule. I have renovated three properties. This was the first time I was not stressed.' },
+  { name:'Anna S.',   area:'City Centre',    project:'Full renovation',  text:'The before/after is honestly shocking. We lived there for eight years and never imagined it could look the way it does now.' },
+] : [
+  { name:'Мария К.',   area:'Гермасогея',    project:'Двухкомнатная квартира', text:'Helyot показали подробные планы до того, как тронули первую плитку. Когда мы зашли в день сдачи — всё было ровно так, как мы согласовали.' },
+  { name:'Дмитрий В.', area:'Агиос Тихонас', project:'Ремонт виллы',           text:'Вилла сдана в бюджет и на два дня раньше срока. Я ремонтировал три объекта — впервые прошёл через это без стресса.' },
+  { name:'Анна С.',    area:'Центр города',  project:'Ремонт под ключ',        text:'Разница до и после — просто поразительная. Мы прожили там восемь лет и не могли представить, что квартира может так выглядеть.' },
+];
+
+const areas = en ? [
+  { name:'Germasogeia',    n:60, types:'Apartments · Villas',  tag:'Seafront',  slug:'germasogeia',          img:'/images/areas/germasogeia.webp' },
+  { name:'Agios Tychonas', n:25, types:'Luxury villas',        tag:'Hillside',  slug:'agios-tychonas',       img:'/images/areas/agios-tychonas.webp' },
+  { name:'City Centre',    n:80, types:'Apartments · Offices', tag:'Urban',     slug:'limassol-city-centre', img:'/images/areas/city-centre.webp' },
+  { name:'Potamos',        n:30, types:'Villas · Townhouses',  tag:'Riverside', slug:'potamos-germasogeias', img:'/images/areas/potamos.webp' },
+] : [
+  { name:'Гермасогея',     n:60, types:'Квартиры · виллы',     tag:'У моря',    slug:'germasogeia',          img:'/images/areas/germasogeia.webp' },
+  { name:'Агиос Тихонас',  n:25, types:'Премиальные виллы',    tag:'На склоне', slug:'agios-tychonas',       img:'/images/areas/agios-tychonas.webp' },
+  { name:'Центр города',   n:80, types:'Квартиры · офисы',     tag:'Город',     slug:'limassol-city-centre', img:'/images/areas/city-centre.webp' },
+  { name:'Потамос',        n:30, types:'Виллы · таунхаусы',    tag:'У реки',    slug:'potamos-germasogeias', img:'/images/areas/potamos.webp' },
+];
+
+
+const c = en ? {
+  metaTitle: 'Our Projects — 500+ Renovations in Cyprus | Helyot',
+  metaDesc: '500+ completed renovation projects in Limassol — apartments, villas, kitchens, bathrooms and offices. Real properties, real budgets, verified outcomes.',
+  heroIndex: 'Our projects', heroEyebrow: 'Portfolio · Cyprus',
+  heroTitle: `500+ renovated homes <em>across Cyprus.</em>`,
+  heroSub: 'Every project on this page was delivered by our in-house team — fixed price, dedicated project manager, zero subcontractors. Real properties, real outcomes, verified results.',
+  crumbHome: 'Home', crumbSelf: 'Projects', homeHref: '/',
+  heroCta: 'Browse all projects', heroCta2: 'Start a project',
+  featLabel: 'Featured work', featSub: 'Before / After',
+  featTitle: `Four rooms. <em>Four outcomes.</em>`, allProjects: 'All projects →',
+  idxLabel: 'The index', idxSub: 'All projects',
+  idxTitle: `Every job, <em>with the numbers.</em>`,
+  filterAll: 'All projects', empty: 'No projects in that category yet.',
+  areaLabel: 'By neighbourhood', areaSub: 'Where we work',
+  areaTitle: `We know <em>every street.</em>`, projectsWord: 'projects',
+  qLabel: '4.9 · Google', qSub: 'Client stories',
+  qTitle: `Real words, <em>real projects.</em>`,
+  onSite: 'on site', fixedPrice: 'fixed price',
+} : {
+  metaTitle: 'Наши проекты — 500+ ремонтов на Кипре | Helyot',
+  metaDesc: 'Более 500 завершённых ремонтов в Лимасоле — квартиры, виллы, кухни, санузлы и офисы. Реальные объекты, реальные бюджеты, подтверждённые результаты.',
+  heroIndex: 'Наши проекты', heroEyebrow: 'Портфолио · Кипр',
+  heroTitle: `500+ домов, <em>отремонтированных на Кипре.</em>`,
+  heroSub: 'Каждый проект на этой странице сделан нашей штатной командой — фиксированная цена, персональный прораб, ноль субподряда. Реальные объекты, реальные результаты.',
+  crumbHome: 'Главная', crumbSelf: 'Проекты', homeHref: '/ru',
+  heroCta: 'Смотреть все проекты', heroCta2: 'Начать проект',
+  featLabel: 'Избранное', featSub: 'До / После',
+  featTitle: `Четыре объекта. <em>Четыре результата.</em>`, allProjects: 'Все проекты →',
+  idxLabel: 'Каталог', idxSub: 'Все проекты',
+  idxTitle: `Каждый объект — <em>с цифрами.</em>`,
+  filterAll: 'Все проекты', empty: 'В этой категории пока нет проектов.',
+  areaLabel: 'По районам', areaSub: 'Где мы работаем',
+  areaTitle: `Мы знаем <em>каждую улицу.</em>`, projectsWord: 'проектов',
+  qLabel: '4.9 · Google', qSub: 'Отзывы клиентов',
+  qTitle: `Реальные слова, <em>реальные проекты.</em>`,
+  onSite: 'на объекте', fixedPrice: 'фикс. цена',
+};
+
+const stats = en ? [
+  { to: 500, sfx: '+',  label: 'Projects completed', sub: 'Every one warranted' },
+  { to: 35,  sfx: '',   label: 'In-house specialists', sub: 'Every trade employed directly' },
+  { to: 12,  sfx: '',   label: 'Locations served',   sub: 'Republic of Cyprus' },
+  { to: 4.9, sfx: '★',  label: 'Google rating',      sub: '47 reviews' },
+] : [
+  { to: 500, sfx: '+',  label: 'Проектов сдано',  sub: 'Каждый с гарантией' },
+  { to: 35,  sfx: '',   label: 'Штатных специалистов', sub: 'Все работы своими силами' },
+  { to: 12,  sfx: '',   label: 'Локаций',         sub: 'Республика Кипр' },
+  { to: 4.9, sfx: '★',  label: 'Рейтинг Google',  sub: '47 отзывов' },
+];
+---
+
+<BaseLayout lang={lang}
+  title={c.metaTitle}
+  description={c.metaDesc}>
+<Header lang={lang}/>
+
+<main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+
+  <CineHero
+    lang={lang}
+    photo="/images/gallery-hero.webp"
+    index={c.heroIndex}
+    eyebrow={c.heroEyebrow}
+    titleHtml={c.heroTitle}
+    subtitle={c.heroSub}
+    breadcrumb={[{ label: c.crumbHome, href: c.homeHref }, { label: c.crumbSelf }]}
+    cta={{ label: c.heroCta, href: '#all-projects' }}
+    ctaSecondary={{ label: c.heroCta2, href: '#booking' }}
+  />
+
+  <!-- ── Featured ─────────────────────────────────────────── -->
+  <section class="gl-section">
+    <div class="container-wide">
+      <div class="gl-head" data-reveal>
+        <div>
+          <p class="cine-label">
+            <span class="cine-label__index">{c.featLabel}</span>
+            {c.featSub}
+          </p>
+          <h2 class="cine-display gl-title" data-words set:html={c.featTitle} />
+        </div>
+        <a href="#all-projects" class="gl-head-link">{c.allProjects}</a>
+      </div>
+
+      <div class="gl-feat" data-stagger-group>
+        {featured.map((f, i) => (
+          <a href={f.slug ? portfolioHref(f.slug) : "#all-projects"} class={`gl-frame ${i === 0 ? 'gl-frame--lead' : ''}`} data-stagger-item>
+            <span class="gl-frame-img cine-scene">
+              <img src={f.img} alt={f.title} width="900" height="620" loading="lazy" decoding="async" />
+            </span>
+            <span class="gl-frame-cap">
+              <span class="gl-frame-n">{String(i + 1).padStart(2, '0')}</span>
+              <span class="gl-frame-main">
+                <span class="gl-frame-title">{f.title}</span>
+                <span class="gl-frame-room">{f.room}</span>
+              </span>
+              <span class="gl-frame-meta">{f.area} · {f.sub}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── All projects ─────────────────────────────────────── -->
+  <section id="all-projects" class="gl-section gl-section--alt">
+    <div class="container-wide">
+      <div class="gl-head" data-reveal>
+        <div>
+          <p class="cine-label">
+            <span class="cine-label__index">{c.idxLabel}</span>
+            {c.idxSub}
+          </p>
+          <h2 class="cine-display gl-title" data-words set:html={c.idxTitle} />
+        </div>
+      </div>
+
+      <div class="gl-filters" id="gl-filters" data-reveal>
+        <button class="gl-filter is-on" data-pf="all">{c.filterAll}</button>
+        {['apartment','villa','kitchen','bathroom','office'].map(f => (
+          <button class="gl-filter" data-pf={f}>{tl[f]}</button>
+        ))}
+      </div>
+
+      <div class="gl-list" id="gl-list" data-stagger-group>
+        {projects.map(p => (
+          <a href={svcHref(p.type)} class="gl-row" data-pt={p.type} data-stagger-item>
+            <span class="gl-thumb cine-scene">
+              <img src={p.img} alt={p.title} width="240" height="160" loading="lazy" decoding="async" />
+            </span>
+            <span class="gl-row-main">
+              <span class="gl-row-top">
+                <span class="gl-row-title">{p.title}</span>
+                <span class="gl-row-finish">{p.finish}</span>
+              </span>
+              <span class="gl-row-desc">{p.desc}</span>
+              <span class="gl-tags">{p.tags.map(t => <span class="gl-tag">{t}</span>)}</span>
+            </span>
+            <span class="gl-row-facts">
+              <span class="gl-fact"><b>{p.sqm} m²</b><i>{tl[p.type]} · {p.area}</i></span>
+              <span class="gl-fact"><b>{p.dur}</b><i>{c.onSite} · {p.year}</i></span>
+              <span class="gl-fact"><b>{p.budget}</b><i>{c.fixedPrice}</i></span>
+              <span class="gl-result">{p.result}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+      <p class="gl-empty" id="gl-empty" hidden>{c.empty}</p>
+    </div>
+  </section>
+
+  <!-- ── Numbers ──────────────────────────────────────────── -->
+  <section class="gl-stats">
+    <div class="container-wide gl-stats-in">
+      {stats.map(s => (
+        <div class="gl-stat">
+          <span class="gl-stat-num"><span data-count-to={s.to} data-count-suffix={s.sfx}>{s.to}{s.sfx}</span></span>
+          <span class="gl-stat-lbl">{s.label}</span>
+          <span class="gl-stat-sub">{s.sub}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── By neighbourhood ─────────────────────────────────── -->
+  <section class="gl-section gl-section--flush">
+    <div class="container-wide">
+      <div class="gl-head" data-reveal>
+        <div>
+          <p class="cine-label">
+            <span class="cine-label__index">{c.areaLabel}</span>
+            {c.areaSub}
+          </p>
+          <h2 class="cine-display gl-title" data-words set:html={c.areaTitle} />
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-bleed bands, same language as the services section on the home page -->
+    <div class="gl-bands">
+      {areas.map((a, i) => (
+        <a href={hubHref(a.slug)} class="gl-band" data-reveal>
+          <span class="gl-band-bg" aria-hidden="true">
+            <img src={a.img} alt="" width="1200" height="400" loading="lazy" decoding="async" />
+          </span>
+          <span class="gl-band-in container-wide">
+            <span class="gl-band-n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="gl-band-main">
+              <span class="gl-band-title">{a.name}</span>
+              <span class="gl-band-sub">{a.types} · {a.tag}</span>
+            </span>
+            <span class="gl-band-side">
+              <span class="gl-band-count">{a.n}+ {c.projectsWord}</span>
+              <span class="gl-band-arrow" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </span>
+            </span>
+          </span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── Client words ─────────────────────────────────────── -->
+  <section class="gl-section gl-section--alt">
+    <div class="container-wide">
+      <div class="gl-head" data-reveal>
+        <div>
+          <p class="cine-label">
+            <span class="cine-label__index">{c.qLabel}</span>
+            {c.qSub}
+          </p>
+          <h2 class="cine-display gl-title" data-words set:html={c.qTitle} />
+        </div>
+      </div>
+
+      <div class="gl-quotes" data-stagger-group>
+        {quotes.map(q => (
+          <figure class="gl-quote" data-stagger-item>
+            <blockquote>“{q.text}”</blockquote>
+            <figcaption>
+              <span class="gl-quote-name">{q.name}</span>
+              <span class="gl-quote-meta">{q.area} · {q.project}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <BookingForm lang={lang}/>
+</main>
+
+<Footer lang={lang}/><CookieConsent lang={lang}/><FloatingContactBar lang={lang}/>
+</BaseLayout>
+
+<style>
+.gl-section { padding: 6rem 0; border-top: 1px solid rgba(255,255,255,.06); }
+.gl-section--alt { background: #06060A; }
+
+.gl-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap; margin-bottom: 3rem;
+}
+.gl-title { margin: 1.2rem 0 0; font-size: clamp(1.9rem, 4vw, 3.2rem); }
+.gl-head-link {
+  font-size: 0.78rem; letter-spacing: .06em; color: #E8B86D;
+  text-decoration: none; white-space: nowrap;
+  border-bottom: 1px solid rgba(232,184,109,.3); padding-bottom: .2rem;
+  transition: border-color .2s;
+}
+.gl-head-link:hover { border-color: #E8B86D; }
+
+/* ── Featured frames ── */
+.gl-feat { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5rem 2rem; }
+.gl-frame { text-decoration: none; display: block; }
+.gl-frame--lead { grid-column: 1 / -1; }
+.gl-frame-img {
+  display: block; aspect-ratio: 3 / 2; overflow: hidden;
+  border-radius: 4px; border: 1px solid rgba(255,255,255,.08);
+}
+.gl-frame--lead .gl-frame-img { aspect-ratio: 21 / 9; }
+.gl-frame-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s ease; }
+.gl-frame:hover .gl-frame-img img { transform: scale(1.03); }
+.gl-frame-cap { display: flex; align-items: baseline; gap: 1.2rem; padding: 1rem .2rem 0; }
+.gl-frame-n {
+  font-family: 'Spectral', Georgia, serif; font-size: 0.84rem;
+  color: #E8B86D; font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+.gl-frame-main { display: flex; flex-direction: column; gap: .2rem; min-width: 0; }
+.gl-frame-title {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.15rem;
+  color: #F0F0F6; transition: color .18s;
+}
+.gl-frame:hover .gl-frame-title { color: #E8B86D; }
+.gl-frame-room { font-size: 0.78rem; color: #8288A5; }
+.gl-frame-meta { font-size: 0.78rem; color: #8288A5; margin-left: auto; white-space: nowrap; }
+
+/* ── Filters ── */
+.gl-filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2.5rem; }
+.gl-filter {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; letter-spacing: .02em; text-transform: lowercase;
+  color: #8288A5; background: transparent; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.1); border-radius: 4px;
+  padding: .45rem 1.1rem; transition: color .18s, border-color .18s;
+}
+.gl-filter:hover { color: #B8B8CC; border-color: rgba(255,255,255,.2); }
+.gl-filter.is-on { color: #E8B86D; border-color: #E8B86D; }
+
+/* ── Project index rows ── */
+.gl-list { display: flex; flex-direction: column; }
+.gl-row {
+  display: grid; grid-template-columns: 200px 1fr auto; gap: 2rem; align-items: center;
+  padding: 1.8rem 0; border-top: 1px solid rgba(255,255,255,.07);
+  text-decoration: none; transition: padding-left .25s ease;
+}
+.gl-row:last-of-type { border-bottom: 1px solid rgba(255,255,255,.07); }
+.gl-row:hover { padding-left: .6rem; }
+.gl-thumb {
+  display: block; width: 200px; aspect-ratio: 3 / 2; overflow: hidden;
+  border-radius: 3px; border: 1px solid rgba(255,255,255,.08);
+}
+.gl-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+.gl-row:hover .gl-thumb img { transform: scale(1.05); }
+.gl-row-main { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.gl-row-top { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; }
+.gl-row-title {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.2rem;
+  color: #F0F0F6; transition: color .15s;
+}
+.gl-row:hover .gl-row-title { color: #E8B86D; }
+.gl-row-finish {
+  font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: #8288A5;
+}
+.gl-row-desc { font-size: 0.84rem; color: #8288A5; line-height: 1.6; max-width: 56ch; }
+.gl-tags { display: flex; gap: .5rem; flex-wrap: wrap; }
+.gl-tag {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; letter-spacing: .04em; text-transform: lowercase; color: #E8B86D;
+  border: 1px solid rgba(232,184,109,.25); border-radius: 3px; padding: .2rem .65rem;
+}
+.gl-row-facts {
+  display: flex; flex-direction: column; gap: .55rem; align-items: flex-end;
+  text-align: right; white-space: nowrap;
+}
+.gl-fact { display: flex; flex-direction: column; gap: .1rem; }
+.gl-fact b {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400; font-size: 1.02rem;
+  color: #B8B8CC; font-variant-numeric: tabular-nums;
+}
+.gl-fact i { font-style: normal; font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: #8288A5; }
+.gl-result { font-size: 0.72rem; color: #E8B86D; }
+.gl-empty { color: #8288A5; font-size: .9rem; padding: 2rem 0; }
+
+/* ── Stat strip ── */
+.gl-stats { background: #06060A; border-top: 1px solid rgba(255,255,255,.06); }
+.gl-stats-in { display: flex; flex-wrap: wrap; gap: 0; }
+.gl-stat {
+  flex: 1 1 auto; min-width: 150px;
+  display: flex; flex-direction: column; gap: .3rem;
+  padding: 2.2rem 2rem 2.2rem 0;
+}
+.gl-stat-num {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: 2.1rem; letter-spacing: -.02em;
+  color: #E8B86D; font-variant-numeric: tabular-nums;
+}
+.gl-stat-lbl { font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: #9598B2; }
+.gl-stat-sub { font-size: 0.72rem; color: #8288A5; }
+
+/* ── Areas as bands ── */
+.gl-section--flush { padding-bottom: 0; }
+.gl-bands { display: flex; flex-direction: column; margin-top: 1rem; }
+.gl-band {
+  position: relative; display: block; text-decoration: none;
+  border-top: 1px solid rgba(255,255,255,.08); overflow: hidden; isolation: isolate;
+}
+.gl-band:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.gl-band-bg { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+.gl-band-bg img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center 55%;
+  opacity: .22; transform: scale(1.04);
+  transition: opacity .55s ease, transform 1.1s cubic-bezier(.16,1,.3,1);
+}
+.gl-band::after {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(90deg, rgba(6,6,10,.94) 0%, rgba(6,6,10,.78) 45%, rgba(6,6,10,.52) 100%);
+  transition: background .45s ease;
+}
+.gl-band:hover .gl-band-bg img { opacity: .42; transform: scale(1); }
+.gl-band:hover::after {
+  background: linear-gradient(90deg, rgba(6,6,10,.88) 0%, rgba(6,6,10,.62) 45%, rgba(6,6,10,.30) 100%);
+}
+.gl-band-in {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  gap: 2rem; padding-top: 1.9rem; padding-bottom: 1.9rem;
+}
+.gl-band-n {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300; font-size: 1.4rem;
+  color: rgba(232,184,109,.55); font-variant-numeric: tabular-nums;
+}
+.gl-band-main { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }
+.gl-band-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.1; letter-spacing: -.02em;
+  color: #F0F0F6; transition: color .2s ease;
+}
+.gl-band:hover .gl-band-title { color: #E8B86D; }
+.gl-band-sub { font-size: .84rem; color: #9DA0B8; }
+.gl-band-side { display: flex; align-items: center; gap: 1.5rem; white-space: nowrap; }
+.gl-band-count {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.78rem; letter-spacing: .02em; color: #E8B86D; text-transform: lowercase;
+}
+.gl-band-arrow {
+  width: 40px; height: 40px; border-radius: 4px;
+  border: 1px solid rgba(232,184,109,.35);
+  display: flex; align-items: center; justify-content: center; color: #E8B86D;
+  transition: background .25s ease, transform .25s cubic-bezier(.16,1,.3,1);
+}
+.gl-band:hover .gl-band-arrow { background: rgba(232,184,109,.1); transform: translateX(4px); }
+
+/* ── Quotes ── */
+.gl-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; }
+.gl-quote { margin: 0; border-top: 1px solid rgba(255,255,255,.1); padding-top: 1.6rem; }
+.gl-quote blockquote {
+  margin: 0 0 1.4rem;
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: 1.02rem; line-height: 1.7; color: #B8B8CC;
+}
+.gl-quote figcaption { display: flex; flex-direction: column; gap: .2rem; }
+.gl-quote-name { font-size: .84rem; color: #F0F0F6; }
+.gl-quote-meta { font-size: 0.72rem; color: #8288A5; }
+
+@media (max-width: 1024px) {
+  .gl-quotes { grid-template-columns: 1fr; gap: 2.2rem; }
+  .gl-row { grid-template-columns: 150px 1fr; gap: 1.4rem; }
+  .gl-thumb { width: 150px; }
+  .gl-row-facts { grid-column: 2; flex-direction: row; flex-wrap: wrap; gap: 1.2rem; align-items: baseline; text-align: left; }
+}
+@media (max-width: 760px) {
+  .gl-section { padding: 3.5rem 0; }
+  .gl-head { margin-bottom: 2rem; }
+  .gl-feat { grid-template-columns: 1fr; gap: 2rem; }
+  .gl-frame--lead .gl-frame-img { aspect-ratio: 3 / 2; }
+  .gl-frame-cap { flex-wrap: wrap; gap: .6rem 1rem; }
+  .gl-frame-meta { margin-left: 0; width: 100%; }
+  .gl-band-in { grid-template-columns: auto 1fr; gap: .8rem 1rem; padding-top: 1.4rem; padding-bottom: 1.4rem; }
+  .gl-band-side { grid-column: 2; justify-content: space-between; width: 100%; }
+  .gl-band-bg img { opacity: .28; }
+  .gl-row { grid-template-columns: 90px 1fr; gap: 1rem; padding: 1.4rem 0; }
+  .gl-thumb { width: 90px; }
+  .gl-stat { padding: 1.4rem 1.2rem 1.4rem 0; min-width: 120px; }
+  .gl-stat-num { font-size: 1.5rem; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .gl-row-finish { font-size: 0.72rem; }
+  .gl-tag { font-size: .72rem; }
+  .gl-stat-lbl { font-size: 0.72rem; }
+}
+</style>
+
+<script is:inline>
+(function () {
+  var wrap  = document.getElementById('gl-filters');
+  var list  = document.getElementById('gl-list');
+  var empty = document.getElementById('gl-empty');
+  if (!wrap || !list) return;
+
+  wrap.addEventListener('click', function (e) {
+    var btn = e.target.closest('.gl-filter');
+    if (!btn) return;
+
+    wrap.querySelectorAll('.gl-filter').forEach(function (b) { b.classList.remove('is-on'); });
+    btn.classList.add('is-on');
+
+    var want = btn.getAttribute('data-pf');
+    var shown = 0;
+    list.querySelectorAll('.gl-row').forEach(function (row) {
+      var show = want === 'all' || row.getAttribute('data-pt') === want;
+      row.hidden = !show;
+      if (show) shown++;
+    });
+    empty.hidden = shown > 0;
+  });
+})();
+</script>

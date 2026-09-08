@@ -1,0 +1,372 @@
+---
+import { type Lang } from '../../i18n/ui';
+import { ru } from '../../i18n/ru';
+import { en as enStrings } from '../../i18n/en';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+const strings = en ? enStrings : ru;
+
+/* One source for the rating. It was hard-coded as 47 here and in QuoteWall
+   while the i18n block said 45 — three numbers for one figure. */
+const reviewCount = strings.site.googleMapsReviews;
+const reviewsUrl  = strings.site.googleMapsUrl;
+---
+
+<section id="hero" class="hero-cine vignette">
+
+  <!-- Layer 0: full-bleed photo — the studio where the project is drawn.
+       Plans, laptop and drawings on the table: "design · build · oversee"
+       in one frame, before a single wall is touched. -->
+  <div class="hero-cine__bg cine-scene" aria-hidden="true">
+    <picture>
+      <source media="(max-width: 640px)" srcset="/images/hero-home-mobile.webp" />
+      <img src="/images/hero-main.webp" alt="" width="1200" height="630"
+        loading="eager" fetchpriority="high" decoding="async" data-kenburns />
+    </picture>
+  </div>
+
+  <!-- Layer 1: cinematic grade — dark base, light from the horizon -->
+  <div class="hero-cine__grade" aria-hidden="true"></div>
+
+  <!-- Layer 2: content, drifts up as you scroll away -->
+  <div class="hero-cine__content" data-hero-exit>
+    <div class="container-wide">
+
+      <p class="cine-label hero-cine__eyebrow" data-reveal data-reveal-delay="0.15">
+        {en ? 'Design · Build · Oversee — Limassol, Cyprus' : 'Проект · Стройка · Контроль — Лимасол, Кипр'}
+      </p>
+
+      <h1 class="cine-display hero-cine__h1" data-words>
+        {en
+          ? <>Your renovation isn't your <em>second job.</em></>
+          : <>Ремонт — не ваша <em>вторая работа.</em></>}
+      </h1>
+
+      <div class="hero-cine__row">
+        <p class="hero-cine__sub" data-reveal data-reveal-delay="0.55">
+          {en
+            ? <><strong>Full-home renovation, interior design and construction oversight in Limassol.</strong> One team designs it, builds it and answers for it — no fifteen phone numbers, no contractors blaming each other.</>
+            : <><strong>Ремонт под ключ, дизайн интерьера и строительный контроль в Лимасоле.</strong> Одна команда проектирует, строит и отвечает за результат — без пятнадцати телефонов и подрядчиков, кивающих друг на друга.</>}
+        </p>
+
+        <div class="hero-cine__act" data-reveal data-reveal-delay="0.7">
+          <div class="hero-cine__ctas">
+            <a href="#booking" class="hero-cine__cta" data-magnetic>
+              <span>{en ? 'Start your project' : 'Начать проект'}</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
+            <a href="/en/gallery" class="hero-cine__cta hero-cine__cta--ghost" data-magnetic>
+              <span>{en ? 'View our work' : 'Наши работы'}</span>
+            </a>
+          </div>
+          <p class="hero-cine__reassure">
+            {en
+              ? 'Free site visit within 48 hours · Fixed price in writing · No obligation'
+              : 'Бесплатный выезд за 48 часов · Фиксированная цена письменно · Без обязательств'}
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Layer 3: bottom editorial strip — stats as film credits -->
+  <div class="hero-cine__foot" data-reveal data-reveal-delay="0.9">
+    <div class="container-wide hero-cine__foot-in">
+      <div class="hero-cine__stats">
+        <div class="hero-cine__stat">
+          <span class="hero-cine__stat-num"><span data-count-to="500" data-count-suffix="+">500+</span></span>
+          <span class="hero-cine__stat-lbl">{en ? 'Projects completed' : 'Проектов сдано'}</span>
+        </div>
+        <div class="hero-cine__stat">
+          <span class="hero-cine__stat-num"><span data-count-to="35" data-count-suffix="">35</span></span>
+          <span class="hero-cine__stat-lbl">{en ? 'In-house specialists' : 'Штатных специалистов'}</span>
+        </div>
+        <div class="hero-cine__stat">
+          <span class="hero-cine__stat-num"><span data-count-to="48" data-count-suffix="h">48h</span></span>
+          <span class="hero-cine__stat-lbl">{en ? 'Warranty response' : 'Гарантийный выезд'}</span>
+        </div>
+        <div class="hero-cine__stat hero-cine__stat--rating">
+          <span class="hero-cine__stat-num">4.9<svg width="12" height="12" viewBox="0 0 20 20" fill="#E8B86D" aria-hidden="true" style="display:inline-block;margin-left:.3rem;vertical-align:baseline;"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span>
+          <span class="hero-cine__stat-lbl">{reviewCount} {en ? 'client testimonials' : 'отзывов клиентов'}</span>
+        </div>
+      </div>
+      <div class="hero-cine__scroll" aria-hidden="true">
+        <span>{en ? 'scroll' : 'скролл'}</span>
+        <div class="hero-cine__scroll-line"></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<style>
+/* ── Section: true full viewport ─────────────────────────── */
+.hero-cine {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-top: -57px;
+  background: #08080E;
+}
+
+/* ── Layer 0: photo ──────────────────────────────────────── */
+.hero-cine__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero-cine__bg img {
+  object-position: center 38%;
+}
+
+/* ── Layer 1: grade ──────────────────────────────────────── */
+/* Directional grade: darkest where the copy sits (left column and the very
+   bottom), light on the right so the sunset and the plans stay visible.
+   The old photo needed a near-opaque wash; this one does not. */
+.hero-cine__grade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(100deg,
+      rgba(6,6,12,.70) 0%,
+      rgba(6,6,12,.50) 32%,
+      rgba(6,6,12,.18) 62%,
+      rgba(6,6,12,.04) 100%),
+    linear-gradient(180deg,
+      rgba(6,6,12,.30) 0%,
+      rgba(6,6,12,.04) 32%,
+      rgba(6,6,12,.18) 72%,
+      rgba(6,6,12,.70) 100%);
+}
+
+/* ── Layer 2: content ────────────────────────────────────── */
+.hero-cine__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-bottom: 3.2rem;
+}
+.hero-cine__eyebrow { margin-bottom: 2rem; }
+
+.hero-cine__h1 {
+  max-width: 15ch;
+  margin: 0 0 2.4rem;
+  text-shadow: 0 2px 40px rgba(4,4,8,.6);
+}
+
+.hero-cine__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+.hero-cine__sub {
+  font-size: .95rem;
+  line-height: 1.8;
+  color: #B8B8CC;
+  max-width: 46ch;
+  margin: 0;
+}
+/* Lead clause carries the keywords — brighter, not louder */
+.hero-cine__sub strong {
+  color: #EFEFF6;
+  font-weight: 600;
+}
+
+/* ── CTAs: editorial underline buttons, no boxes ─────────── */
+.hero-cine__act {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  flex-shrink: 0;
+}
+.hero-cine__ctas {
+  display: flex;
+  gap: 2.2rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+/* Removes the three biggest objections before the click */
+.hero-cine__reassure {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: .06em;
+  /* The grade is lighter now, so this line sits on the bright half of the
+     photo — it needs its own contrast rather than the page background's. */
+  color: #CBCDDE;
+  text-align: center;
+  text-shadow: 0 1px 12px rgba(4,4,8,.9), 0 0 3px rgba(4,4,8,.7);
+}
+.hero-cine__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .85rem 1.9rem;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid #E8B86D;
+  color: #E8B86D;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: .03em;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+  will-change: transform;
+}
+.hero-cine__cta svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.hero-cine__cta:hover {
+  background: rgba(232,184,109,.09);
+  color: #F3D5A0;
+}
+.hero-cine__cta:hover svg { transform: translateX(3px); }
+/* Secondary reads as a quiet link, not a second button — the hero must have
+   one obvious primary action. Border only, per the agreed button language. */
+.hero-cine__cta--ghost {
+  border-color: transparent;
+  color: #B8B8CC;
+  padding-left: 0;
+  padding-right: 0;
+  position: relative;
+}
+.hero-cine__cta--ghost::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: .55rem;
+  height: 1px;
+  background: rgba(255,255,255,.28);
+  transition: background .2s ease;
+}
+.hero-cine__cta--ghost:hover {
+  background: transparent;
+  color: #FFFFFF;
+}
+.hero-cine__cta--ghost:hover::after { background: rgba(255,255,255,.7); }
+
+/* ── Layer 3: foot strip ─────────────────────────────────── */
+/* Hairline row, no panel — the numbers sit on the photo like film credits. */
+.hero-cine__foot {
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid rgba(255,255,255,.09);
+}
+.hero-cine__foot-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+.hero-cine__stats {
+  display: flex;
+  align-items: stretch;
+}
+.hero-cine__stat {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  padding: 0 clamp(1.4rem, 3.5vw, 3.2rem);
+  border-left: 1px solid rgba(255,255,255,.09);
+}
+.hero-cine__stat:first-child { padding-left: 0; border-left: none; }
+.hero-cine__stat-num {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 300;
+  font-size: 1.15rem;
+  line-height: 1;
+  letter-spacing: -.01em;
+  color: #E8B86D;
+  font-variant-numeric: tabular-nums;
+}
+.hero-cine__stat-lbl {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .58rem;
+  font-weight: 400;
+  letter-spacing: .16em;
+  text-transform: lowercase;
+  color: #83869E;
+}
+
+/* ── Scroll cue ──────────────────────────────────────────── */
+.hero-cine__scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  opacity: .45;
+}
+.hero-cine__scroll span {
+  font-size: .62rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: #9598B2;
+}
+.hero-cine__scroll-line {
+  width: 1px;
+  height: 2.2rem;
+  background: linear-gradient(to bottom, #E8B86D, transparent);
+  animation: scroll-pulse 2.2s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes scroll-pulse {
+  0%, 100% { transform: scaleY(.35); opacity: .4; }
+  50%      { transform: scaleY(1);   opacity: 1; }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 959px) {
+  .hero-cine { min-height: 92dvh; }
+  .hero-cine__row { flex-direction: column; align-items: flex-start; gap: 1.8rem; }
+  .hero-cine__stats { flex-wrap: wrap; row-gap: 1rem; }
+  .hero-cine__stat--rating { display: none; }
+  .hero-cine__scroll { display: none; }
+}
+@media (max-width: 640px) {
+  /* Content flows from below the sticky header instead of overflowing under it */
+  .hero-cine { justify-content: flex-start; }
+  .hero-cine__content { padding-top: calc(57px + 1.5rem); padding-bottom: 2.2rem; }
+  .hero-cine__eyebrow { margin-bottom: 1.4rem; }
+  .hero-cine__h1 { font-size: clamp(2.5rem, 11vw, 3.4rem); margin-bottom: 1.6rem; }
+  .hero-cine__act { width: 100%; gap: .75rem; }
+  .hero-cine__ctas { gap: 1rem; width: 100%; }
+  .hero-cine__cta { padding: .9rem 1.6rem; font-size: 0.84rem; }
+  .hero-cine__reassure { text-align: left; font-size: .66rem; line-height: 1.5; }
+  .hero-cine__stat-num { font-size: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-cine__scroll-line { animation: none; }
+  .hero-ticker__track { animation: none; }
+}
+
+/* Mobile legibility: these labels sit at 9–11px, unreadable on a phone. */
+@media (max-width: 700px) {
+  .hero-cine__stat-lbl { font-size: .72rem; }
+  .hero-cine__reassure { font-size: 0.78rem; }
+  /* A "scroll" prompt is noise on a touch screen */
+  .hero-cine__scroll { display: none; }
+}
+
+/* The directional grade assumes text in a left column. On a phone the headline
+   spans the whole width, so the wash has to be even rather than directional. */
+@media (max-width: 700px) {
+  .hero-cine__grade {
+    background:
+      linear-gradient(180deg,
+        rgba(6,6,12,.72) 0%,
+        rgba(6,6,12,.60) 35%,
+        rgba(6,6,12,.62) 70%,
+        rgba(6,6,12,.86) 100%);
+  }
+}
+</style>

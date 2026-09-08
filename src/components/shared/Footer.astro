@@ -1,0 +1,196 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+const year = new Date().getFullYear();
+const ru = lang === 'ru';
+const aboutHref   = ru ? '/ru/about'   : '/en/about';
+const processHref = ru ? '/ru/process' : '/en/process';
+const blogHref    = ru ? '/ru/blog'    : '/en/blog';
+// Privacy is localised; Terms and Cookies exist in English only.
+const privacyHref = ru ? '/ru/privacy' : '/en/privacy';
+const careersHref = ru ? '/ru/careers' : '/en/careers';
+const faqHref     = ru ? '/ru/faq' : '/en/faq';
+const galleryHref = ru ? '/ru/gallery' : '/en/gallery';
+---
+
+<style>
+  /* The mobile FloatingContactBar is fixed over the page (<768px, ~66px tall
+     plus its own inset padding). Without this the last row of footer links
+     sits underneath it and can never be read or tapped. */
+  @media (max-width: 767px) {
+    footer { padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px)); }
+  }
+</style>
+
+<footer style="background:#06060A;border-top:1px solid rgba(255,255,255,0.07);">
+
+  <!-- Main footer links -->
+  <div class="py-16">
+    <div class="container-wide">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 lg:gap-16">
+
+        <!-- Brand column -->
+        <div class="col-span-2 md:col-span-1">
+          <a href={lang === 'ru' ? '/ru' : '/'} class="flex items-center gap-2.5 mb-5 group w-fit">
+            <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <rect x="2.6" y="2.6" width="34.8" height="34.8" stroke="#E8B86D" stroke-width="1.4"/>
+              <g stroke="#E8B86D" stroke-width="2.2" stroke-linecap="square">
+                <path d="M13 11 V29"/>
+                <path d="M27 11 V29"/>
+                <path d="M13 20 H27"/>
+              </g>
+            </svg>
+            <span class="font-display font-semibold text-[#F0F0F6] text-base tracking-[0.22em] group-hover:text-[#E8B86D] transition-colors"
+                  style="font-family:'Spectral',Georgia,serif">HELYOT</span>
+          </a>
+          <p class="text-[#8288A5] text-sm leading-relaxed mb-6">
+            {tr('footer.tagline')}<br/>
+            {lang === 'en' ? 'Headquartered in Limassol — working across Cyprus since 2022.' : 'Штаб-квартира в Лимасоле — работаем по всему Кипру с 2022 года.'}
+          </p>
+          <!-- Social icons -->
+          <div class="flex items-center gap-3">
+            {[
+              { href:tr('site.instagram'), label:'Instagram', d:'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z' },
+              { href:tr('site.linkedin'), label:'LinkedIn',  d:'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z' },
+              { href:tr('site.facebook'), label:'Facebook',  d:'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' },
+            ].map((s) => (
+              <a href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+                 class="w-8 h-8 rounded-[4px] flex items-center justify-center text-[#8288A5] hover:text-[#E8B86D] hover:bg-[rgba(232,184,109,0.08)] transition-all"
+                 style="border:1px solid rgba(255,255,255,0.07)">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d={s.d}/></svg>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <!-- Services -->
+        <div>
+          <h3 class="font-display font-semibold text-[#F0F0F6] text-xs uppercase tracking-widest mb-5 opacity-50">
+            {tr('nav.services')}
+          </h3>
+          <nav class="space-y-3">
+            {[
+              { href: lang === 'ru' ? '/ru/uslugi/interior-design'      : '/en/services/interior-design',      label: tr('services.design') },
+              { href: lang === 'ru' ? '/ru/uslugi/apartment-renovation' : '/en/services/apartment-renovation', label: tr('services.apartment') },
+              { href: lang === 'ru' ? '/ru/uslugi/villa-renovation'     : '/en/services/villa-renovation',     label: tr('services.villa') },
+              { href: lang === 'ru' ? '/ru/uslugi/energy-modernization' : '/en/services/energy-modernization', label: tr('services.energy') },
+              { href: lang === 'ru' ? '/ru/uslugi/smart-home'           : '/en/services/smart-home',          label: tr('services.smartHome') },
+              { href: lang === 'ru' ? '/ru/uslugi/office-fit-out'       : '/en/services/office-fit-out',            label: tr('services.commercial') },
+            ].map((link) => (
+              <a href={link.href} class="block text-sm text-[#8288A5] hover:text-[#E8B86D] transition-colors link-underline">
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <h3 class="font-display font-semibold text-[#F0F0F6] text-xs uppercase tracking-widest mb-5 opacity-50">
+            {tr('footer.company')}
+          </h3>
+          <nav class="space-y-3">
+            {[
+              { href: aboutHref,   label: ru ? 'О компании'      : 'About Helyot' },
+              { href: processHref, label: ru ? 'Как мы работаем' : 'How We Work' },
+              { href: careersHref,  label: tr('nav.careers') },
+              { href: faqHref,     label: 'FAQ' },
+              { href: blogHref,    label: tr('nav.blog') },
+            ].map((link) => (
+              <a href={link.href} class="block text-sm text-[#8288A5] hover:text-[#E8B86D] transition-colors">
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        <!-- Contact -->
+        <div>
+          <h3 class="font-display font-semibold text-[#F0F0F6] text-xs uppercase tracking-widest mb-5 opacity-50">
+            {tr('nav.contact')}
+          </h3>
+          <div class="space-y-3 text-sm text-[#8288A5]">
+            <a href={`tel:${tr('site.phone').replace(/\s/g,'')}`} class="flex items-center gap-2.5 hover:text-[#E8B86D] transition-colors">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              {tr('site.phone')}
+            </a>
+            <a href={`mailto:${tr('site.email')}`} class="flex items-center gap-2.5 hover:text-[#E8B86D] transition-colors">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              {tr('site.email')}
+            </a>
+            <a href={`https://wa.me/${tr('site.whatsapp')}`} target="_blank" rel="noopener noreferrer"
+               class="flex items-center gap-2.5 text-green-500 hover:text-green-400 transition-colors">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.375l-.36-.214-3.727.977.994-3.637-.235-.374A9.818 9.818 0 1112 21.818z"/></svg>
+              WhatsApp
+            </a>
+            <p class="text-[#8288A5] text-xs mt-2">{tr('site.address')}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- The full location list used to be dumped here on every page. It
+           now lives on the services page, which is where someone actually
+           choosing an area would look; this is just the way in. -->
+      <p class="fl-loc-note">
+        {ru
+          ? <>Работаем по подконтрольной правительству территории Республики Кипр. <a href="/ru/uslugi#coverage">Города и районы →</a></>
+          : <>We work across the government-controlled areas of the Republic of Cyprus. <a href="/en/services#coverage">Cities and districts →</a></>}
+      </p>
+    </div>
+  </div>
+
+  <!-- Direct-contact strip — an honest CTA instead of a dead newsletter form -->
+  <div style="border-top:1px solid rgba(255,255,255,0.05);padding:1.1rem 0;">
+    <div class="container-wide" style="display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;">
+      <span style="font-family:'Spectral',Georgia,serif;font-size:.95rem;font-weight:400;color:#B8B8CC;">
+        {lang === 'en' ? 'Ready when you are — free site survey within 48 hours.' : 'Готовы, когда готовы вы — бесплатный выезд в течение 48 часов.'}
+      </span>
+      <span style="display:flex;gap:1.6rem;align-items:center;flex-wrap:wrap;">
+        <a href={`tel:${tr('site.phone').replace(/\s/g,'')}`}
+           style="font-size:0.84rem;font-weight:600;color:#E8B86D;text-decoration:none;border-bottom:1px solid rgba(232,184,109,.35);padding-bottom:.15rem;">
+          {tr('site.phone')}
+        </a>
+        <a href={`https://wa.me/${tr('site.whatsapp')}`} target="_blank" rel="noopener noreferrer"
+           style="font-size:0.84rem;font-weight:600;color:#B8B8CC;text-decoration:none;">
+          WhatsApp →
+        </a>
+      </span>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="border-top:1px solid rgba(255,255,255,0.04);" class="py-5">
+    <div class="container-wide flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8288A5]">
+      <p>© {year} Helyot. {tr('footer.rights')}</p>
+      <nav class="flex flex-wrap items-center gap-4">
+        <a href={privacyHref} class="hover:text-[#E8B86D] transition-colors">{tr('footer.privacy')}</a>
+        <a href="/en/terms"   class="hover:text-[#E8B86D] transition-colors">{tr('footer.terms')}</a>
+        <a href="/en/cookies" class="hover:text-[#E8B86D] transition-colors">{tr('footer.cookies')}</a>
+        <a href={careersHref}     class="hover:text-[#E8B86D] transition-colors">{tr('nav.careers')}</a>
+        <a href="/sitemap.xml" class="hover:text-[#E8B86D] transition-colors">{tr('footer.sitemap')}</a>
+        <a href={`mailto:${tr('site.email')}?subject=Error report`} class="hover:text-[#E8B86D] transition-colors">{tr('footer.reportBug')}</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<style>
+.fl-loc-note {
+  margin: 2.4rem 0 0; padding-top: 1.6rem; max-width: 70ch;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.72rem; line-height: 1.7; color: #8288A5;
+}
+.fl-loc-note a { color: #8288A5; text-decoration: none; transition: color .15s; }
+.fl-loc-note a:hover { color: #E8B86D; }
+
+/* Footer nav rows are ~20px tall, well under the 44px touch minimum, so on
+   phones they get vertical padding instead of relying on the text box. */
+@media (max-width: 700px) {
+  footer a.block,
+  footer a.flex { padding-top: .55rem; padding-bottom: .55rem; }
+  .fl-loc-note a { display: inline-block; padding: .5rem 0; }
+}
+
+</style>

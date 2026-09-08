@@ -1,0 +1,436 @@
+---
+import { t, getAlternatePath, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+const altLang: Lang = lang === 'en' ? 'ru' : 'en';
+// The 404 page has no real per-language path (Astro.url.pathname is the
+// literal, non-routable "/404") — send the language switcher home instead.
+const is404 = Astro.url.pathname === '/404' || Astro.url.pathname === '/ru/404';
+const altHref = is404 ? (altLang === 'ru' ? '/ru' : '/') : getAlternatePath(Astro.url, altLang);
+const selfHref = is404 ? (lang === 'ru' ? '/ru' : '/') : Astro.url.pathname;
+
+const aboutHref  = lang === 'ru' ? '/ru/about'   : '/en/about';
+const servicesHref = lang === 'ru' ? '/ru/uslugi' : '/en/services';
+const processHref  = lang === 'ru' ? '/ru/process' : '/en/process';
+const contactHref  = lang === 'ru' ? '/ru/kontakty': '/en/contact';
+const careersHref  = lang === 'ru' ? '/ru/careers' : '/en/careers';
+const faqHref      = lang === 'ru' ? '/ru/faq' : '/en/faq';
+const galleryHref  = lang === 'ru' ? '/ru/gallery' : '/en/gallery';
+---
+
+<style>
+  /* ── Bridge gap: keeps panel open when mouse crosses the 10px gap ── */
+  .nav-item > button::after,
+  .nav-item > a::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 0;
+    width: 100%;
+    height: 14px;
+  }
+
+  /* ── Dropdown panel ─────────────────────────────────────── */
+  .nav-item { position: relative; }
+  .nav-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* spring exit */
+    transition: opacity 0.18s ease, visibility 0.18s ease,
+                transform 0.18s cubic-bezier(0.4, 0, 1, 1);
+    transform: translateY(-6px) scale(0.975);
+    transform-origin: top center;
+    z-index: 200;
+  }
+  .nav-item:hover > .nav-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    /* spring enter */
+    transition: opacity 0.22s ease, visibility 0.22s ease,
+                transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(0) scale(1);
+  }
+  .nav-panel-inner {
+    background: rgba(22,22,31,0.97);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius:4px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 8px 24px rgba(0,0,0,0.4),
+      0 32px 80px rgba(0,0,0,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ── Nav button ─────────────────────────────────────────── */
+  .nav-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.5rem 0.9rem;
+    font-family: 'Jost Variable', system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+    color: #9DA0B8;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s ease, background 0.15s ease;
+    /* underline indicator */
+    overflow: hidden;
+  }
+  .nav-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    width: 0;
+    height: 1.5px;
+    background: #E8B86D;
+    border-radius: 1px;
+    transform: translateX(-50%);
+    transition: width 0.22s cubic-bezier(0.16,1,0.3,1);
+    opacity: 0.7;
+  }
+  .nav-btn:hover {
+    color: #F0F0F6;
+    background: rgba(255,255,255,0.045);
+  }
+  .nav-btn:hover::after { width: 60%; }
+  .nav-item:hover > .nav-btn { color: #F0F0F6; background: rgba(255,255,255,0.045); }
+  .nav-item:hover > .nav-btn::after { width: 60%; }
+  /* ── Active page indicator ── */
+  .nav-btn.nav-active { color: #F0F0F6; }
+  .nav-btn.nav-active::after { width: 60%; opacity: 1; }
+
+  /* ── Chevron ────────────────────────────────────────────── */
+  .nav-arrow {
+    opacity: 0.35;
+    transition: transform 0.24s cubic-bezier(0.16,1,0.3,1), opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .nav-item:hover .nav-arrow { transform: rotate(180deg); opacity: 0.65; }
+
+  /* ── Dropdown link ───────────────────────────────────────── */
+  .nav-link {
+    display: block;
+    padding: 0.55rem 0.9rem;
+    border-radius:4px;
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 0.84rem;
+    font-weight: 450;
+    color: #8288A5;
+    text-decoration: none;
+    transition: color 0.13s, background 0.13s, transform 0.15s;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .nav-link:hover {
+    color: #F0F0F6;
+    background: rgba(255,255,255,0.055);
+    transform: translateX(2px);
+  }
+
+  /* ── Service group label ────────────────────────────────── */
+  .svc-label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #8288A5;
+    padding: 0 0.9rem;
+    margin-bottom: 0.25rem;
+    margin-top: 0.25rem;
+  }
+
+  /* ── Language switch ────────────────────────────────────── */
+  /* No box — the active language is marked by colour and a hairline. */
+  .lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    height: 2rem;
+    flex-shrink: 0;
+    align-self: center;
+    /* Sits away from the CTA so the two don't read as one control */
+    margin-right: 0.9rem;
+  }
+  .lang-switch::after {
+    content: '';
+    order: -1;
+    width: 1px; height: 11px;
+    background: rgba(255,255,255,0.16);
+  }
+  .lang-opt {
+    position: relative;
+    font-family: 'Jost Variable', system-ui, sans-serif;
+    font-size: 0.84rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    padding-bottom: 0.22rem;
+    text-decoration: none;
+    transition: color 0.16s;
+    /* The label is only ~20x17px. Touch targets need ~44px, so the hit area is
+       padded out and pulled back with a negative margin — nothing moves
+       visually, but the tappable box reaches the guideline. */
+    padding: 0.75rem 0.55rem 0.9rem;
+    margin: -0.75rem -0.55rem -0.9rem;
+    line-height: 1;
+  }
+  .lang-on  { color: #E8B86D; }
+  .lang-on::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 1px; background: #E8B86D;
+  }
+  .lang-off { color: #8288A5; }
+  .lang-off:hover { color: #B8B8CC; }
+
+  /* ── Logo hover ─────────────────────────────────────────── */
+  .logo-mark { transition: filter 0.2s ease, transform 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .logo-wrap:hover .logo-mark { filter: brightness(1.15); transform: translateY(-1px); }
+  .logo-text { transition: color 0.2s ease, letter-spacing 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .logo-wrap:hover .logo-text { color: #E8B86D; letter-spacing: 0.26em; }
+
+  /* ── CTA button ─────────────────────────────────────────── */
+  .cta-btn {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Jost Variable', system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+    padding: 0.55rem 1.25rem;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid #E8B86D;
+    color: #E8B86D;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
+  }
+  .cta-btn svg { transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .cta-btn:hover {
+    background: rgba(232,184,109,.08);
+    color: #F3D5A0;
+  }
+  .cta-btn:hover svg { transform: translateX(3px); }
+
+  /* ── Header bar background ──────────────────────────────── */
+  .hdr-bar {
+    background: linear-gradient(180deg, rgba(8,8,14,.72), rgba(8,8,14,.38));
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.2s ease, backdrop-filter 0.2s ease;
+  }
+  /* On mobile/tablet the header sits directly over page content while scrolling —
+     keep it solid so nav text stays legible against busy hero/section backgrounds */
+  @media (max-width: 1023px) {
+    .hdr-bar {
+      background: rgba(18,18,27,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+  }
+
+  /* ── Responsive ─────────────────────────────────────────── */
+  @media (min-width: 1024px) {
+    :global(.lg-flex) { display: flex !important; }
+    :global(.lg-hide) { display: none !important; }
+  }
+  @media (min-width: 768px) {
+    :global(.md-flex)  { display: flex !important; }
+    :global(.md-show)  { display: block !important; }
+  }
+  /* ── Narrow desktop: full nav + CTA overlap — tighten to fit ── */
+  @media (min-width: 1024px) and (max-width: 1199px) {
+    :global(.lg-flex) { gap: 0 !important; }
+    :global(.lg-flex .nav-btn) { padding-left: 0.55rem !important; padding-right: 0.55rem !important; font-size: 0.9rem !important; }
+    :global(.md-show) { display: none !important; }
+  }
+</style>
+
+<header style="position:sticky;top:0;z-index:50;">
+  <div class="hdr-bar" style="box-shadow:none;">
+    <div style="max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 2rem;">
+
+      <!-- ══ LOGO ══════════════════════════════════════════ -->
+      <a href={lang==='ru'?'/ru':'/'} class="logo-wrap" style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0;text-decoration:none;margin-right:1.5rem;" aria-label="Helyot">
+
+        <!-- Mark: monogram H inside a thin frame — an architect's stamp -->
+        <svg class="logo-mark" width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2.6" y="2.6" width="34.8" height="34.8" stroke="#E8B86D" stroke-width="1.4"/>
+          <g stroke="#E8B86D" stroke-width="2.2" stroke-linecap="square">
+            <path d="M13 11 V29"/>
+            <path d="M27 11 V29"/>
+            <path d="M13 20 H27"/>
+          </g>
+        </svg>
+
+        <!-- Wordmark -->
+        <span class="logo-text" style="font-family:'Spectral',Georgia,serif;font-weight:600;font-size:1.08rem;letter-spacing:0.22em;color:#F5F5FF;line-height:1;transition:color .2s,letter-spacing .25s cubic-bezier(0.16,1,0.3,1);">HELYOT</span>
+      </a>
+
+      <!-- ══ DESKTOP NAV ════════════════════════════════════ -->
+      <nav style="display:none;align-items:center;gap:0.25rem;" class="lg-flex" aria-label="Main navigation">
+
+        <!-- Services — direct link to services index -->
+        <a href={servicesHref} class="nav-btn">
+          {lang==='en'?'Services':'Услуги'}
+        </a>
+
+        <!-- Divider -->
+        <div style="width:1px;height:16px;background:rgba(255,255,255,0.07);margin:0 0.125rem;flex-shrink:0;"></div>
+
+        <a href={galleryHref} class="nav-btn">{lang==='en'?'Our Projects':'Наши проекты'}</a>
+        {/* "How We Work" lives in the mobile menu, the footer and the process
+            section on the home page — the top bar was carrying eight items. */}
+        <a href={aboutHref} class="nav-btn">{lang==='en'?'About':'О нас'}</a>
+
+        <!-- Divider -->
+        <div style="width:1px;height:16px;background:rgba(255,255,255,0.07);margin:0 0.125rem;flex-shrink:0;"></div>
+
+        <a href={careersHref} class="nav-btn">{lang==='en'?'Careers':'Вакансии'}</a>
+        <a href={lang==='ru'?'/ru/blog':'/en/blog'} class="nav-btn">{lang==='en'?'Blog':'Блог'}</a>
+        <a href={faqHref} class="nav-btn">FAQ</a>
+        <a href={contactHref} class="nav-btn">{lang==='en'?'Contacts':'Контакты'}</a>
+
+      </nav>
+
+      <!-- ══ RIGHT SIDE ═════════════════════════════════════ -->
+      <div style="display:flex;align-items:center;gap:0.625rem;flex-shrink:0;">
+
+        <!-- Lang toggle -->
+        <div class="lang-switch">
+          <a href={lang==='en' ? selfHref : altHref}
+             class={`lang-opt ${lang==='en'?'lang-on':'lang-off'}`}
+             lang="en" aria-current={lang==='en'?'true':undefined}>EN</a>
+          <a href={lang==='ru' ? selfHref : altHref}
+             class={`lang-opt ${lang==='ru'?'lang-on':'lang-off'}`}
+             lang="ru" aria-current={lang==='ru'?'true':undefined}>RU</a>
+        </div>
+
+        <!-- CTA -->
+        <a href="#booking" class="cta-btn md-flex">
+          {lang==='en'?'Free estimate':'Оценка бесплатно'}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+
+        <!-- Hamburger — same height as lang-switch for alignment -->
+        <button id="hamburger" aria-label="Menu" aria-expanded="false" class="lg-hide"
+                style="display:flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:4px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.03);cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0;align-self:center;"
+                onmouseover="this.style.background='rgba(255,255,255,0.07)';this.style.borderColor='rgba(255,255,255,0.14)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.03)';this.style.borderColor='rgba(255,255,255,0.07)'">
+          <svg id="ham-open"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8288A5" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="ham-close" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8288A5" stroke-width="2.2" stroke-linecap="round" style="display:none;"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ MOBILE MENU ════════════════════════════════════════ -->
+    <div id="mobile-menu" style="display:none;border-top:1px solid rgba(255,255,255,0.06);max-height:80vh;overflow-y:auto;">
+      <div style="padding:0.875rem 1.125rem 1.125rem;">
+
+        <!-- Services — direct link (mobile) -->
+        <a href={servicesHref} style="display:block;padding:0.625rem 0.875rem;border-radius:4px;font-family:'Jost Variable',system-ui,sans-serif;font-size:1.02rem;font-weight:400;color:#9DA0B8;text-decoration:none;text-transform:lowercase;margin-bottom:0.125rem;transition:background .15s,color .15s;" onmouseover="this.style.background='rgba(255,255,255,0.04)';this.style.color='#B8B8CC'" onmouseout="this.style.background='';this.style.color='#8288A5'">
+          {lang==='en'?'Services':'Услуги'}
+        </a>
+
+        {[
+          { label: lang==='en'?'Our Projects':'Наши проекты', href: galleryHref },
+          { label: lang==='en'?'How We Work':'Как работаем',  href: processHref },
+          { label: lang==='en'?'About':'О нас',               href: aboutHref },
+          { label: lang==='en'?'Contacts':'Контакты',          href: contactHref },
+          { label: lang==='en'?'Blog':'Блог',                  href: lang==='ru'?'/ru/blog':'/en/blog' },
+          { label: 'FAQ',                                       href: faqHref },
+          { label: lang==='en'?'Careers':'Вакансии',           href: careersHref },
+        ].map(l => (
+          <a href={l.href} style="display:block;padding:0.625rem 0.875rem;border-radius:4px;font-family:'Jost Variable',system-ui,sans-serif;font-size:1.02rem;font-weight:400;color:#9DA0B8;text-decoration:none;text-transform:lowercase;transition:background .15s,color .15s;" onmouseover="this.style.background='rgba(255,255,255,0.04)';this.style.color='#B8B8CC'" onmouseout="this.style.background='';this.style.color='#8288A5'">{l.label}</a>
+        ))}
+
+        <div style="display:flex;gap:0.625rem;padding-top:0.875rem;border-top:1px solid rgba(255,255,255,0.055);margin-top:0.625rem;">
+          <a href="#booking" style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.7rem;border-radius:4px;background:transparent;border:1.5px solid #E8B86D;font-family:'Jost Variable',system-ui,sans-serif;color:#E8B86D;font-weight:400;font-size:0.9rem;text-transform:lowercase;text-decoration:none;">
+            {lang==='en'?'Free estimate':'Оценка бесплатно'}
+          </a>
+          <div class="lang-switch" style="flex-shrink:0;">
+            <a href={lang==='en' ? selfHref : altHref} class={`lang-opt ${lang==='en'?'lang-on':'lang-off'}`} lang="en">EN</a>
+            <a href={lang==='ru' ? selfHref : altHref} class={`lang-opt ${lang==='ru'?'lang-on':'lang-off'}`} lang="ru">RU</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script is:inline define:vars={{ contactHref }}>
+(function() {
+  /* ── CTA fallback ──────────────────────────────────────────
+     The header/mobile "Free estimate" button points at #booking,
+     but pages like FAQ, Careers, Blog index and the legal pages
+     carry no booking form — the click would do nothing. Send
+     those visitors to the contact page (which has the form)
+     instead of leaving them on a dead anchor.
+     Deferred to DOMContentLoaded: this script sits right after
+     </header>, so at parse time the in-page CTAs further down
+     the document do not exist yet. */
+  function fixDeadBookingLinks() {
+    if (document.getElementById('booking')) return;
+    document.querySelectorAll('a[href="#booking"]').forEach(function(a) {
+      a.setAttribute('href', contactHref + '#booking');
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixDeadBookingLinks);
+  } else {
+    fixDeadBookingLinks();
+  }
+
+  var btn  = document.getElementById('hamburger');
+  var menu = document.getElementById('mobile-menu');
+  var open = document.getElementById('ham-open');
+  var cls  = document.getElementById('ham-close');
+  if (!btn || !menu) return;
+
+  btn.addEventListener('click', function() {
+    var isOpen = menu.style.display === 'block';
+    menu.style.display = isOpen ? 'none' : 'block';
+    open.style.display = isOpen ? '' : 'none';
+    cls.style.display  = isOpen ? 'none' : '';
+    btn.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!btn.contains(e.target) && !menu.contains(e.target)) {
+      menu.style.display = 'none';
+      open.style.display = '';
+      cls.style.display  = 'none';
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  /* ── Active nav state — highlight current page link ── */
+  var path = window.location.pathname.replace(/\/$/, '') || '/';
+  document.querySelectorAll('.nav-btn[href]').forEach(function(link) {
+    var href = link.getAttribute('href').replace(/\/$/, '') || '/';
+    if (href && path === href) {
+      link.classList.add('nav-active');
+      link.setAttribute('aria-current', 'page');
+    }
+  });
+})();
+</script>

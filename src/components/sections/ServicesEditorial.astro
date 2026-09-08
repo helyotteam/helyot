@@ -1,0 +1,286 @@
+---
+/**
+ * SERVICES — four full-bleed bands, one per category.
+ * Replaces the dotted price-list, which read like a restaurant menu rather
+ * than a portfolio of work. Each band carries its own photograph so the
+ * section has rhythm instead of one long column of rows.
+ */
+import { type Lang } from '../../i18n/ui';
+import { services, type ServiceCategory } from '../../lib/servicesData';
+import { categoryHero, categoryBand } from '../../lib/servicePhotos';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+
+const catOrder: ServiceCategory[] = ['spaces', 'commercial', 'specialist', 'trades'];
+
+const catCopy: Record<ServiceCategory, { en: string; ru: string; subEn: string; subRu: string }> = {
+  spaces: {
+    en: 'Homes & living spaces', ru: 'Дом и жильё',
+    subEn: 'Apartments, villas, kitchens, bathrooms, terraces.',
+    subRu: 'Квартиры, виллы, кухни, санузлы, террасы.',
+  },
+  commercial: {
+    en: 'Commercial', ru: 'Коммерция',
+    subEn: 'Offices, hotels, retail and restaurants — built around your opening hours.',
+    subRu: 'Офисы, отели, магазины и рестораны — работаем под ваш график.',
+  },
+  specialist: {
+    en: 'Design & specialist', ru: 'Проект и спецработы',
+    subEn: 'Interior design, energy modernisation, smart home.',
+    subRu: 'Дизайн интерьера, энергомодернизация, умный дом.',
+  },
+  trades: {
+    en: 'Trades & works', ru: 'Виды работ',
+    subEn: 'Flooring, plastering, electrics, plumbing, joinery, facades.',
+    subRu: 'Полы, штукатурка, электрика, сантехника, столярка, фасады.',
+  },
+};
+
+/* One photo per band — alternate the two sets so no image repeats. */
+const bandPhoto: Record<ServiceCategory, string> = {
+  spaces:     categoryBand.spaces,
+  commercial: categoryHero.commercial,
+  specialist: categoryBand.specialist,
+  trades:     categoryHero.trades,
+};
+
+const byCat = (cat: ServiceCategory) => services.filter(s => s.category === cat);
+
+/* Cheapest per-m² rate in the category — a real number, taken from the data. */
+const fromLabel = (cat: ServiceCategory) => {
+  const rates = byCat(cat).filter(s => s.priceUnit === 'sqm' && s.priceFrom).map(s => s.priceFrom!);
+  if (!rates.length) return en ? 'on request' : 'по запросу';
+  return (en ? 'from €' : 'от €') + Math.min(...rates) + (en ? '/m²' : '/м²');
+};
+
+const svcHref = (slug: string) => en ? `/en/services/${slug}` : `/ru/uslugi/${slug}`;
+const allHref = en ? '/en/services' : '/ru/uslugi';
+
+const svcCount = services.length;
+const ruPlural = (n: number, one: string, few: string, many: string) => {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+};
+const countLabel = en
+  ? `${svcCount} services`
+  : `${svcCount} ${ruPlural(svcCount, 'услуга', 'услуги', 'услуг')}`;
+---
+
+<section id="services" class="sv-section">
+  <div class="container-wide">
+    <div class="sv-head">
+      <div>
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{countLabel}</span>
+          {en ? 'What we do' : 'Что мы делаем'}
+        </p>
+        <h2 class="cine-display sv-title" data-words>
+          {en
+            ? <>Every trade. <em>One contractor.</em></>
+            : <>Все работы. <em>Один подрядчик.</em></>}
+        </h2>
+      </div>
+      <p class="sv-sub" data-reveal>
+        {en
+          ? 'From a single bathroom to a full villa — designed, built and warranted by the same in-house team. Prices below are honest starting rates; your figure is fixed after a free survey.'
+          : 'От одной ванной до целой виллы — проектирует, строит и даёт гарантию одна штатная команда. Цены ниже — честные стартовые ставки; ваша сумма фиксируется после бесплатного выезда.'}
+      </p>
+    </div>
+  </div>
+
+  <!-- Bands -->
+  <div class="sv-bands">
+    {catOrder.map((cat, i) => (
+      <a href={allHref} class="sv-band" data-reveal>
+        <span class="sv-band-bg" aria-hidden="true">
+          <img src={bandPhoto[cat]} alt="" width="1200" height="500" loading="lazy" decoding="async" />
+        </span>
+        <span class="sv-band-in container-wide">
+          <span class="sv-band-n">{String(i + 1).padStart(2, '0')}</span>
+
+          <span class="sv-band-main">
+            <span class="sv-band-title">{en ? catCopy[cat].en : catCopy[cat].ru}</span>
+            <span class="sv-band-sub">{en ? catCopy[cat].subEn : catCopy[cat].subRu}</span>
+            <span class="sv-band-list">
+              {byCat(cat).slice(0, 6).map(s => (
+                <span class="sv-chip">{en ? s.titleEn : s.titleRu}</span>
+              ))}
+              {byCat(cat).length > 6 && (
+                <span class="sv-chip sv-chip--more">+{byCat(cat).length - 6}</span>
+              )}
+            </span>
+          </span>
+
+          <span class="sv-band-side">
+            <span class="sv-band-price">{fromLabel(cat)}</span>
+            <span class="sv-band-arrow" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                <path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </span>
+          </span>
+        </span>
+      </a>
+    ))}
+  </div>
+
+  <div class="container-wide">
+    <div class="sv-foot" data-reveal>
+      <a href={allHref} class="sv-all" data-magnetic>
+        {en ? 'Explore all services' : 'Все услуги подробно'}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <p class="sv-area">
+        {en
+          ? 'Available across the Republic of Cyprus — Limassol, Paphos, Larnaca, Nicosia, Ayia Napa, Protaras, Paralimni.'
+          : 'Работаем по всей Республике Кипр — Лимасол, Пафос, Ларнака, Никосия, Айя-Напа, Протарас, Паралимни.'}
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+.sv-section {
+  padding: 7rem 0 5rem;
+  background: #08080E;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.sv-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 3rem; flex-wrap: wrap; margin-bottom: 3.5rem;
+}
+.sv-title { margin: 1.2rem 0 0; }
+.sv-sub {
+  font-size: 0.95rem; line-height: 1.8; color: #9DA0B8;
+  max-width: 44ch; margin: 0;
+}
+
+/* ── Bands ── */
+.sv-bands { display: flex; flex-direction: column; }
+.sv-band {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  border-top: 1px solid rgba(255,255,255,.08);
+  overflow: hidden;
+  isolation: isolate;
+}
+.sv-band:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+
+/* Photo sits behind at low opacity; it lifts on hover rather than shouting. */
+.sv-band-bg { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+.sv-band-bg img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center 55%;
+  opacity: .34;
+  transform: scale(1.04);
+  transition: opacity .55s ease, transform 1.1s cubic-bezier(.16,1,.3,1);
+}
+.sv-band::after {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(90deg, rgba(8,8,14,.88) 0%, rgba(8,8,14,.66) 45%, rgba(8,8,14,.34) 100%);
+  transition: background .45s ease;
+}
+.sv-band:hover .sv-band-bg img { opacity: .55; transform: scale(1); }
+.sv-band:hover::after {
+  background: linear-gradient(90deg, rgba(8,8,14,.82) 0%, rgba(8,8,14,.52) 45%, rgba(8,8,14,.18) 100%);
+}
+
+.sv-band-in {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 2.2rem;
+  padding-top: 2.1rem;
+  padding-bottom: 2.1rem;
+}
+
+.sv-band-n {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 300; font-size: 1.5rem;
+  color: rgba(232,184,109,.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.sv-band-main { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.sv-band-title {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.1; letter-spacing: -.02em;
+  color: #F0F0F6;
+  transition: color .2s ease;
+}
+.sv-band:hover .sv-band-title { color: #E8B86D; }
+.sv-band-sub { font-size: 0.84rem; color: #9DA0B8; line-height: 1.5; max-width: 52ch; }
+
+.sv-band-list { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .3rem; }
+.sv-chip {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.78rem; letter-spacing: .01em; color: #8E91AB;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 4px; padding: .2rem .6rem;
+  transition: border-color .2s ease, color .2s ease;
+}
+.sv-band:hover .sv-chip { border-color: rgba(255,255,255,.2); color: #B8B8CC; }
+.sv-chip--more { color: #E8B86D; border-color: rgba(232,184,109,.3); }
+
+.sv-band-side { display: flex; align-items: center; gap: 1.6rem; white-space: nowrap; }
+.sv-band-price {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 1.02rem; color: #B8B8CC;
+  font-variant-numeric: tabular-nums;
+}
+.sv-band-arrow {
+  width: 42px; height: 42px; border-radius: 4px;
+  border: 1px solid rgba(232,184,109,.35);
+  display: flex; align-items: center; justify-content: center;
+  color: #E8B86D;
+  transition: background .25s ease, transform .25s cubic-bezier(.16,1,.3,1);
+}
+.sv-band:hover .sv-band-arrow { background: rgba(232,184,109,.1); transform: translateX(4px); }
+
+/* ── Foot ── */
+.sv-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap; padding-top: 3rem;
+}
+.sv-all {
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .95rem; font-weight: 400; text-transform: lowercase;
+  color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px;
+  padding: .6rem 1.3rem;
+  transition: background .2s ease, color .2s ease;
+}
+.sv-all svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.sv-all:hover { background: rgba(232,184,109,.08); color: #F3D5A0; }
+.sv-all:hover svg { transform: translateX(3px); }
+.sv-area { font-size: .78rem; color: #8288A5; line-height: 1.6; max-width: 52ch; margin: 0; }
+
+@media (max-width: 900px) {
+  .sv-section { padding: 4rem 0 3rem; }
+  .sv-head { margin-bottom: 2.2rem; }
+  .sv-band-in {
+    grid-template-columns: auto 1fr;
+    gap: 1rem 1.1rem;
+    padding-top: 1.6rem; padding-bottom: 1.6rem;
+  }
+  .sv-band-side { grid-column: 2; justify-content: space-between; width: 100%; }
+  .sv-band-bg img { opacity: .34; }
+  .sv-band::after {
+    background: linear-gradient(90deg, rgba(8,8,14,.90) 0%, rgba(8,8,14,.72) 100%);
+  }
+}
+@media (max-width: 560px) {
+  .sv-chip:nth-child(n+5) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv-band-bg img { transition: opacity .2s ease; transform: none; }
+  .sv-band:hover .sv-band-bg img { transform: none; }
+}
+</style>

@@ -1,0 +1,486 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import CineHero from '../../components/shared/CineHero.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+import FloatingContactBar from '../../components/ui/FloatingContactBar.astro';
+import BookingForm from '../../components/sections/BookingForm.astro';
+
+const lang = 'ru';
+
+const team = [
+  { initials:'AM', name:'Александр М.', role:'Основатель и директор',          exp:'15 лет', spec:['Стратегия','Работа с клиентами'],     g:'linear-gradient(135deg,#1a0f00,#4a2a10)', accent:'rgba(232,184,109,.25)' },
+  { initials:'ML', name:'Мария Л.',      role:'Ведущий дизайнер интерьера',      exp:'8 лет',  spec:['Концепции','Подбор материалов'],       g:'linear-gradient(135deg,#050814,#0d1f45)', accent:'rgba(100,160,255,.2)'  },
+  { initials:'DP', name:'Дмитрий П.',    role:'Руководитель строительства',      exp:'12 лет', spec:['Управление проектами','Конструктив'],  g:'linear-gradient(135deg,#080a10,#151a28)', accent:'rgba(200,200,220,.15)' },
+  { initials:'EK', name:'Елена К.',      role:'Старший менеджер проектов',       exp:'6 лет',  spec:['Планирование','Контроль качества'],    g:'linear-gradient(135deg,#051208,#0d2a14)', accent:'rgba(100,220,120,.18)' },
+  { initials:'NA', name:'Никос А.',      role:'Главный электрик (CERA)',         exp:'9 лет',  spec:['Сертификат CERA','Умный дом'],         g:'linear-gradient(135deg,#040810,#082035)', accent:'rgba(100,180,255,.2)'  },
+  { initials:'AS', name:'Анна С.',       role:'Руководитель клиентского сервиса',exp:'5 лет',  spec:['Онбординг','Послепродажный сервис'],   g:'linear-gradient(135deg,#180810,#3a1025)', accent:'rgba(220,100,160,.18)' },
+  { initials:'PB', name:'Павел Б.',      role:'Мастер плиточник и гидроизолятор',exp:'11 лет', spec:['Крупный формат','Мозаика','Хаммам'],   g:'linear-gradient(135deg,#0a0810,#1e1430)', accent:'rgba(160,100,220,.18)' },
+  { initials:'LV', name:'Лена В.',       role:'Координатор дизайна интерьера',   exp:'4 года', spec:['Планировка','Спецификации','Брифинги'],g:'linear-gradient(135deg,#100a08,#2a1a12)', accent:'rgba(232,184,109,.2)'  },
+];
+
+const milestones = [
+  { period:'Начало 2022',  title:'Основание Helyot',              desc:'Александр М. и Дмитрий П. основывают Helyot с командой из 8 штатных специалистов — строители, электрики, дизайнеры.' },
+  { period:'Конец 2022',   title:'Первые 100 сданных объектов',   desc:'100 ремонтов в первый год. Ноль споров, ноль неоплаченных счетов. Сарафанное радио становится главным источником клиентов.' },
+  { period:'Q2 2023',      title:'Дизайн-сопровождение каждого проекта', desc:'Полная дизайн-концепция стала стандартом для каждого проекта — планы, материалы, свет — до начала работ.' },
+  { period:'Q4 2023',      title:'35 специалистов в штате',       desc:'Все работы полностью своими силами: штукатуры, электрики, сантехники, плиточники, столяры. Одна точка ответственности.' },
+  { period:'Q1 2024',      title:'Сертификация по энергосбережению',desc:'Сертифицированы Cyprus Energy Service. 40+ клиентов получили субсидии ЕС свыше €10 000 каждый.' },
+  { period:'Q4 2024',      title:'500+ сданных проектов',          desc:'500+ завершённых ремонтов. 4.9★ от 47 подтверждённых отзывов Google. Самая длинная гарантия на конструктив в Лимасоле.' },
+];
+
+const clients = [
+  { name:'Мария и Сергей К.', area:'Гермасогея', type:'Квартира 2BR', sqm:95,  year:2024,
+    quote:'Когда мы зашли после сдачи, муж прослезился. Мы жили в этой квартире 7 лет и не могли представить, что она может так выглядеть.',
+    result:'+58% доход Airbnb', detail:'Квартира стала №3 в Гермасогее на Booking.com за 2 недели после листинга.',
+    img:'/images/projects/germasogeia-apt.webp',
+    g:'radial-gradient(ellipse at 40% 60%,rgba(232,184,109,.4) 0%,transparent 55%),linear-gradient(140deg,#0f0800,#2a1500,#0f0800)', icon:'🏠' },
+  { name:'Дмитрий В.',         area:'Агиос Тихонас', type:'Ремонт виллы', sqm:320, year:2023,
+    quote:'Вилла продалась за 3 дня по полной запрошенной цене. Агент сказала, что это была самая быстрая продажа в Агиос Тихонасе за тот год.',
+    result:'+32% рыночная стоимость', detail:'Стоимость выросла на €340 000 по сравнению с оценкой до ремонта.',
+    img:'/images/projects/agios-villa.webp',
+    g:'radial-gradient(ellipse at 50% 70%,rgba(100,160,255,.2) 0%,transparent 55%),linear-gradient(140deg,#050810,#0a1830,#050810)', icon:'🏡' },
+  { name:'Георгий П.',          area:'Центр города', type:'Офис', sqm:240, year:2023,
+    quote:'Сдан ровно за 6 недель, как обещали. Сотрудники въехали в понедельник утром. Ни одного замечания. Я управлял 4 офисными ремонтами по Европе — это был самый профессиональный.',
+    result:'День 42 — в срок', detail:'40 рабочих мест. Никаких перебоев в бизнесе. Вышли на €2 100 ниже бюджета.',
+    img:'/images/projects/city-office.webp',
+    g:'radial-gradient(ellipse at 65% 35%,rgba(110,90,230,.22) 0%,transparent 55%),linear-gradient(140deg,#060610,#121230,#060610)', icon:'🏢' },
+];
+
+const certs = [
+  { num:'01', title:'Лицензированный генподрядчик',              issuer:'Департамент труда и соц. страхования Кипра', ref:'Лиц. № CY-CONS-2022-0847', status:'Активна — бессрочно' },
+  { num:'02', title:'Сертификат CERA — электромонтаж',          issuer:'Электрический орган Кипра (CERA)',           ref:'Рег. № CERA/E/2022-334',   status:'Действует до дек. 2026' },
+  { num:'03', title:'Страхование профессиональной ответственности',issuer:'Generali Insurance Cyprus Ltd.',            ref:'Полис № GN-PI-2024-77421', status:'Активна — ежегодно' },
+  { num:'04', title:'Страхование гражданской ответственности',   issuer:'Generali Insurance Cyprus Ltd.',            ref:'Полис № GN-PL-2024-77422', status:'€2М на инцидент' },
+  { num:'05', title:'Сертификат энергоаудитора',                 issuer:'Cyprus Energy Service (CES)',               ref:'Серт. № CES/EA/2022-0091', status:'Действует до мар. 2027' },
+  { num:'06', title:'Договор с фиксированной ценой',             issuer:'Юридически обязателен — Закон о контрактах Кипра', ref:'Без вариаций без письм. согласования', status:'Все проекты' },
+];
+
+const values = [
+  { n:'01', title:'Мы отвечаем за свои ошибки',    desc:'Если что-то не так — исправим за наш счёт в течение 10 рабочих дней. Без споров, без промедлений.' },
+  { n:'02', title:'Одна цена — всегда',              desc:'Цифра, которую вы подписали — это цифра, которую вы платите. Любое дополнение требует вашего письменного согласия.' },
+  { n:'03', title:'Мастерство — наше преимущество', desc:'Мы не самые дешёвые. Мы конкурируем качеством, стабильностью и репутацией, заработанной на 500+ довольных клиентах.' },
+  { n:'04', title:'Те кто проектирует — строят',    desc:'Наши дизайнеры и строители работают бок о бок. Никаких ошибок перевода. Никаких "я не это имел в виду".' },
+  { n:'05', title:'Прозрачность важнее комфорта',   desc:'Если сроки под угрозой — вы узнаете первыми с планом решения. Мы никогда не скрываем плохих новостей.' },
+  { n:'06', title:'Местная экспертиза — реальная ценность', desc:'15+ лет опыта ремонта означает знание каждого строительного норматива, поставщика, инспектора.' },
+];
+---
+<BaseLayout lang={lang} title="О компании Helyot — Наша команда | Ремонт в Лимасоле" description="Познакомьтесь с командой из 35 специалистов Helyot — самой надёжной ремонтной компании Лимасола. Наша история, ценности и люди.">
+<style>
+:root{--expo:cubic-bezier(0.16,1,0.3,1);--gold:#E8B86D;}
+.ar,.ar-sc,.ar-l,.ar-r{}
+.portrait{border-radius:4px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:transform .4s var(--expo),box-shadow .4s ease;}
+.portrait:hover{transform:translateY(-4px);}
+.portrait-init{font-family:'Spectral',Georgia,serif;font-weight:300;font-size:2rem;z-index:1;position:relative;}
+.portrait::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 30%,rgba(255,255,255,.08),transparent 60%);}
+.portrait::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,rgba(0,0,0,.4),transparent);}
+.team-card:hover .portrait{box-shadow:0 0 0 2px var(--portrait-accent);}
+
+/* ── Таблица сравнения ── */
+.cmp-sec{ background:#06060A; border-top:1px solid rgba(255,255,255,.07); padding:5rem 0; }
+.cmp-head{ max-width:62ch; margin-bottom:3rem; }
+.cmp-h2{ margin:1rem 0 1rem; font-size:clamp(1.8rem,3.2vw,2.6rem); }
+.cmp-lead{ font-size:.9rem; line-height:1.8; color:#8E91AB; max-width: 58ch; }
+.cmp-table{ display:flex; flex-direction:column; }
+.cmp-row{
+  display:grid; grid-template-columns:1fr 1.35fr 1.35fr; gap:2rem;
+  padding:1.4rem 0; border-top:1px solid rgba(255,255,255,.08); align-items:start;
+}
+.cmp-row:last-child{ border-bottom:1px solid rgba(255,255,255,.08); }
+.cmp-row--head{ border-top:none; padding-bottom:.7rem; }
+.cmp-row--head .cmp-them,
+.cmp-row--head .cmp-us{
+  font-family:'Jost Variable',system-ui,sans-serif; font-size:.72rem;
+  letter-spacing:.2em; text-transform:lowercase;
+}
+.cmp-row--head .cmp-them{ color:#8288A5; }
+.cmp-row--head .cmp-us{ color:#E8B86D; }
+.cmp-topic{ font-family:'Spectral',Georgia,serif; font-size:1.02rem; color:#E4E4EE; line-height:1.3; }
+.cmp-them{ font-size:0.84rem; line-height:1.7; color:#8288A5; max-width: 46ch; }
+.cmp-us{ font-size:0.84rem; line-height:1.7; color:#B8B8CC; display:flex; gap:.6rem; align-items:flex-start; max-width: 46ch; }
+.cmp-us svg{ flex-shrink:0; margin-top:.22rem; }
+
+@media (max-width:860px){
+  .cmp-sec{ padding:3.5rem 0; }
+  .cmp-row{ grid-template-columns:1fr; gap:.6rem; padding:1.2rem 0; }
+  .cmp-row--head{ display:none; }
+  .cmp-them::before{ content:'обычно — '; color:#8288A5; }
+}
+.tl-srow{display:grid;grid-template-columns:1fr 64px 1fr;align-items:flex-start;}
+.tl-card{ grid-column:1; grid-row:1; border-top:1px solid rgba(255,255,255,.1); padding:1.2rem 0 2.6rem; text-align:right; }
+.tl-srow:nth-child(odd) .tl-card{ grid-column:3; text-align:left; }
+.tl-period{ display:block; font-family:'Jost Variable',system-ui,sans-serif; font-size:0.72rem; letter-spacing:.2em; text-transform:lowercase; color:#E8B86D; margin-bottom:.5rem; }
+.tl-title{ font-family:'Spectral',Georgia,serif; font-weight:400; font-size:1.1rem; color:#F0F0F6; margin-bottom:.4rem; line-height:1.3; }
+.tl-desc{ font-size:.84rem; color:#8E91AB; line-height:1.7; max-width: 56ch; }
+.tl-mark{ grid-column:2; grid-row:1; position:relative; display:flex; justify-content:center; padding-top:1.15rem; z-index:2; }
+.tl-connector{ position:absolute; top:1.35rem; height:1px; width:32px; right:50%; background:linear-gradient(to left,transparent,rgba(232,184,109,.4)); }
+.tl-srow:nth-child(odd) .tl-connector{ right:auto; left:50%; background:linear-gradient(to right,transparent,rgba(232,184,109,.4)); }
+.tl-dot{ width:9px; height:9px; border-radius:50%; border:1px solid #E8B86D; background:#08080E; box-shadow:0 0 0 5px rgba(232,184,109,.07); }
+.fleet-card{background:transparent;border:none;border-top:1px solid rgba(255,255,255,.08);border-radius:0;padding:1.5rem 0 0;transition:none;}
+.client-card{border-radius:0;overflow:visible;background:transparent;border:none;transition:transform .4s var(--expo);}
+.client-card:hover{transform:translateY(-4px);}
+.client-card > div:first-child{border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,.08);}
+.cert-row:hover{background:rgba(255,255,255,.025);}
+.val-card{background:transparent;border:none;border-top:1px solid rgba(255,255,255,.08);border-radius:0;padding:1.75rem 0 0;transition:none;}
+@media(max-width:767px){
+  #about-hero-grid{grid-template-columns:1fr!important;}
+  #team-grid{grid-template-columns:repeat(2,1fr)!important;}
+  #clients-grid{grid-template-columns:1fr!important;}
+  #values-grid{grid-template-columns:1fr!important;}
+  #tl-wrap .tl-srow{grid-template-columns:38px 1fr!important;}
+  #tl-wrap .tl-card,
+  #tl-wrap .tl-srow:nth-child(odd) .tl-card{ grid-column:2!important; text-align:left!important; }
+  #tl-wrap .tl-mark{ grid-column:1!important; }
+  #tl-wrap .tl-connector{ display:none!important; }
+  #steps-grid{grid-template-columns:1fr!important;}
+  #tl-spine{display:none!important;}
+}
+@media(max-width:560px){
+  .cert-row{grid-template-columns:2.5rem 1fr!important;row-gap:.5rem!important;}
+  .cert-status{grid-column:1/-1;text-align:left!important;padding-left:calc(2.5rem + 2rem);margin-top:-.35rem;}
+}
+
+/* Certificate rows: the fixed 11rem status column overflowed a phone screen. */
+@media (max-width: 700px) {
+  .cert-row { grid-template-columns: 2.25rem 1fr !important; gap: .4rem .9rem !important; padding: 1rem .2rem !important; }
+  .cert-row > :last-child { grid-column: 2; text-align: left !important; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .tl-period { font-size: 0.78rem !important;   span[style*='.63rem'] { font-size: 0.78rem !important; }
+}
+  .cert-row span, .cert-row p { font-size: .78rem !important; }
+}
+</style>
+
+<Header lang={lang}/>
+<main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+
+<!-- §1 HERO -->
+<CineHero
+  lang={lang}
+  photo="/images/projects/agios-villa.webp"
+  index="Helyot · Кипр"
+  eyebrow="О компании"
+  titleHtml={`35 специалистов. Один договор.<br/><em>Цена не меняется.</em>`}
+  subtitle="Каждый человек, работающий на вашем объекте, — штатный сотрудник Helyot: без агентств, субподрядчиков и посторонних. Та же команда, что делает дизайн, строит и подкрепляет результат 5-летней гарантией."
+  breadcrumb={[{ label: 'Главная', href: '/ru' }, { label: 'О компании' }]}
+  cta={{ label: 'Наша команда', href: '#team' }}
+  ctaSecondary={{ label: 'Начать проект', href: '#booking' }}
+/>
+
+<!-- Аккредитации -->
+<section style="background:#0A0A12;border-bottom:1px solid rgba(255,255,255,.06);padding:4rem 0;">
+  <div class="container-wide">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:1rem;">
+      <p class="cine-label"><span class="cine-label__index">Юридический статус · Кипр</span>Лицензии и страхование</p>
+      <div style="display:flex;align-items:center;gap:.45rem;">
+        <div style="width:5px;height:5px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px rgba(34,197,94,.5);"></div>
+        <span style="font-size:.72rem;color:#22c55e;font-weight:500;">Всё активно</span>
+      </div>
+    </div>
+    {[
+      { title:'Лицензированный генподрядчик',              auth:'Департамент труда Кипра' },
+      { title:'Сертифицированный электромонтаж (CERA)',    auth:'Электрический орган Кипра' },
+      { title:'Страхование проф. ответственности',         auth:'Generali Insurance Cyprus' },
+      { title:'Гражданская ответственность — €2М',         auth:'Generali Insurance Cyprus' },
+      { title:'Сертификат энергоаудитора',                 auth:'Cyprus Energy Service' },
+      { title:'Договоры с фиксированной ценой',            auth:'Закон о контрактах Кипра' },
+    ].map((row) => (
+      <div data-reveal style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:1rem 0;border-top:1px solid rgba(255,255,255,.06);">
+        <p style="font-size:.95rem;color:#B8B8CC;font-weight:400;line-height:1.3;flex:1;font-family:'Spectral',Georgia,serif;">{row.title}</p>
+        <p style="font-size:.72rem;color:#8288A5;white-space:nowrap;flex-shrink:0;text-align:right;letter-spacing:.03em;">{row.auth}</p>
+      </div>
+    ))}
+    <p style="margin-top:1.5rem;font-size:0.72rem;color:#8288A5;letter-spacing:.03em;">Документы предоставляются по запросу · Офис в Лимасоле</p>
+  </div>
+</section>
+
+<!-- §2 МАНИФЕСТ -->
+<section style="background:#06060A;border-top:1px solid rgba(255,255,255,.07);padding:3rem 0;">
+  <div style="max-width:820px;margin:0 auto;padding:0 2rem;">
+    <p style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.22em;color:var(--gold);margin-bottom:1.75rem;" class="ar">ПОЧЕМУ МЫ СУЩЕСТВУЕМ</p>
+    <blockquote class="ar" style="margin:0;position:relative;padding-left:1.5rem;border-left:2px solid rgba(232,184,109,.25);">
+      <span aria-hidden="true" style="position:absolute;top:-.75rem;left:-.25rem;font-family:Georgia,serif;font-size:5rem;line-height:1;color:rgba(232,184,109,.1);pointer-events:none;user-select:none;">&ldquo;</span>
+      <p style="position:relative;font-family:'Spectral',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(.95rem,1.7vw,1.2rem);letter-spacing:-.005em;line-height:1.7;color:#8288A5;">
+        Я наблюдал, как слишком много владельцев жилья в Лимасоле теряли деньги — подрядчики обещали фиксированную цену, а потом дважды в месяц пересматривали счёт. Helyot построен на одном принципе: цена, которую вы подписали, — это цена, которую вы платите. Без звёздочек, без оговорок, без сюрпризов. Полная ответственность от первой встречи до последнего дня 5-летней гарантии.
+      </p>
+    </blockquote>
+    <div class="ar" style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:.875rem;">
+      <div style="width:2rem;height:2rem;border-radius:4px;background:rgba(232,184,109,.07);border:1px solid rgba(232,184,109,.15);display:flex;align-items:center;justify-content:center;font-family:'Spectral',Georgia,serif;font-weight:300;font-size:.72rem;color:var(--gold);flex-shrink:0;">AM</div>
+      <div>
+        <p style="font-weight:600;font-size:0.78rem;color:#B0B0C8;">Александр М.</p>
+        <p style="font-size:0.72rem;color:#8288A5;">Основатель, Helyot · Лимасол</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §3 ИСТОРИЯ -->
+<section style="background:#08080E;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div class="ar" style="text-align:center;margin-bottom:4.5rem;">
+      <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:var(--gold);margin-bottom:.5rem;">НАША ИСТОРИЯ</p>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:clamp(1.9rem,3.6vw,2.7rem);letter-spacing:-.025em;">Основаны в 2022. 500+ проектов. Всегда в срок.</h2>
+    </div>
+    <div id="tl-wrap" style="position:relative;max-width:860px;margin:0 auto;">
+      <div id="tl-spine" style="position:absolute;left:50%;top:32px;bottom:48px;width:1px;background:linear-gradient(to bottom,rgba(232,184,109,.6),rgba(255,255,255,.1) 8%,rgba(255,255,255,.1) 92%,transparent);transform:translateX(-50%);pointer-events:none;" aria-hidden="true"></div>
+      {milestones.map((m, i) => (
+        <div class="ar tl-srow" data-delay={String(i * 80)}>
+          {/* Одна карточка — сторона задаётся в CSS. Раньше рисовались обе,
+              и каждая веха дублировалась для поиска и скринридеров. */}
+          <div class="tl-card">
+            <span class="tl-period">{m.period}</span>
+            <p class="tl-title">{m.title}</p>
+            <p class="tl-desc">{m.desc}</p>
+          </div>
+          <div class="tl-mark" aria-hidden="true">
+            <span class="tl-connector"></span>
+            <span class="tl-dot"></span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- §4 КОМАНДА -->
+<section id="team" style="background:#06060A;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div class="ar" style="text-align:center;margin-bottom:3.5rem;">
+      <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:var(--gold);margin-bottom:.5rem;">НАШИ ЛЮДИ</p>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:clamp(1.9rem,3.6vw,2.7rem);letter-spacing:-.025em;margin-bottom:.75rem;">Люди, которые будут работать в вашем доме.</h2>
+      <p style="color:#8288A5;max-width:520px;margin:0 auto;">Каждый человек в этом списке — штатный сотрудник Helyot. Единая команда, единый стандарт, единая ответственность.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;" id="team-grid">
+      {team.map((m, i) => (
+        <div class="team-card ar-sc" data-delay={String(i*70)} style={`--portrait-accent:${m.accent};`}>
+          <div class="portrait" style={`background:${m.g};margin-bottom:1.25rem;box-shadow:0 4px 20px rgba(0,0,0,.4);`}>
+            <span class="portrait-init" style={`color:${m.accent};`}>{m.initials}</span>
+          </div>
+          <p style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:.95rem;color:#F0F0F6;margin-bottom:.2rem;">{m.name}</p>
+          <p style="font-size:0.72rem;color:var(--gold);margin-bottom:.25rem;">{m.role}</p>
+          <p style="font-size:0.72rem;color:#8288A5;margin-bottom:.875rem;">Опыт {m.exp}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+            {m.spec.map(s=>(
+              <span style="font-size:.72rem;padding:.18rem .5rem;border-radius:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:#8288A5;">{s}</span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="ar" style="text-align:center;margin-top:2.5rem;">
+      <div style="display:inline-flex;align-items:center;gap:.875rem;background:#191928;border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:1rem 1.5rem;">
+        <p style="font-size:0.84rem;color:#8288A5;">+ <span style="color:#F0F0F6;font-weight:600;">27 специалистов</span> — плиточники, штукатуры, сантехники, маляры, столяры и помощники</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §5 РЕЗУЛЬТАТЫ КЛИЕНТОВ -->
+<section style="background:#06060A;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div class="ar" style="text-align:center;margin-bottom:3.5rem;">
+      <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:var(--gold);margin-bottom:.5rem;">РЕЗУЛЬТАТЫ КЛИЕНТОВ</p>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:clamp(1.9rem,3.6vw,2.7rem);letter-spacing:-.025em;">Три проекта. Три результата. Измеримых.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;" id="clients-grid">
+      {clients.map((c, i) => (
+        <div class="client-card ar-sc" data-delay={String(i*100)}>
+          <div style={`position:relative;aspect-ratio:16/9;background:${c.g};display:flex;align-items:center;justify-content:center;overflow:hidden;`}>
+            <img src={c.img} alt={c.type} width="600" height="338" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;"/>
+            <div style={`position:absolute;inset:0;background:${c.g};opacity:.4;`}></div>
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(6,6,12,.85) 0%,transparent 60%);"></div>
+            <div style="position:absolute;bottom:.875rem;left:.875rem;right:.875rem;">
+              <div style="display:inline-flex;align-items:center;gap:.375rem;background:rgba(100,220,120,.12);border:1px solid rgba(100,220,120,.25);border-radius:3px;padding:.25rem .75rem;margin-bottom:.5rem;">
+                <span style="font-size:.65rem;font-weight:600;color:#6EDB85;">{c.result}</span>
+              </div>
+              <p style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:.9rem;color:#F0F0F6;">{c.type} · {c.sqm}м²</p>
+            </div>
+          </div>
+          <div style="padding:1.5rem;">
+            <span style="font-size:2rem;line-height:1;color:rgba(232,184,109,.2);font-family:Georgia,serif;display:block;margin-bottom:.375rem;">"</span>
+            <p style="font-size:0.84rem;color:#8288A5;line-height:1.7;margin-bottom:1.25rem;">{c.quote}</p>
+            <div style="background:rgba(255,255,255,.03);border-radius:4px;padding:.875rem;margin-bottom:1.25rem;">
+              <p style="font-size:.72rem;color:#8288A5;line-height:1.6;">{c.detail}</p>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:1rem;border-top:1px solid rgba(255,255,255,.07);">
+              <p style="font-weight:600;font-size:0.84rem;color:#F0F0F6;">{c.name}</p>
+              <div style="display:flex;gap:.15rem;">
+                {Array.from({length:5}).map(()=><svg width="11" height="11" viewBox="0 0 20 20" fill="#E8B86D"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>)}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ СРАВНЕНИЕ ═════════════════════════════════════════════════════════ -->
+<section class="cmp-sec">
+  <div class="container-wide">
+    <div class="ar cmp-head">
+      <p class="cine-label"><span class="cine-label__index">Разница</span>Как это обычно бывает</p>
+      <h2 class="cine-display cmp-h2">Та же работа — <em>две очень разные недели.</em></h2>
+      <p class="cmp-lead">Мы не утверждаем, что все подрядчики Лимасола работают именно так. Мы описываем то, о чём нам рассказывают клиенты, когда приходят, — и то, что мы в ответ изменили у себя.</p>
+    </div>
+
+    <div class="cmp-table ar">
+      <div class="cmp-row cmp-row--head">
+        <span class="cmp-topic"></span>
+        <span class="cmp-them">обычный подрядчик</span>
+        <span class="cmp-us">helyot</span>
+      </div>
+      {[
+        { topic:'Смета',              them:'Оценка с «резервными суммами», которые растут после начала работ.',   us:'Постатейная фиксированная цена. Сколько подписали — столько и платите.' },
+        { topic:'Кто приходит',       them:'Бригады меняются каждую неделю, никто не отвечает за работу прошлой.', us:'Одна штатная команда — от демонтажа до сдачи.' },
+        { topic:'Доп. работы',        them:'Нашли при демонтаже, посчитали потом, спорили ещё позже.',             us:'Работы стоп. Письменное допсоглашение с ценой. Без вашей подписи ничего не продолжается.' },
+        { topic:'Ваш контакт',        them:'Телефон, который не берут, или каждый раз новый человек.',             us:'Один прораб по имени, на связи в WhatsApp, отвечает в течение двух часов.' },
+        { topic:'Пока вас нет',       them:'Узнаёте, что произошло, когда прилетите.',                             us:'Фотоотчёт каждую пятницу. Видеосозвон до и после каждого этапа.' },
+        { topic:'После сдачи',        them:'Гарантия есть на бумаге, но трубку больше не берут.',                  us:'Гарантия 5 лет на конструктив. Техник на объекте за 48 часов, без платы за выезд.' },
+      ].map((r) => (
+        <div class="cmp-row">
+          <span class="cmp-topic">{r.topic}</span>
+          <span class="cmp-them">{r.them}</span>
+          <span class="cmp-us">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8B86D" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            {r.us}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+<!-- §6 ЦЕННОСТИ -->
+<section style="background:#08080E;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div class="ar" style="text-align:center;margin-bottom:3.5rem;">
+      <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:var(--gold);margin-bottom:.5rem;">НАШИ ПРИНЦИПЫ</p>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:clamp(1.9rem,3.6vw,2.7rem);letter-spacing:-.025em;">Шесть принципов. Всё непреговорно.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;" id="values-grid">
+      {values.map((v,i)=>(
+        <div class="val-card ar" data-delay={String(i*70)}>
+          <div style="display:flex;align-items:center;gap:.875rem;margin-bottom:1.25rem;">
+            <span style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:2rem;color:rgba(232,184,109,.2);line-height:1;">{v.n}</span>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,.07);"></div>
+          </div>
+          <h3 style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:.95rem;color:#F0F0F6;margin-bottom:.625rem;">{v.title}</h3>
+          <p style="font-size:0.84rem;color:#8288A5;line-height:1.7;">{v.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- §7 ЛИЦЕНЗИИ -->
+<section style="background:#06060A;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div class="ar" style="margin-bottom:2.5rem;">
+      <p style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:#8288A5;margin-bottom:.6rem;">ДОКУМЕНТЫ</p>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:clamp(1.7rem,3.1vw,2.3rem);letter-spacing:-.02em;color:#E8E8F0;">Лицензии. Страховка. Сертификаты.</h2>
+    </div>
+    <div class="ar" data-delay="40" style="display:flex;align-items:center;gap:1.5rem;background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.14);border-radius:3px;padding:1rem 1.5rem;margin-bottom:1.75rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.6);"></div>
+        <span style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:0.84rem;color:#86efac;">Все лицензии и страховки активны</span>
+      </div>
+      <p style="font-size:0.72rem;color:#4a8a6a;flex:1;min-width:200px;">Каждый проект Helyot работает под полным правовым прикрытием с первого дня — разрешения, сертификаты CERA, двойное страхование. Никаких серых зон.</p>
+    </div>
+    <div class="ar" data-delay="60" style="border:1px solid rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-bottom:0;">
+      {certs.map((c, i) => (
+        <div class="cert-row" style={`display:grid;grid-template-columns:2.75rem 1fr 11rem;gap:2rem;align-items:center;padding:1.1rem 1.5rem;transition:background .15s;${i > 0 ? 'border-top:1px solid rgba(255,255,255,.05);' : ''}`}>
+          <span style="font-family:'Courier New',monospace;font-size:0.72rem;color:rgba(255,255,255,.14);">{c.num}</span>
+          <div>
+            <p style="'Inter',system-ui,sans-serif;font-weight:600;font-size:0.84rem;color:#C8C8D8;margin-bottom:.22rem;">{c.title}</p>
+            <p style="font-size:0.72rem;color:#8288A5;">{c.issuer}</p>
+          </div>
+          <div class="cert-status" style="text-align:right;"><span style="font-size:.67rem;color:#8288A5;white-space:nowrap;">{c.status}</span></div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- §8 ЧТО ДАЛЬШЕ -->
+<section style="background:#08080E;border-top:1px solid rgba(255,255,255,.07);padding:5rem 0 0;">
+  <div style="max-width:1280px;margin:0 auto;padding:0 2rem;">
+    <div class="ar" style="margin-bottom:3.5rem;">
+      <p style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.22em;color:var(--gold);margin-bottom:.6rem;">ГОТОВЫ НАЧАТЬ</p>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:clamp(1.6rem,3vw,2.3rem);letter-spacing:-.025em;">Что произойдёт в ближайшие 48 часов</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:5rem;" id="steps-grid">
+      {[
+        { n:'01', title:'Бесплатный выезд',        body:'Приедем на объект в течение 48 часов. Без оплаты, без обязательств — честный разговор о вашем проекте.', note:'В течение 48 часов' },
+        { n:'02', title:'Дизайн-концепция и смета', body:'Дизайнер подготовит полную концепцию и детальную смету. Вы видите что получите до подписания.',         note:'За 5 рабочих дней' },
+        { n:'03', title:'Один подписанный договор', body:'Один документ. Фиксированная цена. Дата начала подтверждена. Ничего не меняется без вашего письменного согласия.', note:'Никаких сюрпризов' },
+        { n:'04', title:'Строительство и сдача',    body:'Наша команда строит по спецификации. Вы получаете ключи и 5-летнюю гарантию на конструктив.',            note:'Гарантия 5 лет' },
+      ].map((s, i) => (
+        <div class="ar" data-delay={String(i * 80)} style={`padding:0 2rem 2.5rem 0;${i > 0 ? 'padding-left:2rem;border-left:1px solid rgba(255,255,255,.07);' : ''}`}>
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+            <span style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:2.5rem;color:rgba(232,184,109,.1);line-height:1;letter-spacing:-.04em;">{s.n}</span>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,.05);"></div>
+          </div>
+          <h3 style="font-family:'Spectral',Georgia,serif;font-weight:400;font-size:0.9rem;color:#D0D0E0;margin-bottom:.625rem;">{s.title}</h3>
+          <p style="font-size:0.78rem;color:#8288A5;line-height:1.7;margin-bottom:1.25rem;">{s.body}</p>
+          <div style="display:inline-flex;align-items:center;gap:.4rem;">
+            <div style="width:3px;height:3px;border-radius:50%;background:var(--gold);opacity:.6;"></div>
+            <span style="font-size:.63rem;color:#8288A5;font-weight:600;text-transform:uppercase;letter-spacing:.12em;">{s.note}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  <BookingForm lang={lang}/>
+</section>
+
+</main>
+<Footer lang={lang}/><CookieConsent lang={lang}/><FloatingContactBar lang={lang}/>
+</BaseLayout>
+<script is:inline>
+(function() {
+  var EXPO = 'cubic-bezier(0.16,1,0.3,1)';
+  function initReveal() {
+    var items = document.querySelectorAll('.ar,.ar-sc,.ar-l,.ar-r');
+    items.forEach(function(el) {
+      var t = el.classList.contains('ar-sc') ? 'scale(0.95)' : 'translateY(24px)';
+      el.style.opacity='0'; el.style.transform=t;
+      el.style.transition='opacity .7s '+EXPO+', transform .7s '+EXPO;
+    });
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var delay = parseInt(el.dataset.delay || '0');
+        setTimeout(function() { el.style.opacity='1'; el.style.transform='none'; }, delay);
+        io.unobserve(el);
+      });
+    }, { threshold: 0.05 });
+    items.forEach(function(el) { io.observe(el); });
+  }
+  function fixGrids() {
+    var w = window.innerWidth;
+    var hg = document.getElementById('about-hero-grid');
+    if (hg) hg.style.gridTemplateColumns = w < 900 ? '1fr' : '1fr 1fr';
+    var tg = document.getElementById('team-grid');
+    if (tg) tg.style.gridTemplateColumns = w < 640 ? 'repeat(2,1fr)' : w < 900 ? 'repeat(3,1fr)' : 'repeat(4,1fr)';
+    var cg = document.getElementById('clients-grid');
+    if (cg) cg.style.gridTemplateColumns = w < 640 ? '1fr' : w < 900 ? 'repeat(2,1fr)' : 'repeat(3,1fr)';
+    var sg = document.getElementById('steps-grid');
+    if (sg) sg.style.gridTemplateColumns = w < 640 ? '1fr' : w < 900 ? 'repeat(2,1fr)' : 'repeat(4,1fr)';
+    var vg = document.getElementById('values-grid');
+    if (vg) vg.style.gridTemplateColumns = w < 640 ? '1fr' : w < 900 ? 'repeat(2,1fr)' : 'repeat(3,1fr)';
+    var spine = document.getElementById('tl-spine');
+    /* Стороны таймлайна теперь в CSS — переключать нечего. */
+  }
+  if (document.readyState==='loading') {
+    document.addEventListener('DOMContentLoaded',function(){initReveal();fixGrids();});
+  } else { initReveal(); fixGrids(); }
+  window.addEventListener('resize', fixGrids);
+})();
+</script>

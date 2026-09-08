@@ -1,0 +1,75 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import { t } from '../../i18n';
+
+const lang = 'en';
+const strings = t(lang);
+const b = strings.blog;
+
+let posts: Awaited<ReturnType<typeof getCollection<'blog'>>> = [];
+try {
+  posts = (await getCollection('blog')).sort(
+    (a, b) => new Date(b.data.publishedDate).getTime() - new Date(a.data.publishedDate).getTime()
+  );
+} catch {
+  // Collection may not have entries yet
+}
+---
+
+<BaseLayout lang={lang} title={b.title} description={b.subtitle}>
+  <Header lang={lang} />
+
+  <main class="max-w-4xl mx-auto px-4 py-20" style="background:#0E1320;">
+    <h1 class="text-3xl md:text-4xl font-bold mb-3 text-[#F5F6FA]">{b.title}</h1>
+    <p class="text-[#A9AFC0] text-lg mb-14">{b.subtitle}</p>
+
+    {posts.length === 0 && (
+      <p class="text-[#7878A0] text-center py-20">No posts yet. Check back soon.</p>
+    )}
+
+    <div class="grid gap-8">
+      {posts.map((post) => (
+        <article class="group bg-[#15151E] border border-[rgba(255,255,255,.07)] rounded-2xl shadow-sm hover:shadow-md overflow-hidden transition-shadow flex flex-col md:flex-row">
+          {post.data.ogImage && (
+            <a href={`/blog/${post.slug}`} class="md:w-64 shrink-0">
+              <img
+                src={post.data.ogImage}
+                alt={post.data.title}
+                width="400"
+                height="250"
+                loading="lazy"
+                class="w-full h-48 md:h-full object-cover"
+              />
+            </a>
+          )}
+          <div class="p-6 flex flex-col justify-between flex-1">
+            <div>
+              <time class="text-[#7878A0] text-xs" datetime={post.data.publishedDate}>
+                {b.publishedOn} {post.data.publishedDate}
+                {post.data.minuteRead && <span> · {post.data.minuteRead} {b.minuteRead}</span>}
+              </time>
+              <h2 class="text-xl font-bold text-[#F5F6FA] mt-2 mb-3">
+                <a href={`/blog/${post.slug}`} class="hover:text-[#E8B86D] transition-colors">
+                  {post.data.title}
+                </a>
+              </h2>
+              <p class="text-[#A9AFC0] text-sm line-clamp-3">{post.data.description}</p>
+            </div>
+            <a
+              href={`/blog/${post.slug}`}
+              class="mt-4 text-[#E8B86D] hover:text-[#F0C988] text-sm font-semibold inline-flex items-center gap-1"
+            >
+              {b.readMore}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </main>
+
+  <Footer lang={lang} />
+</BaseLayout>

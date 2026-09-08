@@ -1,0 +1,94 @@
+---
+import { t, type Lang } from '../i18n';
+interface Props { lang: Lang; }
+const strings = t(Astro.props.lang);
+const p = strings.promo;
+
+const deadline = new Date(p.deadline);
+const deadlineStr = deadline.toLocaleDateString(Astro.props.lang === 'ru' ? 'ru-RU' : 'en-GB', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+---
+
+<div
+  id="promo-banner"
+  class="bg-gradient-to-r from-brand-600 to-brand-500 text-white py-3 px-4 relative"
+>
+  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-3 text-center">
+    <p class="font-medium text-sm md:text-base">
+      {p.text} <strong>{deadlineStr}</strong>
+    </p>
+
+    <div id="promo-countdown" class="flex gap-2 font-mono text-sm font-bold" aria-live="polite">
+      <span class="bg-white/20 rounded px-2 py-0.5">
+        <span id="cd-days">00</span>д
+      </span>
+      <span class="bg-white/20 rounded px-2 py-0.5">
+        <span id="cd-hours">00</span>ч
+      </span>
+      <span class="bg-white/20 rounded px-2 py-0.5">
+        <span id="cd-minutes">00</span>м
+      </span>
+      <span class="bg-white/20 rounded px-2 py-0.5">
+        <span id="cd-seconds">00</span>с
+      </span>
+    </div>
+
+    <a
+      href="#booking"
+      class="bg-white text-brand-600 font-semibold text-sm px-4 py-1.5 rounded-full hover:bg-brand-50 transition-colors"
+    >{p.cta}</a>
+  </div>
+
+  <button
+    id="promo-close"
+    class="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-1"
+    aria-label="Close banner"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+    </svg>
+  </button>
+</div>
+
+<script define:vars={{ deadlineISO: p.deadline }}>
+  (function () {
+    const banner = document.getElementById('promo-banner');
+    if (sessionStorage.getItem('promo_closed')) {
+      banner && (banner.style.display = 'none');
+      return;
+    }
+
+    document.getElementById('promo-close')?.addEventListener('click', () => {
+      sessionStorage.setItem('promo_closed', '1');
+      banner && (banner.style.display = 'none');
+    });
+
+    const deadline = new Date(deadlineISO + 'T23:59:59').getTime();
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tick() {
+      const diff = deadline - Date.now();
+      if (diff <= 0) {
+        banner && (banner.style.display = 'none');
+        return;
+      }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+
+      const d = document.getElementById('cd-days');
+      const h = document.getElementById('cd-hours');
+      const m = document.getElementById('cd-minutes');
+      const s = document.getElementById('cd-seconds');
+      if (d) d.textContent = pad(days);
+      if (h) h.textContent = pad(hours);
+      if (m) m.textContent = pad(mins);
+      if (s) s.textContent = pad(secs);
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>

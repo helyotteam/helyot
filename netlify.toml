@@ -1,0 +1,266 @@
+# ── Build ──────────────────────────────────────────────────────────────────
+[build]
+  command   = "npm run build"
+  publish   = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ── Redirects ──────────────────────────────────────────────────────────────
+# www → apex
+[[redirects]]
+  from   = "https://www.helyot.com/*"
+  to     = "https://helyot.com/:splat"
+  status = 301
+  force  = true
+
+# Old domain → new domain
+[[redirects]]
+  from   = "https://renovation-limassol.com/*"
+  to     = "https://helyot.com/:splat"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "https://www.renovation-limassol.com/*"
+  to     = "https://helyot.com/:splat"
+  status = 301
+  force  = true
+
+# painting-plastering was one service covering two trades; it is now split into
+# /plastering and /painting. The old URLs land on painting, which cross-links
+# to plastering in its related services.
+[[redirects]]
+  from   = "/en/services/painting-plastering"
+  to     = "/en/services/painting"
+  status = 301
+
+[[redirects]]
+  from   = "/en/services/painting-plastering/*"
+  to     = "/en/services/painting/:splat"
+  status = 301
+
+[[redirects]]
+  from   = "/ru/uslugi/painting-plastering"
+  to     = "/ru/uslugi/painting"
+  status = 301
+
+[[redirects]]
+  from   = "/ru/uslugi/painting-plastering/*"
+  to     = "/ru/uslugi/painting/:splat"
+  status = 301
+
+# ─── Location matrix trimmed ────────────────────────────────────────────────
+# The service × location matrix ran 12 locations against 21 services: 504 pages
+# with only 25–31% unique text each. It now covers Limassol and its districts,
+# where there is real local material. The dropped combinations 301 to the
+# service page; those cities keep their own location hubs.
+[[redirects]]
+  from = "/en/services/:service/paphos"
+  to = "/en/services/:service"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/:service/paphos"
+  to = "/ru/uslugi/:service"
+  status = 301
+[[redirects]]
+  from = "/en/services/:service/larnaca"
+  to = "/en/services/:service"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/:service/larnaca"
+  to = "/ru/uslugi/:service"
+  status = 301
+[[redirects]]
+  from = "/en/services/:service/nicosia"
+  to = "/en/services/:service"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/:service/nicosia"
+  to = "/ru/uslugi/:service"
+  status = 301
+[[redirects]]
+  from = "/en/services/:service/ayia-napa"
+  to = "/en/services/:service"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/:service/ayia-napa"
+  to = "/ru/uslugi/:service"
+  status = 301
+[[redirects]]
+  from = "/en/services/:service/protaras"
+  to = "/en/services/:service"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/:service/protaras"
+  to = "/ru/uslugi/:service"
+  status = 301
+[[redirects]]
+  from = "/en/services/:service/paralimni"
+  to = "/en/services/:service"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/:service/paralimni"
+  to = "/ru/uslugi/:service"
+  status = 301
+
+# ─── EN pages consolidated under /en/ ───────────────────────────────────────
+# These six used to sit at the root while the rest of the English site lived
+# under /en/. One rule now: EN at /en/*, RU at /ru/*.
+[[redirects]]
+  from = "/careers"
+  to = "/en/careers"
+  status = 301
+[[redirects]]
+  from = "/faq"
+  to = "/en/faq"
+  status = 301
+[[redirects]]
+  from = "/gallery"
+  to = "/en/gallery"
+  status = 301
+[[redirects]]
+  from = "/privacy"
+  to = "/en/privacy"
+  status = 301
+[[redirects]]
+  from = "/terms"
+  to = "/en/terms"
+  status = 301
+[[redirects]]
+  from = "/cookies"
+  to = "/en/cookies"
+  status = 301
+
+# ─── Legacy URLs ────────────────────────────────────────────────────────────
+# These used to be Astro.redirect() stub pages. In a static build Astro can only
+# emit a <meta http-equiv="refresh">, which Google treats as a soft redirect —
+# link equity moves slowly and unreliably, and the visitor sees a blank flash.
+# Server-side 301s do the job properly.
+[[redirects]]
+  from = "/areas/germasogeia"
+  to = "/en/renovation/germasogeia"
+  status = 301
+[[redirects]]
+  from = "/areas/agios-tychonas"
+  to = "/en/renovation/agios-tychonas"
+  status = 301
+[[redirects]]
+  from = "/areas/potamos"
+  to = "/en/renovation/potamos-germasogeias"
+  status = 301
+[[redirects]]
+  from = "/areas/city-center"
+  to = "/en/renovation/limassol-city-centre"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/remont-kvartir"
+  to = "/ru/uslugi/apartment-renovation"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/otdelka-vill"
+  to = "/ru/uslugi/villa-renovation"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/commercial"
+  to = "/ru/uslugi/office-fit-out"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/energomodernizatsiya"
+  to = "/ru/uslugi/energy-modernization"
+  status = 301
+[[redirects]]
+  from = "/ru/uslugi/dizajn-interera"
+  to = "/ru/uslugi/interior-design"
+  status = 301
+# The RU stub pointed at the EN gallery, and the EN stub pointed at /portfolio,
+# which does not exist — that one was redirecting straight into a 404.
+[[redirects]]
+  from = "/en/portfolio"
+  to = "/en/gallery"
+  status = 301
+[[redirects]]
+  from = "/ru/portfolio"
+  to = "/ru/gallery"
+  status = 301
+
+# Short paths → EN pages
+[[redirects]]
+  from   = "/services"
+  to     = "/en/services"
+  status = 301
+
+[[redirects]]
+  from   = "/services/*"
+  to     = "/en/services/:splat"
+  status = 301
+
+[[redirects]]
+  from   = "/blog"
+  to     = "/en/blog"
+  status = 301
+
+[[redirects]]
+  from   = "/blog/*"
+  to     = "/en/blog/:splat"
+  status = 301
+
+[[redirects]]
+  from   = "/about"
+  to     = "/en/about"
+  status = 301
+
+[[redirects]]
+  from   = "/process"
+  to     = "/en/process"
+  status = 301
+
+# Localised 404 — must stay last so real /ru/* routes match first
+[[redirects]]
+  from   = "/ru/*"
+  to     = "/ru/404"
+  status = 404
+
+# ── Security Headers ───────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options          = "nosniff"
+    X-Frame-Options                 = "SAMEORIGIN"
+    X-XSS-Protection                = "1; mode=block"
+    Referrer-Policy                 = "strict-origin-when-cross-origin"
+    Permissions-Policy              = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security       = "max-age=31536000; includeSubDomains; preload"
+    # GA is injected only after consent; Leaflet tiles and Google Fonts are the
+    # only third parties the pages actually reach for.
+    Content-Security-Policy         = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://www.google-analytics.com https://api.telegram.org; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    Cache-Control                   = "public, max-age=0, must-revalidate"
+
+# Immutable cache for hashed assets
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Images — long cache (they're hashed by Astro)
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control                = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed       = "/"

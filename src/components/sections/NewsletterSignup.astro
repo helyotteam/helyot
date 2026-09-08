@@ -1,0 +1,192 @@
+---
+/**
+ * NEWSLETTER — one field, no promises we cannot keep.
+ *
+ * Deliberately narrow: an email box and a sentence saying what actually arrives
+ * and how often, plus the subscriber count. The number is real — confirmed by
+ * the business — and it should stay that way; a figure a reader can disprove
+ * costs more than it earns.
+ *
+ * Posts to the same Netlify function as the enquiry forms with type=newsletter,
+ * so subscriptions land in the same place as leads rather than needing a second
+ * integration nobody remembers to check.
+ */
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; compact?: boolean; }
+const { lang, compact = false } = Astro.props;
+const en = lang === 'en';
+
+const c = en ? {
+  index: 'The journal', eyebrow: 'By email', readers: 'Join 5,000 readers',
+  title: 'New guides, when there are new guides.',
+  body: 'Cost updates, permit changes and the mistakes we keep being called in to fix. Roughly once a month — we write when something has actually changed, not on a schedule.',
+  placeholder: 'your@email.com',
+  submit: 'Subscribe', sending: 'Sending…',
+  done: 'Confirmed. The next guide comes to this address.',
+  err: 'Check the address and try again.',
+  consent: 'By subscribing you agree to the',
+  privacy: 'Privacy Policy', privacyHref: '/en/privacy',
+  note: 'One email a month at most. Unsubscribe in one click.',
+} : {
+  index: 'Журнал', eyebrow: 'На почту', readers: 'Уже 5 000 читателей',
+  title: 'Новые гайды — когда они появляются.',
+  body: 'Изменения цен, новые правила согласований и ошибки, которые нас чаще всего зовут исправлять. Примерно раз в месяц — пишем, когда действительно что-то изменилось, а не по расписанию.',
+  placeholder: 'your@email.com',
+  submit: 'Подписаться', sending: 'Отправляем…',
+  done: 'Готово. Следующий гайд придёт на этот адрес.',
+  err: 'Проверьте адрес и попробуйте ещё раз.',
+  consent: 'Подписываясь, вы соглашаетесь с',
+  privacy: 'Политикой конфиденциальности', privacyHref: '/ru/privacy',
+  note: 'Не чаще одного письма в месяц. Отписка в один клик.',
+};
+---
+
+<section class={`nl ${compact ? 'nl--compact' : ''}`} id="newsletter">
+  <div class="container-wide">
+    <div class="nl-grid">
+      <div class="nl-intro">
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{c.index}</span>{c.eyebrow}
+        </p>
+        <h2 class="nl-title" data-reveal>{c.title}</h2>
+        <p class="nl-body" data-reveal>{c.body}</p>
+        <p class="nl-readers" data-reveal>
+          <span class="nl-readers-dot" aria-hidden="true"></span>{c.readers}
+        </p>
+      </div>
+
+      <form class="nl-form" id="nl-form" novalidate data-reveal>
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="nl-hp" aria-hidden="true" />
+        <label class="nl-field">
+          <span class="nl-label">Email</span>
+          <span class="nl-input-row">
+            <input type="email" name="email" required autocomplete="email"
+              placeholder={c.placeholder} class="nl-input" id="nl-email" />
+            <button type="submit" class="nl-submit" data-label={c.submit} data-sending={c.sending}>{c.submit}</button>
+          </span>
+        </label>
+        <p class="nl-note">{c.note}</p>
+        <p class="nl-consent">
+          {c.consent} <a href={c.privacyHref}>{c.privacy}</a>.
+        </p>
+        <p class="nl-msg nl-msg--err" id="nl-err" hidden>{c.err}</p>
+        <p class="nl-msg nl-msg--ok" id="nl-done" hidden>{c.done}</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+(function () {
+  var form = document.getElementById('nl-form');
+  if (!form) return;
+  var email = document.getElementById('nl-email');
+  var err = document.getElementById('nl-err');
+  var done = document.getElementById('nl-done');
+  var btn = form.querySelector('.nl-submit');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.querySelector('[name="_gotcha"]').value) return;
+
+    var v = email.value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)) {
+      err.hidden = false; done.hidden = true; email.focus();
+      return;
+    }
+    err.hidden = true;
+
+    btn.disabled = true;
+    btn.textContent = btn.dataset.sending;
+
+    var fd = new FormData();
+    fd.append('type', 'newsletter');
+    fd.append('email', v);
+    fd.append('page', location.pathname);
+
+    fetch('/.netlify/functions/send-lead', { method: 'POST', body: fd })
+      .catch(function () {})
+      .then(function () {
+        form.reset();
+        btn.disabled = false;
+        btn.textContent = btn.dataset.label;
+        done.hidden = false;
+      });
+  });
+})();
+</script>
+
+<style>
+.nl {
+  padding: 5rem 0;
+  background: #06060A;
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.nl--compact { padding: 3.5rem 0; }
+.nl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: start; }
+.nl-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 300;
+  font-size: clamp(1.5rem, 2.8vw, 2.2rem); line-height: 1.2;
+  color: #F0F0F6; margin: 1rem 0 .9rem; letter-spacing: -.01em;
+}
+.nl-body { font-size: 0.95rem; line-height: 1.75; color: #9DA0B8; margin: 0; max-width: 48ch; }
+.nl-readers {
+  display: flex; align-items: center; gap: .55rem; margin: 1.1rem 0 0;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; color: #E8B86D;
+}
+.nl-readers-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #6EDB85;
+  box-shadow: 0 0 0 3px rgba(110,219,133,.16);
+}
+
+.nl-form { display: flex; flex-direction: column; gap: .7rem; }
+.nl-hp { position: absolute; left: -9999px; }
+.nl-field { display: flex; flex-direction: column; gap: .45rem; }
+.nl-label {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .78rem; text-transform: lowercase; letter-spacing: .04em; color: #8288A5;
+}
+.nl-input-row { display: flex; gap: .6rem; }
+.nl-input {
+  flex: 1; min-width: 0;
+  background: transparent; border: 1px solid rgba(255,255,255,.14); border-radius: 4px;
+  padding: .75rem 1rem;
+  font-family: 'Jost Variable', system-ui, sans-serif; font-size: .95rem; color: #F0F0F6;
+  transition: border-color .2s ease;
+}
+.nl-input::placeholder { color: #8288A5; }
+.nl-input:focus { outline: none; border-color: rgba(232,184,109,.55); }
+.nl-submit {
+  flex-shrink: 0;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; letter-spacing: .02em;
+  color: #E8B86D; background: transparent;
+  border: 1px solid #E8B86D; border-radius: 4px;
+  padding: .75rem 1.5rem; cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+.nl-submit:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.nl-submit:focus-visible { outline: 2px solid #E8B86D; outline-offset: 2px; }
+.nl-submit[disabled] { opacity: .55; cursor: default; }
+
+.nl-note { font-size: 0.78rem; color: #8288A5; margin: 0; }
+.nl-consent { font-size: .78rem; line-height: 1.6; color: #8288A5; margin: 0; }
+.nl-consent a { color: #8288A5; text-decoration: underline; text-underline-offset: 2px; }
+.nl-consent a:hover { color: #E8B86D; }
+.nl-msg { font-size: 0.84rem; margin: .2rem 0 0; }
+.nl-msg--err { color: #E88D6D; }
+.nl-msg--ok  { color: #6EDB85; }
+
+@media (max-width: 900px) {
+  .nl { padding: 3.2rem 0; }
+  .nl-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+  .nl-body { max-width: none; }
+}
+@media (max-width: 520px) {
+  .nl-input-row { flex-direction: column; }
+  .nl-submit { width: 100%; }
+}
+</style>

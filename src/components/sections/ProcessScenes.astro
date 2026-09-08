@@ -1,0 +1,212 @@
+---
+/**
+ * PROCESS — cinematic chapters.
+ * Huge editorial numerals, thin rules, no card boxes.
+ */
+import { type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+
+const steps = en ? [
+  { n: '01', title: 'Free Site Visit', when: 'Within 48 hours',
+    desc: 'We come to your property at a time that suits you. We measure every room, photograph the existing condition, and spend as long as you need discussing your brief. No sales pitch.',
+    deliverables: ['Full scope assessment', 'Room-by-room measurements', 'Photo survey', 'Realistic cost estimate'] },
+  { n: '02', title: '3D Design & Fixed Quote', when: 'Days 2–5',
+    desc: 'Our in-house designer prepares full 3D visualisations of every room. You see materials, colours and finishes before a wall is touched. The quote is itemised, fixed, and fully transparent.',
+    deliverables: ['3D renders of every room', 'Material selection board', 'Itemised fixed-price quote', 'Revisions until approved'] },
+  { n: '03', title: 'Contract & Start Date', when: 'Days 5–7',
+    desc: 'One document. Fixed price. Start date agreed. Nothing in our contract means “this might change later”. Every variation requires your written approval before we proceed.',
+    deliverables: ['Fixed-price contract', 'Project schedule', 'Named project manager', 'Confirmed start date'] },
+  { n: '04', title: 'Permits & Approvals', when: 'Weeks 1–8, in parallel',
+    desc: 'Where the job needs consent, we prepare the drawings, file with the municipality and chase it through. You never queue at a counter on our account, and no structural work starts before the permit is in hand.',
+    deliverables: ['Drawings prepared or coordinated', 'Filed on your behalf', 'Municipality liaison', 'Nothing structural starts without it'] },
+  { n: '05', title: 'Build', when: '4–16 weeks',
+    desc: 'Real weeks, not vague estimates. Your project manager keeps the schedule and keeps you posted — every Friday, a photo report lands in your inbox: what got finished this week, what starts on Monday, wherever in the world you happen to be.',
+    deliverables: ['Friday photo reports', 'WhatsApp to PM', 'Open-site policy', 'Zero subcontractors'] },
+  { n: '06', title: 'Handover & Warranty', when: 'Final day',
+    desc: 'We walk through every room together. Any snagging items are resolved within 5 working days at our cost. You receive keys, CERA certificates, all permits, and your 5-year warranty document.',
+    deliverables: ['Room-by-room walkthrough', 'Snagging resolved in 5 days', 'All permits & certificates', '5-year structural warranty'] },
+] : [
+  { n: '01', title: 'Бесплатный выезд', when: 'В течение 48 часов',
+    desc: 'Выезжаем на объект в удобное для вас время. Замеряем каждое помещение, фотографируем текущее состояние. Без обязательств и без продаж.',
+    deliverables: ['Оценка полного объёма', 'Замеры помещений', 'Фотофиксация', 'Реалистичная смета'] },
+  { n: '02', title: '3D-дизайн и фиксированная смета', when: 'Дни 2–5',
+    desc: 'Наш дизайнер готовит полные 3D-визуализации каждого помещения. Вы видите материалы, цвета и отделку до начала работ. Смета постатейная, зафиксированная и прозрачная.',
+    deliverables: ['3D-рендеры каждого помещения', 'Доска выбора материалов', 'Постатейная смета', 'Правки до согласования'] },
+  { n: '03', title: 'Договор и дата старта', when: 'Дни 5–7',
+    desc: 'Один документ. Фиксированная цена. Дата старта согласована. Любые изменения требуют вашего письменного одобрения до начала выполнения.',
+    deliverables: ['Договор с фиксированной ценой', 'График проекта', 'Назначенный прораб', 'Подтверждённая дата старта'] },
+  { n: '04', title: 'Разрешения и согласования', when: 'Недели 1–8, параллельно',
+    desc: 'Если работы требуют согласования, мы готовим чертежи, подаём в муниципалитет и доводим до результата. Вам не придётся стоять в очередях из-за нас, а конструктивные работы не начнутся, пока разрешение не получено.',
+    deliverables: ['Чертежи готовим или координируем', 'Подаём от вашего имени', 'Ведём переписку с муниципалитетом', 'Без разрешения конструктив не начинаем'] },
+  { n: '05', title: 'Строительство', when: '4–16 недель',
+    desc: 'Реальные недели, а не примерные сроки. Прораб ведёт график и держит вас в курсе — каждую пятницу в почте фотоотчёт: что сделано на этой неделе, что начнётся в понедельник, где бы вы ни находились.',
+    deliverables: ['Пятничные фотоотчёты', 'WhatsApp с прорабом', 'Свободный доступ', 'Ноль субподрядчиков'] },
+  { n: '06', title: 'Сдача и гарантия', when: 'Финальный день',
+    desc: 'Обходим каждое помещение вместе. Замечания устраняются в течение 5 рабочих дней за наш счёт. Вы получаете ключи, сертификаты CERA, разрешения и гарантийный документ.',
+    deliverables: ['Приёмка по помещениям', 'Замечания за 5 дней', 'Все документы и разрешения', 'Гарантия 5 лет на конструктив'] },
+];
+---
+
+<section id="process" class="ps-section">
+  <div class="container-wide">
+    <p class="cine-label" data-reveal>
+      <span class="cine-label__index">{en ? 'Process' : 'Процесс'}</span>
+      {en ? 'How we work' : 'Как мы работаем'}
+    </p>
+    <h2 class="cine-display ps-title" data-words>
+      {en
+        ? <>Six stages. <em>One contract.</em></>
+        : <>Шесть этапов. <em>Один договор.</em></>}
+    </h2>
+    <p class="ps-sub" data-reveal>
+      {en
+        ? 'From the first knock on your door to the day you get the keys — every stage has a fixed timeline and a written deliverable.'
+        : 'От первого визита до дня, когда вы получаете ключи, — у каждого этапа фиксированный срок и письменный результат.'}
+    </p>
+
+    <div class="ps-steps">
+      {steps.map((step, i) => (
+        <article class={`ps-step ${i % 2 === 1 ? 'ps-step--flip' : ''}`} data-reveal>
+          <div class="ps-step-num" aria-hidden="true">{step.n}</div>
+          <div class="ps-step-main">
+            <div class="ps-step-head">
+              <h3 class="ps-step-title">{step.title}</h3>
+              <span class="ps-step-when">{step.when}</span>
+            </div>
+            <p class="ps-step-desc">{step.desc}</p>
+            <ul class="ps-step-deliv">
+              {step.deliverables.map(d => <li>{d}</li>)}
+            </ul>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <a href={en ? '/en/process' : '/ru/process'} class="ps-more" data-reveal>
+      {en ? 'The full process — payments, timelines, warranty' : 'Весь процесс — оплаты, сроки, гарантия'}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<style>
+.ps-section {
+  padding: 7rem 0 6rem;
+  background: #08080E;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.ps-title { margin: 1.2rem 0 1.4rem; }
+.ps-sub {
+  font-size: .95rem; line-height: 1.8; color: #9DA0B8;
+  max-width: 52ch; margin: 0 0 4.5rem;
+}
+
+.ps-steps { display: flex; flex-direction: column; }
+
+/* Checkerboard: the numeral sits left on odd stages and right on even ones,
+   so the eye zigzags down the column instead of running a straight rail. */
+.ps-step {
+  display: grid;
+  grid-template-columns: minmax(96px, 150px) 1fr;
+  gap: 1.4rem 3rem;
+  padding: 2.4rem 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+  align-items: start;
+}
+.ps-step:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+
+.ps-step-num { grid-column: 1; grid-row: 1; }
+.ps-step-main { grid-column: 2; grid-row: 1; }
+
+.ps-step--flip { grid-template-columns: 1fr minmax(96px, 150px); }
+.ps-step--flip .ps-step-num  { grid-column: 2; text-align: right; }
+.ps-step--flip .ps-step-main { grid-column: 1; text-align: right; }
+.ps-step--flip .ps-step-head { flex-direction: row-reverse; }
+.ps-step--flip .ps-step-desc { margin-left: auto; }
+.ps-step--flip .ps-step-deliv { justify-content: flex-end; }
+.ps-step--flip .ps-step-deliv li { padding-left: 0; padding-right: 1.1rem; }
+.ps-step--flip .ps-step-deliv li::before { left: auto; right: 0; }
+
+.ps-step-num {
+  font-family: 'Spectral', Georgia, serif;
+  /* 300 is the lightest Spectral weight we load — 200 was being faked. */
+  font-weight: 300;
+  font-size: clamp(2.8rem, 5.5vw, 4.6rem);
+  line-height: .85;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(232,184,109,.4);
+  user-select: none;
+  transition: color .5s ease;
+}
+.ps-step:hover .ps-step-num { color: rgba(232,184,109,.14); }
+
+.ps-step-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 2rem; flex-wrap: wrap; margin-bottom: .85rem;
+}
+.ps-step-title {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 400; font-size: clamp(1.25rem, 2vw, 1.6rem);
+  letter-spacing: -.01em; color: #F0F0F6; margin: 0;
+}
+.ps-step-when {
+  font-size: .66rem; letter-spacing: .26em; text-transform: uppercase;
+  color: #E8B86D; white-space: nowrap;
+}
+.ps-step-desc {
+  font-size: 0.9rem; line-height: 1.8; color: #B8B8CC;
+  max-width: 58ch; margin: 0 0 1.1rem;
+}
+.ps-step-deliv {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: .4rem 2rem;
+}
+.ps-step-deliv li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.78rem; color: #8288A5;
+}
+.ps-step-deliv li::before {
+  content: '';
+  position: absolute; left: 0; top: .52em;
+  width: .45rem; height: 1px; background: rgba(232,184,109,.6);
+}
+
+.ps-more {
+  display: inline-flex; align-items: center; gap: .55rem; margin-top: 2.4rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.9rem; text-transform: lowercase; color: #E8B86D; text-decoration: none;
+  border: 1px solid #E8B86D; border-radius: 4px; padding: .6rem 1.3rem;
+  transition: background .2s ease, color .2s ease;
+}
+.ps-more svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.ps-more:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.ps-more:hover svg { transform: translateX(3px); }
+
+@media (max-width: 760px) {
+  .ps-section { padding: 4rem 0 3.5rem; }
+  .ps-sub { margin-bottom: 2.5rem; }
+  /* One column on phones — a checkerboard needs two to read as one. */
+  .ps-step,
+  .ps-step--flip { grid-template-columns: 1fr; gap: .8rem; padding: 2rem 0; }
+  .ps-step-num,
+  .ps-step--flip .ps-step-num,
+  .ps-step-main,
+  .ps-step--flip .ps-step-main { grid-column: 1; text-align: left; }
+  .ps-step--flip .ps-step-num { grid-row: 1; }
+  .ps-step--flip .ps-step-main { grid-row: 2; }
+  .ps-step--flip .ps-step-head { flex-direction: row; }
+  .ps-step--flip .ps-step-desc { margin-left: 0; }
+  .ps-step--flip .ps-step-deliv { justify-content: flex-start; }
+  .ps-step--flip .ps-step-deliv li { padding-left: 1.1rem; padding-right: 0; }
+  .ps-step--flip .ps-step-deliv li::before { left: 0; right: auto; }
+  .ps-step-num { font-size: 2.6rem; }
+}
+
+/* Mobile legibility: these labels sit at 9–11px, unreadable on a phone. */
+@media (max-width: 700px) {
+  .ps-step-when { font-size: 0.72rem; }
+}
+</style>

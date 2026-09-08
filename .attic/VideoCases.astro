@@ -1,0 +1,92 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+
+const videos = [
+  {
+    id: 'dQw4w9WgXcQ',
+    titleEn: 'Penthouse Renovation — Limassol Marina',
+    titleRu: 'Ремонт пентхауса — Марина Лимасол',
+    areaEn: 'Limassol Marina', areaRu: 'Марина Лимасол',
+    sqm: 180, durationEn: '14 weeks', durationRu: '14 недель',
+  },
+  {
+    id: 'dQw4w9WgXcQ',
+    titleEn: 'Villa Renovation — Agios Tychonas',
+    titleRu: 'Ремонт виллы — Агиос Тихонас',
+    areaEn: 'Agios Tychonas', areaRu: 'Агиос Тихонас',
+    sqm: 320, durationEn: '20 weeks', durationRu: '20 недель',
+  },
+  {
+    id: 'dQw4w9WgXcQ',
+    titleEn: 'Office Fit-Out — City Centre',
+    titleRu: 'Офис IT-компании — центр города',
+    areaEn: 'City Centre', areaRu: 'Центр города',
+    sqm: 240, durationEn: '6 weeks', durationRu: '6 недель',
+  },
+];
+---
+
+<section class="py-24 bg-gray-950/60">
+  <div class="container-wide">
+    <div class="text-center mb-14 reveal">
+      <span class="section-eyebrow">{lang === 'en' ? 'See the transformation' : 'Смотрите трансформацию'}</span>
+      <h2 class="section-title">{lang === 'en' ? 'Video Cases' : 'Видео-кейсы'}</h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      {videos.map((v, i) => (
+        <div class="glass-card overflow-hidden reveal" style={`animation-delay: ${i * 0.1}s`}>
+          <!-- Lazy YouTube embed -->
+          <div
+            class="relative aspect-video bg-gray-900 cursor-pointer group"
+            data-video-id={v.id}
+          >
+            <img
+              src={`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`}
+              alt={lang === 'en' ? v.titleEn : v.titleRu}
+              width="480"
+              height="270"
+              loading="lazy"
+              class="w-full h-full object-cover"
+            />
+            <div class="absolute inset-0 bg-gray-950/40 flex items-center justify-center group-hover:bg-gray-950/20 transition-colors">
+              <div class="w-16 h-16 rounded-full bg-accent-500/90 flex items-center justify-center group-hover:scale-110 transition-transform shadow-accent">
+                <svg class="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="p-5">
+            <h3 class="font-display font-bold text-white mb-3">{lang === 'en' ? v.titleEn : v.titleRu}</h3>
+            <div class="flex flex-wrap gap-2">
+              <span class="tag">📍 {lang === 'en' ? v.areaEn : v.areaRu}</span>
+              <span class="tag">📐 {v.sqm} {tr('misc.sqm')}</span>
+              <span class="tag">⏱ {lang === 'en' ? v.durationEn : v.durationRu}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLDivElement>('[data-video-id]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.videoId;
+      el.innerHTML = `<iframe
+        src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        class="w-full h-full absolute inset-0"
+        loading="lazy"
+        title="Renovation video"
+      ></iframe>`;
+      el.style.position = 'relative';
+    });
+  });
+</script>

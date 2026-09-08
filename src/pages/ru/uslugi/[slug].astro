@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/shared/Header.astro';
+import Footer from '../../../components/shared/Footer.astro';
+import ServiceDetailPage from '../../../components/pages/ServiceDetailPage.astro';
+import CookieConsent from '../../../components/ui/CookieConsent.astro';
+import FloatingContactBar from '../../../components/ui/FloatingContactBar.astro';
+import { services } from '../../../lib/servicesData';
+import { categoryHero } from '../../../lib/servicePhotos';
+
+export function getStaticPaths() {
+  return services.map((s) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const svc  = services.find((s) => s.slug === slug)!;
+const lang = 'ru';
+---
+
+<BaseLayout lang={lang}
+  title={`${svc.titleRu} в Лимасоле — цена и сроки`}
+  description={svc.seoDescRu}
+  ogImage={categoryHero[svc.category]}>
+  <Header lang={lang} />
+  <main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+    <ServiceDetailPage lang={lang} svc={svc} />
+  </main>
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+  <FloatingContactBar lang={lang} />
+</BaseLayout>

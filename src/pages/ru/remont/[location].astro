@@ -1,0 +1,473 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/shared/Header.astro';
+import Footer from '../../../components/shared/Footer.astro';
+import BookingForm from '../../../components/sections/BookingForm.astro';
+import { services, type ServiceCategory } from '../../../lib/servicesData';
+import { locations, getLocationBySlug, matrixLocationSlugs } from '../../../lib/citiesData';
+import { locationPhoto, categoryBand } from '../../../lib/servicePhotos';
+import { getCollection } from 'astro:content';
+
+export function getStaticPaths() {
+  return locations.map(l => ({ params: { location: l.slug } }));
+}
+
+const { location } = Astro.params;
+const loc = getLocationBySlug(location!)!;
+/* Not every location gets a service × location page any more. */
+const inMatrix = (matrixLocationSlugs as readonly string[]).includes(loc.slug);
+const lang = 'ru';
+
+const catOrder: ServiceCategory[] = ['spaces', 'commercial', 'specialist', 'trades'];
+const catLabel: Record<ServiceCategory, string> = {
+  spaces: 'Дом и жильё',
+  commercial: 'Коммерция',
+  specialist: 'Специальные',
+  trades: 'Виды работ',
+};
+
+const locPrice = (s: typeof services[number]) => {
+  if (s.priceUnit === 'sqm' && s.priceFrom) {
+    const raw = s.priceFrom * loc.priceFactor;
+    const p = raw >= 50 ? Math.round(raw / 5) * 5 : Math.round(raw);
+    return `от €${p}/м²`;
+  }
+  return s.priceLabelRu;
+};
+
+/* Названия районов берём из русской коллекции портфолио — иначе фильтр
+   не находит ни одного кейса и на страницу попадают английские отзывы. */
+const areaMap: Record<string, string[]> = {
+  'germasogeia':          ['Гермасогея'],
+  'agios-tychonas':       ['Агиос Тихонас'],
+  'limassol-marina':      ['Limassol Marina'],
+  'limassol-city-centre': ['Центр города'],
+  'potamos-germasogeias': ['Гермасогея'],
+  'limassol':             ['Гермасогея', 'Агиос Тихонас', 'Limassol Marina', 'Центр города'],
+};
+const caseAreas = areaMap[loc.slug] ?? [];
+const localCases = (await getCollection('portfolio_ru'))
+  .filter(c => caseAreas.includes(c.data.area))
+  .slice(0, 2);
+
+const otherLocations = locations.filter(l => l.slug !== loc.slug);
+const heroPhoto = locationPhoto[loc.slug] ?? '/images/gallery-hero-2.webp';
+const bandPhoto = categoryBand.spaces;
+
+const title = `Ремонт ${loc.inRu}`;
+const metaDesc = `Ремонт ${loc.inRu} — квартиры, виллы, кухни, санузлы и офисы. Фиксированная цена, гарантия 5 лет, бесплатный выезд за 48 часов.`;
+
+const faqSchema = loc.faqsRu.length ? {
+  '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: loc.faqsRu.map(f => ({
+    '@type': 'Question', name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+} : null;
+
+const businessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Helyot',
+  description: metaDesc,
+  url: `https://helyot.com/ru/remont/${loc.slug}`,
+  telephone: '+357 97 499 231',
+  address: { '@type': 'PostalAddress', addressLocality: 'Limassol', addressCountry: 'CY' },
+  areaServed: {
+    '@type': loc.type === 'city' ? 'City' : 'Place',
+    name: loc.nameEn,
+    geo: { '@type': 'GeoCoordinates', latitude: loc.lat, longitude: loc.lng },
+  },
+  priceRange: '€€€',
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://helyot.com/ru' },
+    { '@type': 'ListItem', position: 2, name: 'Ремонт по локациям' },
+    { '@type': 'ListItem', position: 3, name: loc.nameRu },
+  ],
+};
+---
+
+<BaseLayout lang={lang} title={`${title} — Helyot`} description={metaDesc} ogImage={heroPhoto} schema={businessSchema}>
+  <Fragment slot="head">
+    {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+
+  <Header lang={lang} />
+  <main style="background:#08080E;">
+
+    <!-- ══ CINE HERO ═══════════════════════════════════════════ -->
+    <section class="loc-hero vignette">
+      <div class="loc-hero-bg cine-scene" aria-hidden="true">
+        <img src={heroPhoto} alt="" loading="eager" fetchpriority="high" decoding="async"
+          width="1600" height="1000" data-kenburns />
+      </div>
+      <div class="loc-hero-grade" aria-hidden="true"></div>
+      <div class="container-wide" style="position:relative;z-index:2;">
+        <nav aria-label="Breadcrumb" class="loc-bc">
+          <a href="/ru">Главная</a>
+          <span class="loc-bc-sep" aria-hidden="true">/</span>
+          <span aria-current="page">{`Ремонт ${loc.inRu}`}</span>
+        </nav>
+
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{loc.type === 'city' ? 'Кипр' : 'Лимасол'}</span>
+          {loc.nameRu}
+        </p>
+
+        <h1 class="cine-display loc-h1" data-words>
+          Ремонт <em>{loc.inRu}</em> — одна команда, один договор.
+        </h1>
+
+        <div class="loc-hero-row">
+          <p class="loc-sub" data-reveal data-reveal-delay="0.3">
+            Проект, стройка и контроль — одна штатная команда. Фиксированная цена по договору,
+            письменный график, гарантия 5 лет на конструктив.
+          </p>
+          <div class="loc-hero-meta" data-reveal data-reveal-delay="0.45">
+            <div class="loc-meta-item">
+              <span class="loc-meta-lbl">Выезд на объект</span>
+              <span class="loc-meta-val">до 48 часов</span>
+            </div>
+            <div class="loc-meta-item">
+              <span class="loc-meta-lbl">Гарантия</span>
+              <span class="loc-meta-val">5 лет</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="loc-ctas" data-reveal data-reveal-delay="0.6">
+          <a href="#booking" class="loc-cta" data-magnetic>Бесплатная смета
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="https://wa.me/35797499231" target="_blank" rel="noopener" class="loc-cta loc-cta--ghost" data-magnetic>WhatsApp</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ LOCAL CONTEXT ═══════════════════════════════════════ -->
+    <section class="loc-section">
+      <div class="container-wide">
+        <div class="loc-split">
+          <div>
+            <p class="cine-label" data-reveal><span class="cine-label__index">01</span>Район</p>
+            <h2 class="loc-h2" data-reveal>Ремонт {loc.inRu}: что важно знать</h2>
+            <p class="loc-body" data-reveal>{loc.introRu}</p>
+          </div>
+          <div>
+            <h3 class="loc-h3" data-reveal>Что мы проверяем первым делом {loc.inRu}</h3>
+            <ul class="loc-issues" data-stagger-group>
+              {loc.issuesRu.map(issue => (
+                <li data-stagger-item>
+                  <span class="loc-issue-tick" aria-hidden="true">
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#E8B86D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  {issue}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ FULL-BLEED SCENE ════════════════════════════════════ -->
+    <div class="loc-band cine-scene" aria-hidden="true">
+      <img src={bandPhoto} alt="" loading="lazy" decoding="async"
+        width="1600" height="900" data-parallax="0.18" />
+      <div class="loc-band-caption">
+        <span>{loc.nameRu}</span>
+        <span class="loc-band-caption__rule"></span>
+        <span>Все услуги — один подрядчик</span>
+      </div>
+    </div>
+
+    <!-- ══ SERVICES & PRICES ═══════════════════════════════════ -->
+    <section class="loc-section">
+      <div class="container-wide">
+        <p class="cine-label" data-reveal><span class="cine-label__index">02</span>Услуги и цены</p>
+        <h2 class="loc-h2" data-reveal>Всё, что мы делаем {loc.inRu}</h2>
+        <div class="hub-cats">
+          {catOrder.map(cat => (
+            <div class="hub-cat">
+              <h3 class="hub-cat-title" data-reveal>{catLabel[cat]}</h3>
+              <ul class="hub-svc-list" data-stagger-group>
+                {services.filter(s => s.category === cat).map(s => (
+                  <li data-stagger-item>
+                    <a href={inMatrix ? `/ru/uslugi/${s.slug}/${loc.slug}` : `/ru/uslugi/${s.slug}`} class="hub-svc">
+                      <span class="hub-svc-name">{s.titleRu} {loc.inRu}</span>
+                      <span class="hub-svc-dots" aria-hidden="true"></span>
+                      <span class="hub-svc-price">{locPrice(s)}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ REAL LOCAL WORK ═════════════════════════════════════ -->
+    {localCases.length > 0 && (
+      <section class="loc-section">
+        <div class="container-wide">
+          <p class="cine-label" data-reveal><span class="cine-label__index">03</span>Сдано рядом</p>
+          <h2 class="loc-h2" data-reveal>Наши реальные проекты {loc.type === 'district' ? 'в этом районе' : loc.inRu}</h2>
+          <div class="loc-cases" data-stagger-group>
+            {localCases.map(c => (
+              <a href={`/ru/portfolio/${c.slug}`} class="loc-case" data-stagger-item>
+                <div class="loc-case-img cine-scene">
+                  <img src={c.data.coverImage} alt={c.data.title} loading="lazy" width="640" height="420" />
+                </div>
+                <div class="loc-case-body">
+                  <span class="loc-case-meta">{c.data.area} · {c.data.sqm} м² · {c.data.year}</span>
+                  <h3 class="loc-case-title">{c.data.title}</h3>
+                  {c.data.testimonial && (
+                    <blockquote class="loc-case-quote">
+                      «{c.data.testimonial.text}»
+                      <cite>— {c.data.testimonial.author}</cite>
+                    </blockquote>
+                  )}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- ══ FAQ ═════════════════════════════════════════════════ -->
+    {loc.faqsRu.length > 0 && (
+      <section class="loc-section">
+        <div class="container-wide" style="max-width:760px;">
+          <p class="cine-label" data-reveal><span class="cine-label__index">{localCases.length ? '04' : '03'}</span>Вопросы</p>
+          <h2 class="loc-h2" data-reveal>Ремонт {loc.inRu} — частые вопросы</h2>
+          <div class="loc-faq">
+            {loc.faqsRu.map(faq => (
+              <details class="loc-faq-item">
+                <summary>{faq.q}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <p>{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- ══ OTHER LOCATIONS ═════════════════════════════════════ -->
+    <section class="loc-section" style="border-bottom:none;">
+      <div class="container-wide">
+        <h3 class="loc-h3" data-reveal>Ремонт в других локациях Кипра</h3>
+        <ul class="loc-links loc-links--grid">
+          {otherLocations.map(l => (
+            <li><a href={`/ru/remont/${l.slug}`}>Ремонт {l.inRu}</a></li>
+          ))}
+        </ul>
+        <p class="loc-service-area">
+          Helyot работает на всей подконтрольной правительству территории Республики Кипр —
+          Лимасол, Пафос, Ларнака, Никосия и свободный район Фамагусты (Айя-Напа, Протарас,
+          Паралимни). Проекты на оккупированных северных территориях мы не выполняем.
+        </p>
+      </div>
+    </section>
+
+    <BookingForm lang={lang} />
+  </main>
+  <Footer lang={lang} />
+</BaseLayout>
+
+<style>
+.loc-hero {
+  position: relative;
+  padding: 9.5rem 0 4.5rem;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background: #08080E;
+  overflow: hidden;
+}
+.loc-hero-bg { position: absolute; inset: 0; z-index: 0; }
+.loc-hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+.loc-hero-grade {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse 90% 70% at 80% -10%, rgba(232,184,109,.10) 0%, transparent 60%),
+    linear-gradient(180deg, transparent 55%, rgba(8,8,14,.88) 100%),
+    linear-gradient(100deg,
+      rgba(8,8,14,.92) 0%,
+      rgba(8,8,14,.78) 45%,
+      rgba(8,8,14,.45) 75%,
+      rgba(8,8,14,.22) 100%);
+}
+/* Small and pinned above the headline block, matching every other hero */
+.loc-bc {
+  position: absolute;
+  top: -5.2rem; left: 0;
+  display: flex; align-items: center; gap: .3rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; letter-spacing: .02em; color: #8288A5;
+  flex-wrap: wrap;
+}
+.loc-bc a { color: #8288A5; text-decoration: none; transition: color .15s; }
+.loc-bc a:hover { color: #9DA0B8; }
+.loc-bc [aria-current="page"] { color: #8288A5; }
+.loc-bc-sep { color: #8288A5; }
+.loc-h1 { max-width: 22ch; margin: 1.4rem 0 2rem; text-shadow: 0 2px 32px rgba(4,4,8,.75); }
+.loc-hero-row {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 3rem; flex-wrap: wrap; margin-bottom: 2.2rem;
+}
+.loc-sub { font-size: .95rem; line-height: 1.75; color: #B8B8CC; max-width: 52ch; margin: 0; text-shadow: 0 1px 16px rgba(4,4,8,.8); }
+.loc-hero-meta { display: flex; gap: 2.6rem; }
+.loc-meta-item { display: flex; flex-direction: column; gap: .35rem; }
+.loc-meta-lbl { font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; color: #8288A5; }
+.loc-meta-val { font-family: 'Spectral', Georgia, serif; font-size: 1.25rem; font-weight: 500; color: #F0F0F6; }
+.loc-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+.loc-cta {
+  display: inline-flex; align-items: center; gap: .55rem;
+  padding: .95rem 2rem; border-radius:3px;
+  background: #E8B86D; color: #14100A;
+  font-weight: 600; font-size: .9rem; text-decoration: none;
+  box-shadow: 0 8px 36px rgba(232,184,109,.25);
+  transition: background .2s ease;
+  will-change: transform;
+}
+.loc-cta:hover { background: #F0C67E; }
+.loc-cta--ghost {
+  background: transparent; color: #F0F0F6;
+  border: 1px solid rgba(255,255,255,.2); box-shadow: none;
+}
+.loc-cta--ghost:hover { background: rgba(255,255,255,.06); border-color: rgba(232,184,109,.5); }
+
+.loc-section { padding: 5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.loc-h2 {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 300; font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+  letter-spacing: -.02em; line-height: 1.1;
+  color: #F0F0F6; margin: 1.1rem 0 1.6rem;
+}
+.loc-h3 {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 400; font-size: 1.15rem; color: #F0F0F6; margin: 0 0 1.2rem;
+}
+.loc-body { font-size: 0.95rem; line-height: 1.8; color: #B8B8CC; margin: 0; max-width: 56ch; }
+.loc-split { display: grid; grid-template-columns: 1.1fr 1fr; gap: 4rem; align-items: start; }
+
+.loc-issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.loc-issues li {
+  display: flex; gap: .8rem; align-items: flex-start;
+  padding: .85rem 0; font-size: 0.9rem; line-height: 1.6; color: #B8B8CC;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.loc-issues li:first-child { border-top: 1px solid rgba(255,255,255,.06); }
+.loc-issue-tick {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: .1rem;
+  border: 1px solid rgba(232,184,109,.3); background: rgba(232,184,109,.07);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.loc-band { position: relative; height: clamp(300px, 48vh, 520px); border-bottom: 1px solid rgba(255,255,255,.07); }
+.loc-band img { width: 100%; height: 100%; object-fit: cover; }
+.loc-band::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(8,8,14,.55) 0%, rgba(8,8,14,.08) 45%, rgba(8,8,14,.62) 100%);
+}
+.loc-band-caption {
+  position: absolute; left: 0; right: 0; bottom: 1.6rem; z-index: 1;
+  display: flex; align-items: center; justify-content: center; gap: 1.1rem;
+  font-size: .64rem; letter-spacing: .3em; text-transform: uppercase; color: rgba(240,240,246,.85);
+  text-shadow: 0 1px 12px rgba(4,4,8,.8);
+}
+.loc-band-caption__rule { width: 3rem; height: 1px; background: rgba(232,184,109,.7); }
+
+.hub-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem 4rem; margin-top: 1rem; }
+.hub-cat-title {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase;
+  color: #E8B86D; margin: 0 0 1rem; font-family: 'Inter', system-ui, sans-serif;
+}
+.hub-svc-list { list-style: none; margin: 0; padding: 0; }
+.hub-svc {
+  display: flex; align-items: baseline; gap: .8rem;
+  padding: .78rem 0; text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  transition: padding-left .25s ease;
+}
+.hub-svc:hover { padding-left: .5rem; }
+.hub-svc-name { font-size: .9rem; color: #B8B8CC; transition: color .15s; }
+.hub-svc:hover .hub-svc-name { color: #E8B86D; }
+.hub-svc-dots { flex: 1; border-bottom: 1px dotted rgba(255,255,255,.14); transform: translateY(-4px); }
+.hub-svc-price {
+  font-family: 'Spectral', Georgia, serif; font-size: .95rem; color: #9DA0B8;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+
+.loc-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+.loc-case {
+  display: flex; flex-direction: column; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.07); border-radius: 4px; overflow: hidden;
+  transition: border-color .25s ease, transform .25s ease;
+}
+.loc-case:hover { border-color: rgba(232,184,109,.35); transform: translateY(-3px); }
+.loc-case-img { aspect-ratio: 16/10; }
+.loc-case-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.loc-case:hover .loc-case-img img { transform: scale(1.04); }
+.loc-case-body { padding: 1.4rem 1.5rem 1.6rem; }
+.loc-case-meta { font-size: .64rem; letter-spacing: .2em; text-transform: uppercase; color: #E8B86D; }
+.loc-case-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: 1.2rem; color: #F0F0F6; margin: .6rem 0 .8rem; line-height: 1.3;
+}
+.loc-case-quote { font-size: 0.84rem; line-height: 1.7; color: #9DA0B8; font-style: italic; margin: 0; padding: 0; max-width: 52ch; }
+.loc-case-quote cite { display: block; margin-top: .5rem; font-style: normal; color: #8288A5; font-size: .78rem; }
+
+.loc-faq { display: flex; flex-direction: column; margin-top: 1rem; }
+.loc-faq-item { border-bottom: 1px solid rgba(255,255,255,.07); }
+.loc-faq-item:first-child { border-top: 1px solid rgba(255,255,255,.07); }
+.loc-faq-item summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.2rem;
+  padding: 1.2rem 0; cursor: pointer; list-style: none;
+  font-size: .95rem; font-weight: 600; color: #B8B8CC; transition: color .15s;
+}
+.loc-faq-item summary::-webkit-details-marker { display: none; }
+.loc-faq-item summary:hover { color: #F0F0F6; }
+.loc-faq-item[open] summary { color: #E8B86D; }
+.loc-faq-item summary svg { flex-shrink: 0; opacity: .35; transition: transform .25s; }
+.loc-faq-item[open] summary svg { transform: rotate(180deg); }
+.loc-faq-item p { font-size: 0.9rem; line-height: 1.75; color: #9DA0B8; margin: 0; padding: 0 0 1.3rem; max-width: 62ch; }
+
+.loc-links { list-style: none; margin: 0; padding: 0; }
+.loc-links--grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .2rem 2rem; }
+.loc-links li { padding: .4rem 0; }
+.loc-links a {
+  font-size: 0.84rem; color: #9DA0B8; text-decoration: none;
+  border-bottom: 1px solid transparent; transition: color .15s, border-color .15s;
+}
+.loc-links a:hover { color: #E8B86D; border-bottom-color: rgba(232,184,109,.4); }
+.loc-service-area {
+  margin: 3rem 0 0; padding-top: 1.6rem;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-size: .78rem; line-height: 1.7; color: #8288A5; max-width: 72ch;
+}
+
+@media (max-width: 860px) {
+  .loc-hero { padding: 7rem 0 3rem; }
+  .loc-split, .hub-cats, .loc-cases { grid-template-columns: 1fr; gap: 2.4rem; }
+  .loc-links--grid { grid-template-columns: 1fr; }
+  .loc-section { padding: 3.2rem 0; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .loc-bc, .loc-bc a, .loc-bc-sep { font-size: 0.78rem;   .cine-label, .cine-label__index { font-size: 0.72rem; }
+}
+  .loc-bc a { padding: .45rem 0; }
+  .loc-meta-lbl, .loc-case-meta { font-size: 0.72rem; }
+  .loc-svc-name, .hub-svc-price { font-size: 0.84rem; }
+}
+</style>

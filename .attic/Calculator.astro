@@ -1,0 +1,126 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+import Button from '../ui/Button.astro';
+import { servicesList } from '../../lib/calculatorData';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+
+const typeLabels: Record<string, string> = {
+  apartment: tr('calc.apartment'),
+  villa:     tr('calc.villa'),
+  office:    tr('calc.office'),
+};
+const levelLabels: Record<string, string> = {
+  economy:  tr('calc.economy'),
+  standard: tr('calc.standard'),
+  premium:  tr('calc.premium'),
+};
+---
+
+<section id="calculator" class="py-24 bg-gray-950/60">
+  <div class="container-wide">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-12 reveal">
+        <span class="section-eyebrow">Quick estimate</span>
+        <h2 class="section-title">{tr('calc.title')}</h2>
+        <p class="section-subtitle mx-auto">{tr('calc.sub')}</p>
+      </div>
+
+      <div class="glass-card p-8 reveal" style="animation-delay: 0.1s">
+        <div class="grid sm:grid-cols-3 gap-5 mb-6">
+          <!-- Property type -->
+          <div>
+            <label class="form-label">{tr('calc.type')}</label>
+            <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label={tr('calc.type')}>
+              {(['apartment','villa','office'] as const).map((type) => (
+                <label class="calc-type-label cursor-pointer">
+                  <input type="radio" name="calc-type" value={type} class="sr-only peer" aria-label={typeLabels[type]} />
+                  <span class="block text-center glass-card-sm rounded-[4px] py-2.5 text-xs font-medium text-gray-400 peer-checked:bg-accent-500/20 peer-checked:text-accent-300 peer-checked:border-accent-500/40 transition-all">
+                    {type === 'apartment' ? '🏠' : type === 'villa' ? '🏡' : '🏢'}<br />
+                    {typeLabels[type]}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <!-- Area -->
+          <div>
+            <label for="calc-area" class="form-label">{tr('calc.area')}</label>
+            <input
+              id="calc-area"
+              type="range"
+              min="30"
+              max="500"
+              value="80"
+              step="5"
+              class="w-full accent-accent-500 mt-3"
+            />
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+              <span>30</span>
+              <span id="calc-area-val" class="text-white font-semibold">80 {tr('misc.sqm')}</span>
+              <span>500</span>
+            </div>
+          </div>
+
+          <!-- Level -->
+          <div>
+            <label class="form-label">{tr('calc.level')}</label>
+            <div class="space-y-1.5">
+              {(['economy','standard','premium'] as const).map((level) => (
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="calc-level" value={level} class="w-4 h-4 accent-accent-500" aria-label={levelLabels[level]} />
+                  <span class="text-sm text-gray-300">{levelLabels[level]}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="calc-result" class="glass-card-accent rounded-[4px] p-5 text-center mb-6 hidden">
+          <p class="text-gray-400 text-sm mb-1">{tr('calc.result')}</p>
+          <p id="calc-total" class="text-4xl font-display font-semibold text-gradient">€0</p>
+          <p id="calc-range" class="text-gray-500 text-sm mt-1"></p>
+          <p class="text-xs text-gray-500 mt-2">{tr('calc.disclaimer')}</p>
+        </div>
+
+        <Button id="calc-btn" class="w-full justify-center" size="lg">
+          {lang === 'en' ? 'Calculate' : 'Рассчитать'}
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { calculate } from '../../lib/calculatorData';
+  import type { PropertyType, FinishLevel } from '../../lib/calculatorData';
+
+  const areaInput  = document.getElementById('calc-area') as HTMLInputElement;
+  const areaVal    = document.getElementById('calc-area-val');
+  const btn        = document.getElementById('calc-btn') as HTMLButtonElement;
+  const result     = document.getElementById('calc-result');
+  const totalEl    = document.getElementById('calc-total');
+  const rangeEl    = document.getElementById('calc-range');
+
+  areaInput?.addEventListener('input', () => {
+    if (areaVal) areaVal.textContent = `${areaInput.value} m²`;
+  });
+
+  btn?.addEventListener('click', () => {
+    const type  = (document.querySelector<HTMLInputElement>('input[name="calc-type"]:checked')?.value ?? 'apartment') as PropertyType;
+    const level = (document.querySelector<HTMLInputElement>('input[name="calc-level"]:checked')?.value ?? 'standard') as FinishLevel;
+    const area  = parseInt(areaInput?.value ?? '80', 10);
+
+    const { total, min, max } = calculate(type, level, area);
+    if (totalEl) totalEl.textContent = `€${total.toLocaleString()}`;
+    if (rangeEl) rangeEl.textContent  = `€${min.toLocaleString()} – €${max.toLocaleString()}`;
+    result?.classList.remove('hidden');
+  });
+
+  // Default select
+  document.querySelector<HTMLInputElement>('input[name="calc-type"][value="apartment"]')!.checked = true;
+  document.querySelector<HTMLInputElement>('input[name="calc-level"][value="standard"]')!.checked = true;
+</script>

@@ -1,0 +1,114 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/shared/Header.astro';
+import Footer from '../../../components/shared/Footer.astro';
+import CineHero from '../../../components/shared/CineHero.astro';
+import BookingForm from '../../../components/sections/BookingForm.astro';
+import CookieConsent from '../../../components/ui/CookieConsent.astro';
+
+export async function getStaticPaths() {
+  let cases: Awaited<ReturnType<typeof getCollection<'portfolio'>>> = [];
+  try { cases = await getCollection('portfolio'); } catch {}
+  return cases.map((c) => ({ params: { slug: c.slug } }));
+}
+
+const { slug } = Astro.params;
+const lang = 'en';
+
+let portfolioCase: Awaited<ReturnType<typeof getEntry<'portfolio', string>>> | undefined;
+try { portfolioCase = await getEntry('portfolio', slug!); } catch {}
+if (!portfolioCase) return Astro.redirect('/404');
+
+const { Content } = await portfolioCase.render();
+const d = portfolioCase.data;
+
+const typeLabel: Record<string, string> = {
+  apartment: 'Apartment', villa: 'Villa', office: 'Office', bathroom: 'Bathroom', kitchen: 'Kitchen',
+};
+---
+
+<BaseLayout lang={lang} title={`${d.title} — Helyot`} description={d.description} ogImage={d.coverImage}>
+  <Header lang={lang} />
+  <main style="background:#08080E;color:#F0F0F6;overflow-x:hidden;">
+
+    <CineHero
+      lang={lang}
+      photo={d.coverImage}
+      index={`${d.area} · ${d.year}`}
+      eyebrow={typeLabel[d.type] ?? 'Project'}
+      title={d.title}
+      subtitle={d.description}
+      breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Projects', href: '/en/gallery' }, { label: d.area }]}
+      meta={[
+        { label: 'Area', value: `${d.sqm} m²` },
+        { label: 'Duration', value: d.duration },
+        { label: 'Level', value: d.level },
+      ]}
+    />
+
+    <article class="container-narrow" style="padding:4rem 0 2rem;">
+
+      {d.tours && d.tours.length > 0 && (
+        <div style="margin-bottom:3rem;">
+          {d.tours.map((tour) => (
+            <div class="pf-tour">
+              <p class="pf-tour-label">{tour.type === 'matterport' ? 'Virtual Tour 360°' : 'Interactive Tour'}</p>
+              <iframe src={tour.url} title="360° Virtual Tour" width="800" height="450" loading="lazy" allowfullscreen class="w-full aspect-video block"></iframe>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {d.images && d.images.length > 0 && (
+        <div class="pf-gallery" data-stagger-group>
+          {d.images.map((img, i) => (
+            <span class="pf-shot cine-scene" data-stagger-item>
+              <img src={img} alt={`${d.title} — photo ${i+1}`} width="480" height="360" loading="lazy" />
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div class="prose-article">
+        <Content />
+      </div>
+
+      {d.testimonial && (
+        <blockquote class="pf-quote">
+          <div class="pf-stars" aria-hidden="true">
+            {Array.from({ length: d.testimonial.rating }, () => (
+              <svg width="15" height="15" viewBox="0 0 20 20" fill="#E8B86D"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            ))}
+          </div>
+          <p class="pf-quote-text">“{d.testimonial.text}”</p>
+          <cite class="pf-quote-author">— {d.testimonial.author}</cite>
+        </blockquote>
+      )}
+
+      <div style="margin-top:3rem;">
+        <a href="/en/gallery" class="pf-back">← All projects</a>
+      </div>
+    </article>
+
+  </main>
+  <BookingForm lang={lang} />
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+</BaseLayout>
+
+<style>
+  .pf-tour { border:1px solid rgba(255,255,255,.08); border-radius:4px; overflow:hidden; margin-bottom:1rem; }
+  .pf-tour-label { padding:.85rem 1.25rem; font-size:0.84rem; font-weight:500; color:#B8B8CC; border-bottom:1px solid rgba(255,255,255,.08); margin:0; }
+  .pf-gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; margin-bottom:3.5rem; }
+  .pf-shot { display:block; aspect-ratio:4/3; border-radius:4px; overflow:hidden; border:1px solid rgba(255,255,255,.07); }
+  .pf-shot img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
+  .pf-shot:hover img { transform:scale(1.05); }
+  .pf-quote { margin:3.5rem 0 0; padding:2rem 2.25rem; border:1px solid rgba(232,184,109,.2); border-radius:4px; background:linear-gradient(135deg,rgba(232,184,109,.06),transparent); }
+  .pf-stars { display:flex; gap:.2rem; margin-bottom:1rem; }
+  .pf-quote-text { font-family:'Spectral',Georgia,serif; font-size:1.3rem; font-style:italic; line-height:1.5; color:#F0F0F6; margin:0 0 1rem; max-width:46ch; }
+  .pf-quote-author { font-style:normal; color:#E8B86D; font-size:0.84rem; }
+  .pf-back { color:#9DA0B8; text-decoration:none; font-size:.9rem; transition:color .15s; }
+  .pf-back:hover { color:#E8B86D; }
+  @media (max-width:640px){ .pf-gallery { grid-template-columns:1fr 1fr; } }
+</style>

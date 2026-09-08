@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+
+const lang = 'en';
+---
+<BaseLayout lang={lang} title="Terms of Service — Helyot" description="Terms and conditions for Helyot renovation services in Limassol, Cyprus." noindex>
+<Header lang={lang}/>
+<main style="background:#08080E;color:#F0F0F6;min-height:100vh;padding:5rem 0 6rem;">
+  <div style="max-width:860px;margin:0 auto;padding:0 2rem;">
+
+    <nav style="font-size:0.72rem;color:#8288A5;margin-bottom:2rem;display:flex;gap:.4rem;">
+      <a href="/" style="color:#8288A5;text-decoration:none;" onmouseover="this.style.color='#E8B86D'" onmouseout="this.style.color='#8288A5'">Home</a>
+      <span>/</span><span>Terms of Service</span>
+    </nav>
+
+    <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.2em;color:#E8B86D;margin-bottom:.75rem;">LEGAL</p>
+    <h1 style="font-family:'Spectral',Georgia,serif;font-weight:300;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.03em;margin-bottom:.5rem;">Terms of Service</h1>
+    <p style="color:#8288A5;font-size:0.84rem;margin-bottom:3rem;">Last updated: 1 June 2025</p>
+
+    <style>
+      .legal-section { margin-bottom: 2.5rem; }
+      .legal-section h2 { font-family:'Spectral',Georgia,serif; font-weight:400; font-size:1.15rem; color:#F0F0F6; margin-bottom:.875rem; padding-bottom:.5rem; border-bottom:1px solid rgba(255,255,255,.07); }
+      .legal-section p, .legal-section li { font-size:0.9rem; color:#8288A5; line-height:1.8; margin-bottom:.625rem; }
+      .legal-section ul { padding-left:1.25rem; }
+      .legal-section a { color:#E8B86D; }
+      strong { color:#B8B8CC; }
+    </style>
+
+    <div class="legal-section">
+      <h2>1. Parties</h2>
+      <p>These Terms of Service ("Terms") govern the relationship between <strong>Helyot</strong>, a licensed renovation and construction company registered in Limassol, Cyprus ("Company", "we", "us"), and any individual or legal entity ("Client", "you") who engages our services or uses our website at helyot.com.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>2. Services</h2>
+      <p>Helyot provides renovation, construction, interior design and related services in Limassol, Cyprus. The specific scope, price and timeline of each project is defined in a written contract signed by both parties before works commence.</p>
+      <ul>
+        <li>No works begin without a signed fixed-price contract</li>
+        <li>All quotations are valid for 30 days from issue date</li>
+        <li>Scope changes require a written variation order approved by the Client before execution</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2>3. Payment Terms</h2>
+      <p>Payment milestones are defined in the individual project contract. Standard structure:</p>
+      <ul>
+        <li><strong>30%</strong> mobilisation deposit on contract signing</li>
+        <li><strong>30%</strong> at structural completion milestone</li>
+        <li><strong>30%</strong> at second fix (before finishing works)</li>
+        <li><strong>10%</strong> final payment at snagging sign-off and handover</li>
+      </ul>
+      <p>Late payments accrue interest at 2% per month after a 14-day grace period.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>4. Warranties</h2>
+      <p>Helyot provides the following written warranties from the date of project handover:</p>
+      <ul>
+        <li><strong>5 years</strong> — structural and finishing works</li>
+        <li><strong>10 years</strong> — waterproofing installations (bathrooms, terraces, flat roofs)</li>
+        <li><strong>1 year</strong> — cosmetic finishes (paint, minor surface marks)</li>
+      </ul>
+      <p>Warranties are void if the Client makes modifications to the covered works without Helyot's written consent, or if damage results from misuse, accident or third-party interference.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>5. Client Obligations</h2>
+      <ul>
+        <li>Provide accurate information about the property and its structural condition</li>
+        <li>Ensure site access is available during agreed working hours</li>
+        <li>Make payments on schedule as defined in the contract</li>
+        <li>Obtain required approvals (e.g. building management consent) where applicable</li>
+        <li>Notify Helyot promptly of any concerns or defects identified</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2>6. Limitation of Liability</h2>
+      <p>Helyot's total liability for any claim arising from a project shall not exceed the total contract value for that project. We are not liable for indirect, consequential or loss-of-profit damages unless caused by our gross negligence or wilful misconduct.</p>
+      <p>Helyot carries Professional Indemnity Insurance (€2M per incident) and Public Liability Insurance (€2M per incident). Certificate copies are available on request.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>7. Intellectual Property</h2>
+      <p>3D designs, visualisations and drawings produced by Helyot's design bureau remain the intellectual property of Helyot until the project contract value is paid in full, at which point all design documentation is transferred to the Client.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>8. Governing Law</h2>
+      <p>These Terms are governed by the laws of the Republic of Cyprus. Any disputes shall be subject to the exclusive jurisdiction of the courts of Limassol, Cyprus.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>9. Contact</h2>
+      <p>For any questions regarding these Terms:<br/>
+      <strong>Helyot</strong><br/>
+      Limassol, Cyprus<br/>
+      Email: <a href="mailto:helyotteam@gmail.com">helyotteam@gmail.com</a><br/>
+      Phone: <a href="tel:+35797499231">+357 97 499 231</a></p>
+    </div>
+
+  </div>
+</main>
+<Footer lang={lang}/><CookieConsent lang={lang}/>
+</BaseLayout>

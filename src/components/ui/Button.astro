@@ -1,0 +1,62 @@
+---
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'glass';
+  size?:    'sm' | 'md' | 'lg';
+  href?:    string;
+  type?:    'button' | 'submit' | 'reset';
+  class?:   string;
+  disabled?: boolean;
+  target?:  string;
+  rel?:     string;
+  ariaLabel?: string;
+}
+
+const {
+  variant  = 'primary',
+  size     = 'md',
+  href,
+  type     = 'button',
+  class:   className = '',
+  disabled = false,
+  target,
+  rel,
+  ariaLabel,
+} = Astro.props;
+
+const sizeClasses = {
+  sm: 'px-4 py-2 text-sm rounded-[4px]',
+  md: 'px-6 py-3 text-base rounded-[4px]',
+  lg: 'px-8 py-4 text-lg rounded-[4px]',
+};
+
+const variantClasses = {
+  primary:   'bg-accent-500 hover:bg-accent-600 text-white font-semibold shadow-accent hover:shadow-none',
+  secondary: 'border border-white/20 hover:border-white/40 text-white font-semibold backdrop-blur-sm hover:bg-white/8',
+  ghost:     'text-gray-300 hover:text-white hover:bg-white/5 font-medium',
+  glass:     'glass-btn text-white font-semibold',
+};
+
+const base = 'inline-flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none';
+const classes = [base, sizeClasses[size], variantClasses[variant], className].join(' ');
+---
+
+{href ? (
+  <a
+    href={href}
+    class={classes}
+    target={target}
+    rel={rel}
+    aria-label={ariaLabel}
+  >
+    <slot />
+  </a>
+) : (
+  <button
+    type={type}
+    class={classes}
+    disabled={disabled}
+    aria-label={ariaLabel}
+  >
+    <slot />
+  </button>
+)}

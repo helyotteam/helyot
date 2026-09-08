@@ -1,0 +1,94 @@
+---
+/**
+ * ARTICLE NAV — previous / next at the foot of a post.
+ *
+ * An article used to end in a dead stop: share row, then the footer. This gives
+ * the reader who finished one piece the obvious next move without making them
+ * go back to the index. Order follows the same editorial weight the blog front
+ * page uses, so "next" means the next most useful piece, not the next by date.
+ */
+import { getBlogPosts } from '../../lib/content';
+import { type Lang } from '../../i18n/ui';
+
+interface Props { lang: Lang; slug: string; }
+const { lang, slug } = Astro.props;
+const en = lang === 'en';
+const base = en ? '/en/blog' : '/ru/blog';
+
+const posts = [...(await getBlogPosts(lang))].sort((a, b) =>
+  (b.data.featured ?? 0) - (a.data.featured ?? 0) ||
+  +new Date(b.data.publishedDate) - +new Date(a.data.publishedDate));
+
+const i = posts.findIndex(p => p.slug === slug);
+const prev = i > 0 ? posts[i - 1] : null;
+const next = i >= 0 && i < posts.length - 1 ? posts[i + 1] : null;
+
+const c = en
+  ? { prev: 'Previous', next: 'Read next', all: 'All articles' }
+  : { prev: 'Предыдущая', next: 'Читать дальше', all: 'Все статьи' };
+---
+
+{(prev || next) && (
+  <nav class="an" aria-label={c.next}>
+    <div class="container-wide">
+      <div class="an-grid">
+        {prev ? (
+          <a href={`${base}/${prev.slug}`} class="an-item an-item--prev">
+            <span class="an-key">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              {c.prev}
+            </span>
+            <span class="an-title">{prev.data.title}</span>
+          </a>
+        ) : <span class="an-item an-item--empty" aria-hidden="true"></span>}
+
+        {next ? (
+          <a href={`${base}/${next.slug}`} class="an-item an-item--next">
+            <span class="an-key">{c.next}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </span>
+            <span class="an-title">{next.data.title}</span>
+          </a>
+        ) : <span class="an-item an-item--empty" aria-hidden="true"></span>}
+      </div>
+    </div>
+  </nav>
+)}
+
+<style>
+.an {
+  padding: 2.6rem 0;
+  background: #08080E;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.an-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+.an-item {
+  display: flex; flex-direction: column; gap: .55rem;
+  text-decoration: none; min-width: 0;
+}
+.an-item--next { text-align: right; align-items: flex-end; }
+.an-item--empty { display: none; }
+.an-key {
+  display: inline-flex; align-items: center; gap: .45rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.78rem; text-transform: lowercase; letter-spacing: .04em; color: #8288A5;
+  transition: color .18s;
+}
+.an-item:hover .an-key { color: #E8B86D; }
+.an-key svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.an-item--prev:hover .an-key svg { transform: translateX(-3px); }
+.an-item--next:hover .an-key svg { transform: translateX(3px); }
+.an-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: 1.08rem; line-height: 1.3; color: #E4E4F0;
+  transition: color .18s;
+}
+.an-item:hover .an-title { color: #E8B86D; }
+
+@media (max-width: 700px) {
+  .an-grid { grid-template-columns: 1fr; gap: 1.6rem; }
+  .an-item--next { text-align: left; align-items: flex-start; }
+  .an-item--empty { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .an-key svg { transition: none; } }
+</style>

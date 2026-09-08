@@ -1,0 +1,127 @@
+---
+/**
+ * ARTICLE CTA — soft close for blog posts.
+ * A full booking form (pick a service, pick a date) is the wrong ask after
+ * a guide: the reader is still researching. This offers the next honest
+ * step — a written estimate or a direct line — without a form wall.
+ */
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const en = lang === 'en';
+const tr = (k: string) => t(lang, k as any);
+
+const c = en ? {
+  index: 'Still reading?', eyebrow: 'Next step',
+  title: `Want this costed <em>for your place?</em>`,
+  body: 'Guides give you the range. A survey gives you the number. We measure, ask the awkward questions, and send an itemised fixed price — usually within a week. No obligation, and no follow-up calls if you say no.',
+  points: [
+    'Free site visit, typically within 48 hours',
+    'Itemised fixed price in writing',
+    'You keep the quote whether you proceed or not',
+  ],
+  cta: 'Request an estimate', href: '/en/contact#booking',
+  or: 'or just call', services: 'Browse all services', servicesHref: '/en/services',
+} : {
+  index: 'Дочитали?', eyebrow: 'Следующий шаг',
+  title: `Посчитать это <em>для вашего объекта?</em>`,
+  body: 'Гайд даёт вилку. Выезд даёт цифру. Мы делаем замеры, задаём неудобные вопросы и присылаем постатейную фиксированную смету — обычно в течение недели. Без обязательств и без назойливых звонков, если вы откажетесь.',
+  points: [
+    'Бесплатный выезд, обычно в течение 48 часов',
+    'Постатейная фиксированная цена письменно',
+    'Смета остаётся у вас в любом случае',
+  ],
+  cta: 'Запросить смету', href: '/ru/kontakty#booking',
+  or: 'или просто позвоните', services: 'Все услуги', servicesHref: '/ru/uslugi',
+};
+---
+
+<section class="ac-section">
+  <div class="container-wide">
+    <div class="ac-grid">
+
+      <div>
+        <p class="cine-label"><span class="cine-label__index">{c.index}</span>{c.eyebrow}</p>
+        <h2 class="cine-display ac-title" set:html={c.title} />
+        <p class="ac-body">{c.body}</p>
+      </div>
+
+      <div class="ac-side">
+        <ul class="ac-points">
+          {c.points.map(pt => (
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8B86D" stroke-width="1.6" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+              {pt}
+            </li>
+          ))}
+        </ul>
+
+        <div class="ac-actions">
+          <a href={c.href} class="ac-cta">
+            {c.cta}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <span class="ac-or">{c.or}</span>
+          <a href={`tel:${tr('site.phone').replace(/\s/g,'')}`} class="ac-phone">{tr('site.phone')}</a>
+        </div>
+
+        <a href={c.servicesHref} class="ac-services">{c.services} →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+.ac-section {
+  background: #06060A;
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: 5rem 0;
+}
+.ac-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 3.5rem; align-items: start; }
+.ac-title { margin: 1rem 0 1rem; font-size: clamp(1.7rem, 3vw, 2.4rem); }
+.ac-body { font-size: 0.9rem; line-height: 1.8; color: #9DA0B8; max-width: 48ch; margin: 0; }
+
+.ac-side { display: flex; flex-direction: column; gap: 1.8rem; }
+.ac-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.ac-points li {
+  display: flex; align-items: flex-start; gap: .75rem;
+  font-size: 0.9rem; color: #B8B8CC; line-height: 1.6;
+  padding: .75rem 0; border-top: 1px solid rgba(255,255,255,.08);
+}
+.ac-points li:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.ac-points svg { flex-shrink: 0; margin-top: .2rem; }
+
+.ac-actions { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
+.ac-cta {
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .95rem; text-transform: lowercase; color: #E8B86D;
+  text-decoration: none; border: 1px solid #E8B86D; border-radius: 4px;
+  padding: .7rem 1.5rem; transition: background .2s ease, color .2s ease;
+}
+.ac-cta svg { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.ac-cta:hover { background: rgba(232,184,109,.09); color: #F3D5A0; }
+.ac-cta:hover svg { transform: translateX(3px); }
+.ac-or { font-family: 'Jost Variable', system-ui, sans-serif; font-size: 0.84rem; color: #8288A5; text-transform: lowercase; }
+.ac-phone {
+  font-family: 'Spectral', Georgia, serif; font-size: 1.02rem; color: #B8B8CC;
+  text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.22); padding-bottom: .12rem;
+  transition: border-color .2s;
+}
+.ac-phone:hover { border-color: rgba(255,255,255,.6); }
+
+.ac-services {
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: .84rem; text-transform: lowercase; color: #8288A5; text-decoration: none;
+  transition: color .2s;
+}
+.ac-services:hover { color: #E8B86D; }
+
+@media (max-width: 900px) {
+  .ac-section { padding: 3.5rem 0; }
+  .ac-grid { grid-template-columns: 1fr; gap: 2rem; }
+}
+</style>

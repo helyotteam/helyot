@@ -1,0 +1,41 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+
+const problems = lang === 'en' ? [
+  { icon: '🌡️', prob: 'Extreme summer heat (40°C+)',       sol: 'Spray insulation + reflective coatings that cut AC costs by 40%.' },
+  { icon: '💧', prob: 'Water damage from roof leaks',      sol: 'Full waterproofing with 10-year leak guarantee on all flat roofs.' },
+  { icon: '🧂', prob: 'Salt-air corrosion near the sea',   sol: 'Marine-grade materials and anti-corrosion treatments for coastal properties.' },
+  { icon: '📋', prob: 'Complex Cyprus building regulations',sol: 'We handle all permits, certificates and Council of Architecture approvals.' },
+  { icon: '🌊', prob: 'Winter humidity & mould risk',      sol: 'Controlled ventilation, anti-mould plasters and humidity barriers.' },
+  { icon: '⚡', prob: 'High electricity bills',            sol: 'Energy-efficient design + EU-subsidised solar and heat-pump integration.' },
+] : [
+  { icon: '🌡️', prob: 'Экстремальная летняя жара (40°C+)',     sol: 'Напыляемая теплоизоляция и отражающие покрытия снижают затраты на кондиционирование на 40%.' },
+  { icon: '💧', prob: 'Протечки и водный ущерб',                sol: 'Полная гидроизоляция с 10-летней гарантией на плоские кровли.' },
+  { icon: '🧂', prob: 'Солевая коррозия у моря',                sol: 'Морские материалы и антикоррозионная обработка для прибрежных объектов.' },
+  { icon: '📋', prob: 'Сложное кипрское законодательство',       sol: 'Берём на себя разрешения, сертификаты и согласования с муниципалитетом.' },
+  { icon: '🌊', prob: 'Зимняя влажность и риск плесени',        sol: 'Управляемая вентиляция, антиплесневые штукатурки и барьеры влажности.' },
+  { icon: '⚡', prob: 'Высокие счета за электричество',         sol: 'Энергоэффективный дизайн + субсидируемые ЕС панели и тепловые насосы.' },
+];
+---
+
+<section class="py-24 bg-gray-950">
+  <div class="container-wide">
+    <div class="text-center mb-14 reveal">
+      <span class="section-eyebrow">{lang === 'en' ? 'Cyprus-specific expertise' : 'Кипрская специфика'}</span>
+      <h2 class="section-title">{lang === 'en' ? 'Problems We Solve in Cyprus' : 'Задачи, которые мы решаем на Кипре'}</h2>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {problems.map((item, i) => (
+        <div class="glass-card p-6 group reveal" style={`animation-delay: ${i * 0.08}s`}>
+          <div class="text-3xl mb-4">{item.icon}</div>
+          <h3 class="font-semibold text-white mb-2">{item.prob}</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">{item.sol}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

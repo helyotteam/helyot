@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/shared/Header.astro';
+import Footer from '../../components/shared/Footer.astro';
+import PaybackCalculator from '../../components/sections/PaybackCalculator.astro';
+import BookingForm from '../../components/sections/BookingForm.astro';
+import CookieConsent from '../../components/ui/CookieConsent.astro';
+import { t } from '../../i18n/ui';
+
+const lang = 'en';
+---
+
+<BaseLayout lang={lang} title="Renovation Payback Calculator" description="Calculate how quickly your Limassol property renovation pays off through increased rental income.">
+  <Header lang={lang} />
+  <main>
+    <div class="pt-20 pb-4 text-center container-wide">
+      <span class="section-eyebrow">Investment ROI</span>
+      <h1 class="section-title">{t(lang,'payback.title')}</h1>
+    </div>
+    <PaybackCalculator lang={lang} />
+    <BookingForm lang={lang} />
+  </main>
+  <Footer lang={lang} />
+  <CookieConsent lang={lang} />
+</BaseLayout>

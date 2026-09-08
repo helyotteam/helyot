@@ -1,0 +1,699 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Header from '../../../../components/shared/Header.astro';
+import Footer from '../../../../components/shared/Footer.astro';
+import BookingForm from '../../../../components/sections/BookingForm.astro';
+import { services } from '../../../../lib/servicesData';
+import { matrixLocations, getLocationBySlug } from '../../../../lib/citiesData';
+import { priceRowsBySlug, examplesBySlug } from '../../../../lib/pricingData';
+import { getLocalAngle } from '../../../../lib/localAngles';
+import { getTraitNotes } from '../../../../lib/traitNotes';
+import { categoryHero, categoryBand, locationPhoto } from '../../../../lib/servicePhotos';
+import { getCollection } from 'astro:content';
+
+export function getStaticPaths() {
+  return services.flatMap(s =>
+    matrixLocations.map(l => ({ params: { slug: s.slug, location: l.slug } }))
+  );
+}
+
+const { slug, location } = Astro.params;
+const svc = services.find(s => s.slug === slug)!;
+const loc = getLocationBySlug(location!)!;
+const lang = 'en';
+const angle = getLocalAngle(location!, svc.category);
+/* Composed from the area's traits and this service — a different set of
+   lines on almost every pair, where the category angle above is shared. */
+const notes = getTraitNotes(svc.slug, loc.traits, 'en');
+const traitCtx = loc.traitContextEn ?? {};
+const traitLabel: Record<string, string> = {"coastal": "Coastal", "older-stock": "Older stock", "managed": "Managed building", "no-lift": "Walk-up", "hillside": "Sloping ground", "conservation": "Conservation area", "short-let": "Short lets", "premium": "Premium level"};
+
+/* Price adjusted for location — computed label only for per-m² services
+   (round to €5 only when coarse rounding won't distort small rates) */
+const rawPrice = svc.priceUnit === 'sqm' && svc.priceFrom ? svc.priceFrom * loc.priceFactor : null;
+const price = rawPrice ? (rawPrice >= 50 ? Math.round(rawPrice / 5) * 5 : Math.round(rawPrice)) : null;
+const priceLabel = price ? `from €${price}/m²` : svc.priceLabelEn;
+
+/* ── Pricing blocks ── */
+const priceRows = priceRowsBySlug[svc.slug] ?? [];
+const examples = (svc.priceUnit === 'sqm' && svc.priceFrom) ? (examplesBySlug[svc.slug] ?? []) : [];
+const exPrice = (sqm: number) =>
+  '€' + (Math.round(sqm * svc.priceFrom! * loc.priceFactor / 50) * 50).toLocaleString('en-US');
+
+/* ── Real local cases (portfolio) — only genuine, area-matched work ── */
+const areaMap: Record<string, string[]> = {
+  'germasogeia':          ['Germasogeia'],
+  'agios-tychonas':       ['Agios Tychonas'],
+  'limassol-marina':      ['Limassol Marina'],
+  'limassol-city-centre': ['City Centre'],
+  'potamos-germasogeias': ['Germasogeia'],
+  'limassol':             ['Germasogeia', 'Agios Tychonas', 'Limassol Marina', 'City Centre'],
+};
+const caseAreas = areaMap[loc.slug] ?? [];
+const localCases = (await getCollection('portfolio'))
+  .filter(c => caseAreas.includes(c.data.area))
+  .slice(0, 2);
+
+/* Section numbering shifts with optional blocks */
+let secN = 2;
+const secPrices = priceRows.length || examples.length ? String(++secN).padStart(2, '0') : '';
+const secCases  = localCases.length ? String(++secN).padStart(2, '0') : '';
+const secFaq    = String(++secN).padStart(2, '0');
+
+/* Photography */
+const heroPhoto = categoryHero[svc.category];
+const bandPhoto = locationPhoto[loc.slug] ?? categoryBand[svc.category];
+
+/* Interlinking: sibling services here + this service elsewhere */
+const siblingServices = services
+  .filter(s => s.slug !== svc.slug && (s.category === svc.category || svc.relatedSlugs.includes(s.slug)))
+  .slice(0, 4);
+const otherLocations = matrixLocations.filter(l => l.slug !== loc.slug);
+
+/* Limassol is the base city, so /services/<svc> already targets it and this
+   variant carries an identical title — the two would compete for the same
+   query. Point the canonical at the parent instead of self. */
+const canonical = loc.slug === 'limassol'
+  ? `https://helyot.com/en/services/${svc.slug}`
+  : undefined;
+
+const title = `${svc.titleEn} ${loc.inEn}`;
+const metaDesc = `${svc.titleEn} ${loc.inEn} — ${svc.priceLabelEn}, fixed price in the contract, 5-year warranty. Free site visit within 48 hours.`;
+
+const allFaqs = [...loc.faqsEn, ...svc.faqsEn];
+const faqSchema = allFaqs.length ? {
+  '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: allFaqs.map(f => ({
+    '@type': 'Question', name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+} : null;
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: title,
+  serviceType: svc.titleEn,
+  description: metaDesc,
+  areaServed: {
+    '@type': loc.type === 'city' ? 'City' : 'Place',
+    name: loc.nameEn,
+    geo: { '@type': 'GeoCoordinates', latitude: loc.lat, longitude: loc.lng },
+  },
+  provider: {
+    '@type': 'LocalBusiness',
+    name: 'Helyot',
+    url: 'https://helyot.com',
+    telephone: '+357 97 499 231',
+    address: { '@type': 'PostalAddress', addressLocality: 'Limassol', addressCountry: 'CY' },
+  },
+  ...(price ? { offers: { '@type': 'Offer', priceCurrency: 'EUR', price: String(price), unitText: 'per m²' } } : {}),
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://helyot.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Services', item: 'https://helyot.com/en/services' },
+    { '@type': 'ListItem', position: 3, name: svc.titleEn, item: `https://helyot.com/en/services/${svc.slug}` },
+    { '@type': 'ListItem', position: 4, name: loc.nameEn },
+  ],
+};
+---
+
+<BaseLayout lang={lang} title={title} description={metaDesc} ogImage={heroPhoto} canonical={canonical} schema={serviceSchema}>
+  <Fragment slot="head">
+    {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+
+  <Header lang={lang} />
+  <main style="background:#08080E;">
+
+    <!-- ══ CINE HERO ═══════════════════════════════════════════ -->
+    <section class="loc-hero vignette">
+      <div class="loc-hero-bg cine-scene" aria-hidden="true">
+        <img src={heroPhoto} alt="" loading="eager" fetchpriority="high" decoding="async"
+          width="1600" height="1000" data-kenburns />
+      </div>
+      <div class="loc-hero-grade" aria-hidden="true"></div>
+      <div class="container-wide" style="position:relative;z-index:2;">
+        <nav aria-label="Breadcrumb" class="loc-bc">
+          <a href="/">Home</a>
+          <span class="loc-bc-sep" aria-hidden="true">/</span>
+          <span aria-current="page">{svc.titleEn}</span>
+        </nav>
+
+        <p class="cine-label" data-reveal>
+          <span class="cine-label__index">{loc.type === 'city' ? 'Cyprus' : 'Limassol'}</span>
+          {loc.nameEn}
+        </p>
+
+        <h1 class="cine-display loc-h1" data-words>
+          {svc.titleEn} <em>{loc.inEn}</em>
+        </h1>
+
+        <div class="loc-hero-row">
+          <p class="loc-sub" data-reveal data-reveal-delay="0.3">{svc.heroSubEn}</p>
+          <div class="loc-hero-meta" data-reveal data-reveal-delay="0.45">
+            <div class="loc-meta-item">
+              <span class="loc-meta-lbl">Price guide</span>
+              <span class="loc-meta-val">{priceLabel}</span>
+            </div>
+            <div class="loc-meta-item">
+              <span class="loc-meta-lbl">Timeline</span>
+              <span class="loc-meta-val">{svc.timelineEn}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="loc-ctas" data-reveal data-reveal-delay="0.6">
+          <a href="#booking" class="loc-cta" data-magnetic>Get free estimate
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="https://wa.me/35797499231" target="_blank" rel="noopener" class="loc-cta loc-cta--ghost" data-magnetic>WhatsApp</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ LOCAL CONTEXT ═══════════════════════════════════════ -->
+    <section class="loc-section">
+      <div class="container-wide">
+        <div class="loc-split">
+          <div>
+            <p class="cine-label" data-reveal><span class="cine-label__index">01</span>The area</p>
+            <h2 class="loc-h2" data-reveal>Renovating {loc.inEn}</h2>
+            <p class="loc-body" data-reveal>{loc.introEn}</p>
+          </div>
+          <div>
+            <h3 class="loc-h3" data-reveal>What we check first {loc.inEn}</h3>
+            <ul class="loc-issues" data-stagger-group>
+              {loc.issuesEn.map(issue => (
+                <li data-stagger-item>
+                  <span class="loc-issue-tick" aria-hidden="true">
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#E8B86D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  {issue}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ FULL-BLEED SCENE ════════════════════════════════════ -->
+    <div class="loc-band cine-scene" aria-hidden="true">
+      <img src={bandPhoto} alt="" loading="lazy" decoding="async"
+        width="1600" height="900" data-parallax="0.18" />
+      <div class="loc-band-caption">
+        <span>{loc.nameEn}</span>
+        <span class="loc-band-caption__rule"></span>
+        <span>{svc.titleEn}</span>
+      </div>
+    </div>
+
+
+    <!-- ══ LOCAL DETAIL ════════════════════════════════════════
+         What differs about this kind of work in this specific area. Without it
+         a service × location page is the service page with the name swapped. -->
+    {angle && (
+      <section class="loc-section loc-angle-sec">
+        <div class="container-wide">
+          <div class="loc-split">
+            <div>
+              <p class="cine-label" data-reveal><span class="cine-label__index">Local detail</span>{loc.nameEn}</p>
+              <h2 class="loc-h2" data-reveal>{`${svc.titleEn} ${loc.inEn} — what changes`}</h2>
+              <p class="loc-body" data-reveal>{angle.en}</p>
+            </div>
+            <div>
+              <h3 class="loc-h3" data-reveal>What a quote here usually adds</h3>
+              <ul class="loc-adds" data-stagger-group>
+                {angle.addsEn.map(a => <li data-stagger-item>{a}</li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+    <!-- ══ SCOPE ═══════════════════════════════════════════════ -->
+    <section class="loc-section">
+      <div class="container-wide">
+        <p class="cine-label" data-reveal><span class="cine-label__index">02</span>Scope of work</p>
+        <h2 class="loc-h2" data-reveal>What's included</h2>
+        <div class="loc-inc" data-stagger-group>
+          {svc.includesEn.map((item, i) => (
+            <div class="loc-inc-item" data-stagger-item>
+              <span class="loc-inc-n">{String(i + 1).padStart(2, '0')}</span>
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PRICES ══════════════════════════════════════════════ -->
+    {(priceRows.length > 0 || examples.length > 0) && (
+      <section class="loc-section">
+        <div class="container-wide">
+          <p class="cine-label" data-reveal><span class="cine-label__index">{secPrices}</span>Pricing</p>
+          <h2 class="loc-h2" data-reveal>{svc.titleEn} prices {loc.inEn}</h2>
+          <div class="loc-price-grid">
+            {priceRows.length > 0 && (
+              <div>
+                <h3 class="loc-h3" data-reveal>By type of work</h3>
+                <table class="loc-price-table">
+                  <thead>
+                    <tr><th>Work</th><th>Price</th></tr>
+                  </thead>
+                  <tbody>
+                    {priceRows.map(row => (
+                      <tr><td>{row.en}</td><td>{row.priceEn}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {examples.length > 0 && (
+              <div>
+                <h3 class="loc-h3" data-reveal>Worked examples {loc.inEn}</h3>
+                <div class="loc-examples" data-stagger-group>
+                  {examples.map((ex, i) => (
+                    <div class="loc-example" data-stagger-item>
+                      <span class="loc-example-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                      <span class="loc-example-obj">{ex.en}</span>
+                      <span class="loc-example-price"><small>from</small> {exPrice(ex.sqm)}</span>
+                    </div>
+                  ))}
+                </div>
+                <p class="loc-price-note">
+                  Estimates at the {priceLabel} baseline. Your written quote is fixed
+                  after a free site survey — and it stays fixed.
+                </p>
+              </div>
+            )}
+          </div>
+          {priceRows.length > 0 && (
+            <p class="loc-price-note" style="margin-top:1.4rem;">
+              Baseline rates for the Republic of Cyprus: labour + standard materials,
+              waste removal included. No hidden extras are added later.
+            </p>
+          )}
+        </div>
+      </section>
+    )}
+
+    <!-- ══ REAL LOCAL WORK ═════════════════════════════════════ -->
+    {localCases.length > 0 && (
+      <section class="loc-section">
+        <div class="container-wide">
+          <p class="cine-label" data-reveal><span class="cine-label__index">{secCases}</span>Delivered nearby</p>
+          <h2 class="loc-h2" data-reveal>Our real projects {loc.type === 'district' ? 'in this area' : loc.inEn}</h2>
+          <div class="loc-cases" data-stagger-group>
+            {localCases.map(c => (
+              <a href={`/en/portfolio/${c.slug}`} class="loc-case" data-stagger-item>
+                <div class="loc-case-img cine-scene">
+                  <img src={c.data.coverImage} alt={c.data.title} loading="lazy" width="640" height="420" />
+                </div>
+                <div class="loc-case-body">
+                  <span class="loc-case-meta">{c.data.area} · {c.data.sqm} m² · {c.data.year}</span>
+                  <h3 class="loc-case-title">{c.data.title}</h3>
+                  {c.data.testimonial && (
+                    <blockquote class="loc-case-quote">
+                      “{c.data.testimonial.text}”
+                      <cite>— {c.data.testimonial.author}</cite>
+                    </blockquote>
+                  )}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- ══ FAQ ═════════════════════════════════════════════════ -->
+    <section class="loc-section">
+      <div class="container-wide" style="max-width:760px;">
+        <p class="cine-label" data-reveal><span class="cine-label__index">{secFaq}</span>Questions</p>
+        <h2 class="loc-h2" data-reveal>{svc.titleEn} {loc.inEn} — FAQ</h2>
+        {angle.factorsEn && (
+          <div class="loc-factors" data-reveal>
+            <h3 class="loc-h3">What changes a quote here</h3>
+            <table class="loc-ftable">
+              <thead><tr><th>Item</th><th>Why</th><th>Added</th></tr></thead>
+              <tbody>
+                {angle.factorsEn.map(f => (
+                  <tr><td>{f.what}</td><td>{f.why}</td><td class="loc-fcost">{f.cost}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {notes.length > 0 && (
+          <div class="loc-notes" data-stagger-group>
+            <h3 class="loc-h3">What we account for here</h3>
+            {notes.map(n => (
+              <div class="loc-note" data-stagger-item>
+                <span class="loc-note-tag">{traitLabel[n.trait] ?? n.trait}</span>
+                {traitCtx[n.trait] && <span class="loc-note-ctx">{traitCtx[n.trait]}</span>}
+                <p>{n.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div class="loc-faq">
+          {allFaqs.map(faq => (
+            <details class="loc-faq-item">
+              <summary>{faq.q}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>
+              </summary>
+              <p>{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ INTERLINKS ══════════════════════════════════════════ -->
+    <section class="loc-section" style="border-bottom:none;">
+      <div class="container-wide">
+        <p class="loc-parent-link" data-reveal>
+          Full technology, process and scope details are on the main
+          <a href={`/en/services/${svc.slug}`}>{svc.titleEn}</a> page.
+        </p>
+        <div class="loc-links-grid">
+          <div>
+            <h3 class="loc-h3" data-reveal>Other services {loc.inEn}</h3>
+            <ul class="loc-links">
+              {siblingServices.map(s => (
+                <li><a href={`/en/services/${s.slug}/${loc.slug}`}>{s.titleEn} {loc.inEn}</a></li>
+              ))}
+              <li><a href={`/en/renovation/${loc.slug}`} style="color:#E8B86D;">All services & prices {loc.inEn} →</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="loc-h3" data-reveal>{svc.titleEn} elsewhere</h3>
+            <ul class="loc-links">
+              {otherLocations.map(l => (
+                <li><a href={`/en/services/${svc.slug}/${l.slug}`}>{l.nameEn}</a></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <p class="loc-service-area">
+          Helyot operates across the government-controlled areas of the Republic of Cyprus —
+          Limassol, Paphos, Larnaca, Nicosia and the free Famagusta area (Ayia Napa, Protaras,
+          Paralimni). We do not undertake projects in the occupied northern areas.
+        </p>
+      </div>
+    </section>
+
+    <BookingForm lang={lang} />
+  </main>
+  <Footer lang={lang} />
+</BaseLayout>
+
+<style>
+/* ── Hero ─────────────────────────────────────────────────── */
+.loc-hero {
+  position: relative;
+  padding: 9.5rem 0 4.5rem;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background: #08080E;
+  overflow: hidden;
+}
+.loc-hero-bg { position: absolute; inset: 0; z-index: 0; }
+.loc-hero-bg img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center 40%;
+}
+.loc-hero-grade {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse 90% 70% at 80% -10%, rgba(232,184,109,.10) 0%, transparent 60%),
+    linear-gradient(180deg, transparent 55%, rgba(8,8,14,.88) 100%),
+    linear-gradient(100deg,
+      rgba(8,8,14,.92) 0%,
+      rgba(8,8,14,.78) 45%,
+      rgba(8,8,14,.45) 75%,
+      rgba(8,8,14,.22) 100%);
+}
+
+/* ── Full-bleed parallax band ─────────────────────────────── */
+.loc-band {
+  position: relative;
+  height: clamp(300px, 48vh, 520px);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.loc-band img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.loc-band::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(8,8,14,.55) 0%, rgba(8,8,14,.08) 45%, rgba(8,8,14,.62) 100%);
+}
+.loc-band-caption {
+  position: absolute; left: 0; right: 0; bottom: 1.6rem; z-index: 1;
+  display: flex; align-items: center; justify-content: center; gap: 1.1rem;
+  font-size: .64rem; letter-spacing: .3em; text-transform: uppercase; color: rgba(240,240,246,.85);
+  text-shadow: 0 1px 12px rgba(4,4,8,.8);
+}
+.loc-band-caption__rule { width: 3rem; height: 1px; background: rgba(232,184,109,.7); }
+/* Small and pinned above the headline block, matching every other hero */
+.loc-bc {
+  position: absolute;
+  top: -5.2rem; left: 0;
+  display: flex; align-items: center; gap: .3rem;
+  font-family: 'Jost Variable', system-ui, sans-serif;
+  font-size: 0.72rem; letter-spacing: .02em; color: #8288A5;
+  flex-wrap: wrap;
+}
+.loc-bc a { color: #8288A5; text-decoration: none; transition: color .15s; }
+.loc-bc a:hover { color: #9DA0B8; }
+.loc-bc [aria-current="page"] { color: #8288A5; }
+.loc-bc-sep { color: #8288A5; }
+.loc-h1 { max-width: 20ch; margin: 1.4rem 0 2rem; text-shadow: 0 2px 32px rgba(4,4,8,.75); }
+.loc-hero-row {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 3rem; flex-wrap: wrap; margin-bottom: 2.2rem;
+}
+.loc-sub { font-size: .95rem; line-height: 1.75; color: #B8B8CC; max-width: 52ch; margin: 0; text-shadow: 0 1px 16px rgba(4,4,8,.8); }
+.loc-hero-meta { display: flex; gap: 2.6rem; }
+.loc-meta-item { display: flex; flex-direction: column; gap: .35rem; }
+.loc-meta-lbl {
+  font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; color: #8288A5;
+}
+.loc-meta-val {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 1.25rem; font-weight: 500; color: #F0F0F6;
+}
+.loc-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+.loc-cta {
+  display: inline-flex; align-items: center; gap: .55rem;
+  padding: .95rem 2rem; border-radius:3px;
+  background: #E8B86D; color: #14100A;
+  font-weight: 600; font-size: .9rem; text-decoration: none;
+  box-shadow: 0 8px 36px rgba(232,184,109,.25);
+  transition: background .2s ease;
+  will-change: transform;
+}
+.loc-cta:hover { background: #F0C67E; }
+.loc-cta--ghost {
+  background: transparent; color: #F0F0F6;
+  border: 1px solid rgba(255,255,255,.2); box-shadow: none;
+}
+.loc-cta--ghost:hover { background: rgba(255,255,255,.06); border-color: rgba(232,184,109,.5); }
+
+/* ── Sections ─────────────────────────────────────────────── */
+.loc-section {
+  padding: 5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.loc-h2 {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 300; font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+  letter-spacing: -.02em; line-height: 1.1;
+  color: #F0F0F6; margin: 1.1rem 0 1.6rem;
+}
+.loc-h3 {
+  font-family: 'Spectral', Georgia, serif;
+  font-weight: 400; font-size: 1.15rem; color: #F0F0F6;
+  margin: 0 0 1.2rem;
+}
+.loc-body { font-size: 0.95rem; line-height: 1.8; color: #B8B8CC; margin: 0; max-width: 56ch; }
+
+.loc-split {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 4rem; align-items: start;
+}
+
+/* issues */
+.loc-issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.loc-issues li {
+  display: flex; gap: .8rem; align-items: flex-start;
+  padding: .85rem 0; font-size: 0.9rem; line-height: 1.6; color: #B8B8CC;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.loc-issues li:first-child { border-top: 1px solid rgba(255,255,255,.06); }
+.loc-issue-tick {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: .1rem;
+  border: 1px solid rgba(232,184,109,.3); background: rgba(232,184,109,.07);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* includes */
+.loc-inc {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 0 3rem; margin-top: 1rem;
+}
+.loc-inc-item {
+  display: flex; gap: 1.1rem; align-items: baseline;
+  padding: .95rem 0; font-size: .9rem; color: #B8B8CC; line-height: 1.6;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.loc-inc-n {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 0.78rem; color: rgba(232,184,109,.65);
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+
+/* faq */
+.loc-faq { display: flex; flex-direction: column; margin-top: 1rem; }
+.loc-faq-item { border-bottom: 1px solid rgba(255,255,255,.07); }
+.loc-faq-item:first-child { border-top: 1px solid rgba(255,255,255,.07); }
+.loc-faq-item summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.2rem;
+  padding: 1.2rem 0; cursor: pointer; list-style: none;
+  font-size: .95rem; font-weight: 600; color: #B8B8CC;
+  transition: color .15s;
+}
+.loc-faq-item summary::-webkit-details-marker { display: none; }
+.loc-faq-item summary:hover { color: #F0F0F6; }
+.loc-faq-item[open] summary { color: #E8B86D; }
+.loc-faq-item summary svg { flex-shrink: 0; opacity: .35; transition: transform .25s; }
+.loc-faq-item[open] summary svg { transform: rotate(180deg); }
+.loc-faq-item p {
+  font-size: 0.9rem; line-height: 1.75; color: #9DA0B8;
+  margin: 0; padding: 0 0 1.3rem; max-width: 62ch;
+}
+
+/* prices */
+.loc-price-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 3.5rem; align-items: start; margin-top: 1rem; }
+.loc-price-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.loc-price-table th {
+  text-align: left; font-size: .64rem; letter-spacing: .2em; text-transform: uppercase;
+  font-weight: 600; color: #8288A5; padding: 0 0 .7rem;
+  border-bottom: 1px solid rgba(232,184,109,.25);
+}
+.loc-price-table th:last-child, .loc-price-table td:last-child { text-align: right; white-space: nowrap; }
+.loc-price-table td {
+  padding: .8rem 0; color: #B8B8CC; line-height: 1.5;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.loc-price-table td:last-child {
+  font-family: 'Spectral', Georgia, serif; font-size: 0.95rem; color: #F0F0F6;
+  font-variant-numeric: tabular-nums; padding-left: 1.5rem;
+}
+.loc-examples { display: flex; flex-direction: column; gap: .9rem; }
+.loc-example {
+  position: relative;
+  display: flex; flex-direction: column; gap: .3rem;
+  padding: 1.3rem 1.5rem 1.4rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 4px;
+  background: linear-gradient(120deg, rgba(232,184,109,.05) 0%, rgba(232,184,109,.015) 55%, transparent 100%);
+  overflow: hidden;
+  transition: border-color .25s ease;
+}
+.loc-example:hover { border-color: rgba(232,184,109,.35); }
+.loc-example-n {
+  position: absolute; top: .4rem; right: .9rem;
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 3.2rem; font-weight: 300; line-height: 1;
+  color: rgba(232,184,109,.08); pointer-events: none;
+}
+.loc-example-obj { font-size: 0.84rem; letter-spacing: .06em; text-transform: uppercase; color: #9DA0B8; }
+.loc-example-price {
+  font-family: 'Spectral', Georgia, serif; font-size: 2rem; font-weight: 400;
+  color: #E8B86D; white-space: nowrap; font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+.loc-example-price small {
+  font-size: .95rem; color: #9DA0B8; font-family: 'Inter', system-ui, sans-serif; margin-right: .3rem;
+}
+.loc-price-note { font-size: 0.78rem; line-height: 1.7; color: #8288A5; margin: 1.1rem 0 0; max-width: 58ch; }
+
+/* local cases */
+.loc-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+.loc-case {
+  display: flex; flex-direction: column; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.07); border-radius: 4px; overflow: hidden;
+  transition: border-color .25s ease, transform .25s ease;
+}
+.loc-case:hover { border-color: rgba(232,184,109,.35); transform: translateY(-3px); }
+.loc-case-img { aspect-ratio: 16/10; }
+.loc-case-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.loc-case:hover .loc-case-img img { transform: scale(1.04); }
+.loc-case-body { padding: 1.4rem 1.5rem 1.6rem; }
+.loc-case-meta {
+  font-size: .64rem; letter-spacing: .2em; text-transform: uppercase; color: #E8B86D;
+}
+.loc-case-title {
+  font-family: 'Spectral', Georgia, serif; font-weight: 400;
+  font-size: 1.2rem; color: #F0F0F6; margin: .6rem 0 .8rem; line-height: 1.3;
+}
+.loc-case-quote {
+  font-size: 0.84rem; line-height: 1.7; color: #9DA0B8; font-style: italic;
+  margin: 0; padding: 0; max-width: 52ch;
+}
+.loc-case-quote cite { display: block; margin-top: .5rem; font-style: normal; color: #8288A5; font-size: .78rem; }
+
+/* parent link + service area */
+.loc-parent-link { font-size: .9rem; color: #9DA0B8; margin: 0 0 2.4rem; }
+.loc-parent-link a { color: #E8B86D; text-decoration: none; border-bottom: 1px solid rgba(232,184,109,.4); }
+.loc-parent-link a:hover { border-bottom-color: #E8B86D; }
+.loc-service-area {
+  margin: 3rem 0 0; padding-top: 1.6rem;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-size: .78rem; line-height: 1.7; color: #8288A5; max-width: 72ch;
+}
+
+/* interlinks */
+.loc-links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.loc-links { list-style: none; margin: 0; padding: 0; columns: 1; }
+.loc-links li { padding: .4rem 0; }
+.loc-links a {
+  font-size: 0.84rem; color: #9DA0B8; text-decoration: none;
+  border-bottom: 1px solid transparent; transition: color .15s, border-color .15s;
+}
+.loc-links a:hover { color: #E8B86D; border-bottom-color: rgba(232,184,109,.4); }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .loc-hero { padding: 7rem 0 3rem; }
+  .loc-split, .loc-links-grid, .loc-price-grid, .loc-cases { grid-template-columns: 1fr; gap: 2.4rem; }
+  .loc-inc { grid-template-columns: 1fr; }
+  .loc-section { padding: 3.2rem 0; }
+}
+
+/* Mobile legibility floor — 9–11px labels are unreadable on a phone. */
+@media (max-width: 700px) {
+  .loc-bc, .loc-bc a, .loc-bc-sep { font-size: 0.78rem; }
+  .loc-bc a { padding: .45rem 0; }
+  .loc-meta-lbl, .loc-case-meta { font-size: 0.72rem; }
+  .loc-svc-name, .hub-svc-price { font-size: 0.84rem; }
+}
+
+.loc-adds { list-style: none; margin: 1rem 0 0; padding: 0; }
+.loc-adds li {
+  position: relative; padding: .6rem 0 .6rem 1.3rem;
+  font-size: 0.9rem; line-height: 1.6; color: #B8B8CC;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.loc-adds li::before {
+  content: ''; position: absolute; left: 0; top: 1.15em;
+  width: .55rem; height: 1px; background: rgba(232,184,109,.7);
+}
+.loc-angle-sec { background: #06060A; }
+</style>

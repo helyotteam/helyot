@@ -1,0 +1,29 @@
+---
+import { t, type Lang } from '../../i18n/ui';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const tr = (k: string) => t(lang, k as any);
+
+const badges = [
+  { icon: '🏛️', label: tr('trust.licensed') },
+  { icon: '🛡️', label: tr('trust.insured')  },
+  { icon: '✅', label: tr('trust.warranty')  },
+  { icon: '📋', label: tr('trust.free')       },
+  { icon: '👷', label: tr('trust.team')       },
+  { icon: '💎', label: tr('trust.materials')  },
+];
+---
+
+<section style="background:#191928;border-top:1px solid rgba(255,255,255,0.07);border-bottom:1px solid rgba(255,255,255,0.07);" class="py-4">
+  <div class="container-wide">
+    <div class="flex flex-wrap items-center justify-center gap-2 md:gap-5">
+      {badges.map((b, i) => (
+        <div class="flex items-center gap-2 reveal" style={`animation-delay:${i*0.06}s`}>
+          <span class="text-sm" aria-hidden="true">{b.icon}</span>
+          <span class="text-xs font-medium text-[#7878A0] whitespace-nowrap">{b.label}</span>
+          {i < badges.length - 1 && <span class="hidden md:inline text-[#1A1A28] ml-3">·</span>}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
