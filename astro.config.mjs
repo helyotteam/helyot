@@ -2,10 +2,11 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 
-// @astrojs/react + framer-motion are installed and ready.
-// Activate when adding the first .tsx component:
-//   import react from '@astrojs/react';
-//   integrations: [..., react({ include: ['**/*.tsx', '**/*.jsx'] })]
+// The site ships no framework components — every page is .astro. React,
+// react-dom, framer-motion, leaflet and alpinejs were installed against
+// features that were later removed; none of them appeared in a single source
+// file or in the built bundle, so they were uninstalled rather than kept
+// "ready". Add an integration when a .tsx component actually exists.
 
 export default defineConfig({
   site: 'https://helyot.com',
@@ -20,8 +21,4 @@ export default defineConfig({
     tailwind({ applyBaseStyles: false }),
     mdx(),
   ],
-  vite: {
-    ssr: { noExternal: ['alpinejs'] },
-    optimizeDeps: { exclude: ['leaflet'] },
-  },
 });

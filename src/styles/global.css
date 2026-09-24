@@ -14,19 +14,25 @@
    for chips and 4px for everything else — no pills, no 8/12/16px.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Spectral has no variable cut, so the weights stay static. 500 is not
+   optional: it sets .loc-meta-val on all 252 matrix pages and the step
+   numerals in the booking form. 300-italic was dropped — nothing asked for
+   it, so it only ever added an @font-face rule nobody matched. */
 @import '@fontsource/spectral/300.css';
 @import '@fontsource/spectral/400.css';
 @import '@fontsource/spectral/500.css';
 @import '@fontsource/spectral/600.css';
-@import '@fontsource/spectral/300-italic.css';
 /* 400-italic carries every gold <em> in .cine-display — without it the
-   browser fakes the slant and the signature headings look wrong. */
+   browser fakes the slant and the signature headings look wrong.
+   500-italic is the pull-quote on the two About pages. */
 @import '@fontsource/spectral/400-italic.css';
 @import '@fontsource/spectral/500-italic.css';
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-/* 700 is used by the uppercase micro-labels and buttons across the site. */
+/* Inter is variable: one file per subset covers 100–900, replacing the three
+   static cuts (400/500/600) that cost 24 KB each per subset. The family is
+   named 'Inter Variable', matching the 'Jost Variable' convention already
+   used here. It also fixes weight 300, which was requested in three places
+   and silently fell back because no 300 file was ever loaded. */
+@import '@fontsource-variable/inter';
 /* Jost — navigation and header UI. Geometric, deliberately unlike Inter. */
 @import '@fontsource-variable/jost';
 /* Playfair Display removed — only the never-activated light theme + unused
@@ -87,7 +93,7 @@
   body  {
     background-color: var(--bg);
     color: var(--white);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter Variable', system-ui, sans-serif;
     /* Prevent pull-to-refresh accident on iOS/Android */
     overscroll-behavior-y: none;
     /* No horizontal overflow */
@@ -115,7 +121,7 @@
     font-family: 'Spectral', Georgia, serif;
     color: var(--white);
   }
-  p, li, td, th, label, span { font-family: 'Inter', system-ui, sans-serif; }
+  p, li, td, th, label, span { font-family: 'Inter Variable', system-ui, sans-serif; }
 
   /* Inline spans/em inside headings must inherit the heading's serif —
      otherwise the bare `span` rule above overrides it back to Inter. */

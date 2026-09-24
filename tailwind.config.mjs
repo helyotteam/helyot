@@ -23,7 +23,7 @@ export default {
       },
       fontFamily: {
         display: ['Spectral', 'Georgia', 'serif'],
-        sans:    ['Inter',         'system-ui', 'sans-serif'],
+        sans:    ['Inter Variable',         'system-ui', 'sans-serif'],
         mono:    ['JetBrains Mono','monospace'],
       },
       fontSize: {

@@ -3,6 +3,20 @@ import { t, getLangFromUrl, getAlternatePath, locales, type Lang } from '../i18n
 import '../styles/global.css';
 import '../styles/glass.css';
 
+/* Font preloads. The @font-face rules live inside the bundled CSS, so the
+   browser cannot discover a single font until that stylesheet has downloaded
+   and parsed — measured at 1.25 s on the homepage, with one face arriving at
+   2.9 s. Importing with ?url gives us the hashed build path at author time,
+   so these two faces start in parallel with the CSS instead of after it.
+   Only the two that paint the most text are preloaded; preloading more would
+   compete with the LCP image for bandwidth. Subsets are picked per language —
+   a Russian page still needs latin for the brand name, prices and units, but
+   cyrillic is what its body copy is set in. */
+import interLatin      from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import interCyrillic   from '@fontsource-variable/inter/files/inter-cyrillic-wght-normal.woff2?url';
+import spectralLatin   from '@fontsource/spectral/files/spectral-latin-300-normal.woff2?url';
+import spectralCyril   from '@fontsource/spectral/files/spectral-cyrillic-300-normal.woff2?url';
+
 interface Props {
   title?:       string;
   description?: string;
@@ -112,7 +126,12 @@ const GA_ID   = /^G-[A-Z0-9]{6,}$/.test(rawGaId) ? rawGaId : '';
     <meta name="apple-mobile-web-app-capable"          content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <!-- Fonts self-hosted via @fontsource — no external requests -->
+    <!-- Fonts self-hosted via @fontsource — no external requests.
+         Preloaded so they start with the stylesheet, not after it. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href={lang === 'ru' ? interCyrillic : interLatin} />
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href={lang === 'ru' ? spectralCyril : spectralLatin} />
 
     <!-- GA4 — loads ONLY after explicit cookie consent (GDPR compliant), and
          ONLY if PUBLIC_GA_ID is configured for this build -->
