@@ -127,17 +127,6 @@ function initTextReveals() {
       scrollTrigger: { trigger: el, start: 'top 88%', once: true },
     });
   });
-
-  gsap.utils.toArray<HTMLElement>('[data-chars]').forEach(el => {
-    const chars = (el.textContent || '').split('');
-    el.innerHTML = chars.map(c =>
-      c === ' ' ? ' ' : `<span class="c-in" style="display:inline-block;will-change:transform;">${c}</span>`
-    ).join('');
-    gsap.from(el.querySelectorAll('.c-in'), {
-      yPercent: 60, opacity: 0, duration: 0.6, ease: 'power3.out', stagger: 0.022,
-      scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-    });
-  });
 }
 
 function initParallax() {
@@ -197,23 +186,6 @@ function initCounters() {
   });
 }
 
-function initHorizontalScroll() {
-  gsap.utils.toArray<HTMLElement>('[data-h-scroll]').forEach(section => {
-    const track = section.querySelector<HTMLElement>('[data-h-track]');
-    if (!track) return;
-    const dist = () => track.scrollWidth - window.innerWidth;
-    if (dist() <= 0) return;
-    gsap.to(track, {
-      x: () => -dist(), ease: 'none',
-      scrollTrigger: {
-        trigger: section, pin: true, scrub: 1,
-        start: 'top top', end: () => '+=' + dist(),
-        invalidateOnRefresh: true,
-      },
-    });
-  });
-}
-
 function initMagnetic() {
   if (!window.matchMedia('(pointer: fine)').matches) return;
   document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach(btn => {
@@ -231,15 +203,11 @@ function initMagnetic() {
   });
 }
 
-function initLines() {
-  gsap.utils.toArray<HTMLElement>('[data-line]').forEach(el => {
-    gsap.from(el, {
-      scaleX: 0, transformOrigin: 'left center', duration: 1.1, ease: 'power3.inOut',
-      scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-    });
-  });
-}
-
+/* Removed as dead: initHorizontalScroll (data-h-scroll), initLines
+   (data-line) and the data-chars branch of initTextReveals. All three were
+   checked against the built output — zero pages of 415 carry those
+   attributes, so the code ran its querySelectorAll and found nothing on every
+   page load. initCounters is kept: data-count-to is on 4 pages. */
 export function initCinema() {
   if (reduced()) {
     // Kill the CSS-hidden state so content is simply visible
@@ -254,7 +222,5 @@ export function initCinema() {
   initKenBurns();
   initHeroExit();
   initCounters();
-  initHorizontalScroll();
   initMagnetic();
-  initLines();
 }
