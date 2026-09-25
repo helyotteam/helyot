@@ -25,6 +25,22 @@ export interface LocationData {
   /** Price adjustment vs Limassol baseline, e.g. 1.0, 0.95 */
   priceFactor: number;
   /**
+   * How we actually serve this place.
+   *
+   * The site used to say «working across Cyprus» everywhere, which invites the
+   * one question it cannot answer well: «so where is your Paphos crew?» An
+   * honest tier reads stronger than a blanket claim — and it is what a client
+   * comparing contractors is really trying to establish.
+   *
+   *   primary   — Limassol and its districts. Own crews, own warehouse,
+   *               same-day site visits.
+   *   secondary — Larnaca, Paphos, Nicosia. Regular projects, crews travel,
+   *               visits scheduled rather than same-day.
+   *   selected  — the far east coast. Project by project, on scope that
+   *               justifies the distance.
+   */
+  tier: 'primary' | 'secondary' | 'selected';
+  /**
    * Physical and regulatory traits of the area.
    *
    * A service × location page used to carry one paragraph per *category*, so
@@ -61,7 +77,7 @@ export const locations: LocationData[] = [
 
   /* ══ CITIES ═══════════════════════════════════════════════════════════ */
   {
-    slug: 'limassol', type: 'city',
+    slug: 'limassol', type: 'city', tier: 'primary',
     nameEn: 'Limassol', nameRu: 'Лимасол',
     inEn: 'in Limassol', inRu: 'в Лимасоле',
     lat: 34.6841, lng: 33.0379,
@@ -93,7 +109,7 @@ export const locations: LocationData[] = [
     traitContextRu: { 'coastal': 'дома примерно в 800 м от воды', 'older-stock': 'корпуса 1980-х, построенные до того, как утепление и современная электрика стали нормой' },
   },
   {
-    slug: 'paphos', type: 'city',
+    slug: 'paphos', type: 'city', tier: 'secondary',
     nameEn: 'Paphos', nameRu: 'Пафос',
     inEn: 'in Paphos', inRu: 'в Пафосе',
     lat: 34.7754, lng: 32.4245,
@@ -122,7 +138,7 @@ export const locations: LocationData[] = [
     priceFactor: 1.0,
   },
   {
-    slug: 'larnaca', type: 'city',
+    slug: 'larnaca', type: 'city', tier: 'secondary',
     nameEn: 'Larnaca', nameRu: 'Ларнака',
     inEn: 'in Larnaca', inRu: 'в Ларнаке',
     lat: 34.9199, lng: 33.6201,
@@ -151,7 +167,7 @@ export const locations: LocationData[] = [
     priceFactor: 0.97,
   },
   {
-    slug: 'nicosia', type: 'city',
+    slug: 'nicosia', type: 'city', tier: 'secondary',
     nameEn: 'Nicosia', nameRu: 'Никосия',
     inEn: 'in Nicosia', inRu: 'в Никосии',
     lat: 35.1856, lng: 33.3823,
@@ -182,7 +198,7 @@ export const locations: LocationData[] = [
 
   /* ══ LIMASSOL DISTRICTS ═══════════════════════════════════════════════ */
   {
-    slug: 'germasogeia', type: 'district', parent: 'limassol',
+    slug: 'germasogeia', type: 'district', parent: 'limassol', tier: 'primary',
     nameEn: 'Germasogeia', nameRu: 'Гермасогея',
     inEn: 'in Germasogeia', inRu: 'в Гермасогее',
     lat: 34.7167, lng: 33.0833,
@@ -214,7 +230,7 @@ export const locations: LocationData[] = [
     traitContextRu: { 'coastal': 'бо́льшая часть района в километре от моря плюс влажность от бассейна дамбы', 'older-stock': 'ванные и кухни эпохи комплексов 1998–2008 на полном износе', 'managed': 'почти в каждом доме есть компания, задающая часы и доступ к лифту', 'short-let': 'полы, покраска и мебель обновляются каждые 4–5 лет' },
   },
   {
-    slug: 'agios-tychonas', type: 'district', parent: 'limassol',
+    slug: 'agios-tychonas', type: 'district', parent: 'limassol', tier: 'primary',
     nameEn: 'Agios Tychonas', nameRu: 'Агиос Тихонас',
     inEn: 'in Agios Tychonas', inRu: 'в Агиос Тихонасе',
     lat: 34.7231, lng: 33.1470,
@@ -246,7 +262,7 @@ export const locations: LocationData[] = [
     traitContextRu: { 'coastal': 'прибрежные вилловые участки с прямой экспозицией', 'hillside': 'участки поместий выше дороги с реальным перепадом высот', 'premium': 'ожидания, не прощающие ни одного упрощённого узла' },
   },
   {
-    slug: 'potamos-germasogeias', type: 'district', parent: 'limassol',
+    slug: 'potamos-germasogeias', type: 'district', parent: 'limassol', tier: 'primary',
     nameEn: 'Potamos Germasogeias', nameRu: 'Потамос Гермасогеяс',
     inEn: 'in Potamos Germasogeias', inRu: 'в Потамосе',
     lat: 34.7050, lng: 33.0900,
@@ -278,7 +294,7 @@ export const locations: LocationData[] = [
     traitContextRu: { 'coastal': 'рамы балконов и окон, уже съеденные морским воздухом', 'no-lift': 'бо́льшая часть домов без лифта', 'older-stock': 'устаревшие планировки, теряющие метры на коридорах', 'short-let': 'вентиляция ванных, не рассчитанная на круглогодичных гостей' },
   },
   {
-    slug: 'limassol-marina', type: 'district', parent: 'limassol',
+    slug: 'limassol-marina', type: 'district', parent: 'limassol', tier: 'primary',
     nameEn: 'Limassol Marina', nameRu: 'Лимасол Марина',
     inEn: 'at Limassol Marina', inRu: 'в Лимасол Марине',
     lat: 34.6708, lng: 33.0413,
@@ -310,7 +326,7 @@ export const locations: LocationData[] = [
     traitContextRu: { 'coastal': 'самая жёсткая солевая экспозиция на острове', 'managed': 'согласованные часы, защита лифтов и только лицензированные подрядчики', 'premium': 'интерьеры уровня застройщика, которые владельцы доводят до bespoke' },
   },
   {
-    slug: 'limassol-city-centre', type: 'district', parent: 'limassol',
+    slug: 'limassol-city-centre', type: 'district', parent: 'limassol', tier: 'primary',
     nameEn: 'Limassol City Centre', nameRu: 'Центр Лимасола',
     inEn: 'in Limassol City Centre', inRu: 'в центре Лимасола',
     lat: 34.6750, lng: 33.0443,
@@ -343,7 +359,7 @@ export const locations: LocationData[] = [
   },
   /* ══ FAMAGUSTA FREE AREA (east coast, Republic-controlled) ═══════════ */
   {
-    slug: 'ayia-napa', type: 'city',
+    slug: 'ayia-napa', type: 'city', tier: 'selected',
     nameEn: 'Ayia Napa', nameRu: 'Айя-Напа',
     inEn: 'in Ayia Napa', inRu: 'в Айя-Напе',
     lat: 34.9823, lng: 34.0016,
@@ -372,7 +388,7 @@ export const locations: LocationData[] = [
     priceFactor: 1.0,
   },
   {
-    slug: 'protaras', type: 'city',
+    slug: 'protaras', type: 'city', tier: 'selected',
     nameEn: 'Protaras', nameRu: 'Протарас',
     inEn: 'in Protaras', inRu: 'в Протарасе',
     lat: 35.0125, lng: 34.0583,
@@ -401,7 +417,7 @@ export const locations: LocationData[] = [
     priceFactor: 1.0,
   },
   {
-    slug: 'paralimni', type: 'city',
+    slug: 'paralimni', type: 'city', tier: 'selected',
     nameEn: 'Paralimni', nameRu: 'Паралимни',
     inEn: 'in Paralimni', inRu: 'в Паралимни',
     lat: 35.0380, lng: 33.9823,

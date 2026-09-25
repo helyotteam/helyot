@@ -5,6 +5,7 @@ import Footer from '../../../components/shared/Footer.astro';
 import BookingForm from '../../../components/sections/BookingForm.astro';
 import { services, type ServiceCategory } from '../../../lib/servicesData';
 import { locations, getLocationBySlug, matrixLocationSlugs } from '../../../lib/citiesData';
+import { coverageNote, coverageLabel } from '../../../lib/coverage';
 import { locationPhoto, categoryBand } from '../../../lib/servicePhotos';
 import { getCollection } from 'astro:content';
 
@@ -157,6 +158,9 @@ const breadcrumbSchema = {
             <p class="cine-label" data-reveal><span class="cine-label__index">01</span>Район</p>
             <h2 class="loc-h2" data-reveal>Ремонт {loc.inRu}: что важно знать</h2>
             <p class="loc-body" data-reveal>{loc.introRu}</p>
+            <p class="loc-cover" data-reveal>
+              <strong>{coverageLabel(loc.tier, 'ru')}.</strong> {coverageNote(loc, 'ru')}
+            </p>
           </div>
           <div>
             <h3 class="loc-h3" data-reveal>Что мы проверяем первым делом {loc.inRu}</h3>
@@ -358,6 +362,13 @@ const breadcrumbSchema = {
 .loc-body { font-size: 0.95rem; line-height: 1.8; color: #B8B8CC; margin: 0; max-width: 56ch; }
 .loc-split { display: grid; grid-template-columns: 1.1fr 1fr; gap: 4rem; align-items: start; }
 
+.loc-cover {
+  margin: 1.4rem 0 0; padding: .95rem 1.1rem;
+  border-left: 2px solid rgba(232,184,109,.28);
+  background: rgba(232,184,109,.035);
+  font-size: .88rem; line-height: 1.75; color: #9DA0B8;
+}
+.loc-cover strong { color: #E8B86D; font-weight: 500; }
 .loc-issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .loc-issues li {
   display: flex; gap: .8rem; align-items: flex-start;

@@ -17,6 +17,7 @@
 import CineHero from '../shared/CineHero.astro';
 import BookingForm from '../sections/BookingForm.astro';
 import { type ServiceData, getRelatedServices } from '../../lib/servicesData';
+import { articleFor } from '../../lib/serviceArticles';
 import { priceRowsBySlug } from '../../lib/pricingData';
 import { categoryHero, categoryBand } from '../../lib/servicePhotos';
 import { matrixLocations } from '../../lib/citiesData';
@@ -34,6 +35,7 @@ const includes = en ? svc.includesEn : svc.includesRu;
 const faqs     = en ? svc.faqsEn : svc.faqsRu;
 
 const related    = getRelatedServices(svc.relatedSlugs).slice(0, 4);
+const deepRead   = articleFor(svc.slug, lang);
 const heroPhoto  = categoryHero[svc.category];
 const bandPhoto  = categoryBand[svc.category];
 const priceRows  = priceRowsBySlug[svc.slug] ?? [];
@@ -190,6 +192,7 @@ const c = en ? {
   faqLabel: 'Questions', faqTitle: (t: string) => `${t} — questions we get asked`,
   locTitle: (t: string) => `${t} by location`,
   relTitle: 'Related services',
+  readTitle: 'Further reading',
   area: 'Helyot operates across the government-controlled areas of the Republic of Cyprus — Limassol, Paphos, Larnaca, Nicosia and the free Famagusta area. We do not undertake projects in the occupied northern areas.',
 } : {
   eyebrow: 'Услуга', crumbHome: 'Главная', crumbSvc: 'Услуги', homeHref: '/ru',
@@ -210,6 +213,7 @@ const c = en ? {
   faqLabel: 'Вопросы', faqTitle: (t: string) => `${t} — что спрашивают чаще всего`,
   locTitle: (t: string) => `${t} по локациям`,
   relTitle: 'Смежные услуги',
+  readTitle: 'Разбор по теме',
   area: 'Helyot работает на подконтрольной правительству территории Республики Кипр — Лимасол, Пафос, Ларнака, Никосия и свободная зона Фамагусты. На оккупированных северных территориях мы не работаем.',
 };
 
@@ -687,6 +691,18 @@ const deep = en ? svc.deepEn : svc.deepRu;
           </ul>
         </div>
       )}
+      {/* The journal piece on this same subject. Pointing at it from here is
+          the other half of the intent split: this page answers «do it for me»,
+          that one answers «what will it cost and why». Linking them says which
+          is which instead of leaving two similar pages to compete. */}
+      {deepRead && (
+        <div>
+          <h3 class="sd-h3" data-reveal>{c.readTitle}</h3>
+          <ul class="sd-links">
+            <li><a href={deepRead.href}>{deepRead.label}</a></li>
+          </ul>
+        </div>
+      )}
     </div>
     <p class="sd-area">{c.area}</p>
   </div>
@@ -951,7 +967,7 @@ const deep = en ? svc.deepEn : svc.deepRu;
 .sd-faq-item p { font-size: 0.9rem; line-height: 1.8; color: #9DA0B8; margin: 0; padding: 0 0 1.3rem; max-width: 64ch; }
 
 /* ── Links ──────────────────────────────────────────────── */
-.sd-links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.sd-links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 3rem; }
 .sd-links { list-style: none; margin: 0; padding: 0; }
 .sd-links li { padding: .45rem 0; border-bottom: 1px solid rgba(255,255,255,.05); }
 .sd-links a { font-size: 0.9rem; color: #9DA0B8; text-decoration: none; transition: color .15s; }

@@ -66,7 +66,7 @@ export const services: ServiceData[] = [
   {
     slug: 'house-construction', category: 'spaces', icon: '🏗️',
     titleEn: 'House Construction',        titleRu: 'Строительство дома',
-    seoDescEn: 'Turnkey house construction in Limassol and across Cyprus. From plot survey and permits to handover. €2,000–3,200/m² to NZEB class A+. Fixed price, 5-year warranty.',
+    seoDescEn: 'Turnkey house construction in Limassol and along the south coast. From plot survey and permits to handover. €2,000–3,200/m² to NZEB class A+. Fixed price, 5-year warranty.',
     seoDescRu: 'Строительство дома под ключ в Лимасоле и по Кипру. От изысканий и разрешений до сдачи. €2 000–3 200/м² с классом A+ по NZEB. Фиксированная цена, гарантия 5 лет.',
     heroSubEn: 'From an empty plot to keys in hand — design, permits and construction under one contract.',
     heroSubRu: 'От пустого участка до ключей — проект, разрешения и стройка по одному договору.',
@@ -600,7 +600,7 @@ export const services: ServiceData[] = [
 
     deepEn: {
       scopeTitle: 'What we paint',
-      scopeLead: 'Complete residential and commercial painting across Cyprus, with a coating system chosen for each substrate rather than one tin used everywhere.',
+      scopeLead: 'Complete residential and commercial painting across Limassol and the south coast, with a coating system chosen for each substrate rather than one tin used everywhere.',
       scope: [
         { title: 'Interior walls & ceilings', body: 'Full apartment and villa repainting, smooth skim-coating, moisture-resistant finishes for bathrooms and kitchens.' , photo: PAINTING_SCOPE_PHOTOS[0] },
         { title: 'Exterior facades & balconies', body: 'UV-stable and salt-resistant coating systems specified for Mediterranean exposure.' , photo: PAINTING_SCOPE_PHOTOS[1] },
