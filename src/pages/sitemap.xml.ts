@@ -17,28 +17,6 @@ const pages = [
   { url: '/en/blog/',                           p: '0.9', freq: 'weekly'  },
 
   // ── EN Service pages ───────────────────────────────────
-  { url: '/en/services/apartment-renovation/',  p: '0.9', freq: 'monthly' },
-  { url: '/en/services/villa-renovation/',      p: '0.9', freq: 'monthly' },
-  { url: '/en/services/bathroom-renovation/',   p: '0.8', freq: 'monthly' },
-  { url: '/en/services/kitchen-renovation/',    p: '0.8', freq: 'monthly' },
-  { url: '/en/services/office-fit-out/',        p: '0.8', freq: 'monthly' },
-  { url: '/en/services/interior-design/',       p: '0.8', freq: 'monthly' },
-  { url: '/en/services/energy-modernization/',  p: '0.8', freq: 'monthly' },
-  { url: '/en/services/smart-home/',            p: '0.7', freq: 'monthly' },
-  { url: '/en/services/flooring/',              p: '0.7', freq: 'monthly' },
-  { url: '/en/services/waterproofing/',         p: '0.7', freq: 'monthly' },
-  { url: '/en/services/facade/',                p: '0.7', freq: 'monthly' },
-  { url: '/en/services/windows-doors/',         p: '0.7', freq: 'monthly' },
-  { url: '/en/services/pool-renovation/',       p: '0.7', freq: 'monthly' },
-  { url: '/en/services/terrace-outdoor/',       p: '0.7', freq: 'monthly' },
-  { url: '/en/services/hotel-renovation/',      p: '0.7', freq: 'monthly' },
-  { url: '/en/services/retail-restaurant/',     p: '0.7', freq: 'monthly' },
-  { url: '/en/services/joinery/',               p: '0.6', freq: 'monthly' },
-  { url: '/en/services/plastering/',            p: '0.6', freq: 'monthly' },
-  { url: '/en/services/painting/',              p: '0.6', freq: 'monthly' },
-  { url: '/en/services/electrical-plumbing/',   p: '0.6', freq: 'monthly' },
-  { url: '/en/services/structural-extensions/', p: '0.6', freq: 'monthly' },
-
   // EN blog posts are generated from the collection below, same as RU —
   // the hardcoded list they used to live in had drifted six articles behind.
 
@@ -69,9 +47,33 @@ const pages = [
   { url: '/calculators/payback/',                    p: '0.6', freq: 'monthly' },
 ];
 
+
+/* EN service pages were a hand-written list here. It had 21 entries while the
+   catalogue had 22, so house-construction — added later — never reached the
+   sitemap at all. The RU half was already generated from data; the blog list
+   had drifted the same way before and was fixed the same way. Both halves now
+   come from `services`, so adding a service cannot silently skip indexing. */
+const servicePriority: Record<string, string> = {
+  'apartment-renovation': '0.9', 'villa-renovation': '0.9',
+  'house-construction':   '0.9',
+  'bathroom-renovation':  '0.8', 'kitchen-renovation':   '0.8',
+  'office-fit-out':       '0.8', 'interior-design':      '0.8',
+  'energy-modernization': '0.8',
+  'smart-home':           '0.7', 'flooring':             '0.7',
+  'waterproofing':        '0.7', 'facade':               '0.7',
+  'windows-doors':        '0.7', 'pool-renovation':      '0.7',
+  'terrace-outdoor':      '0.7', 'hotel-renovation':     '0.7',
+  'retail-restaurant':    '0.7',
+  'joinery':              '0.6', 'plastering':           '0.6',
+  'painting':             '0.6', 'electrical-plumbing':  '0.6',
+  'structural-extensions':'0.6',
+};
+
 // ── Parent service pages, both langs (generated from data) ──
 for (const s of services) {
-  pages.push({ url: `/ru/uslugi/${s.slug}/`, p: '0.7', freq: 'monthly' });
+  const p = servicePriority[s.slug] ?? '0.7';
+  pages.push({ url: `/en/services/${s.slug}/`, p, freq: 'monthly' });
+  pages.push({ url: `/ru/uslugi/${s.slug}/`,   p, freq: 'monthly' });
 }
 
 // ── Location hubs (generated from data) ──────────────────

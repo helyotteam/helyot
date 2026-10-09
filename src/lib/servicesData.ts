@@ -143,10 +143,7 @@ export const services: ServiceData[] = [
     seoDescRu: 'Ремонт квартир под ключ в Лимасоле, Кипр. Электрика, сантехника, плитка, полы, покраска. Фиксированная цена. Бесплатная смета.',
     heroSubEn: 'From layout redesign to final finishing — every trade, one fixed price.',
     heroSubRu: 'От перепланировки до финишной отделки — все работы по одной фиксированной цене.',
-    /* Было 170 при том, что FAQ на этой же странице говорил «от €150 для
-       торгового помещения». Ресторанная цифра тянула заголовок вверх;
-       страница теперь про ретейл, и €150 — честный пол для него. */
-    priceFrom: 150, priceLabelEn: 'from €150/m²', priceLabelRu: 'от €150/м²', priceUnit: 'sqm',
+    priceFrom: 170, priceLabelEn: 'from €170/m²', priceLabelRu: 'от €170/м²', priceUnit: 'sqm',
     timelineEn: '5–14 weeks depending on size', timelineRu: '5–14 недель в зависимости от площади',
     includesEn: ['Demolition & waste removal','Full electrical rewire','New plumbing & drainage','Plastering & ceiling levelling','Tile installation (bathrooms & kitchen)','Flooring (parquet, SPC or tile)','Interior painting (2 coats + primer)','Door & skirting installation','Kitchen fitting (if supplied)','Snagging & handover'],
     includesRu: ['Демонтаж и вывоз мусора','Полная замена электропроводки','Новая сантехника и канализация','Штукатурка и выравнивание потолков','Укладка плитки (ванная, кухня)','Напольные покрытия (паркет, SPC или плитка)','Покраска (2 слоя + грунтовка)','Монтаж дверей и плинтусов','Установка кухни (при наличии)','Приёмка и передача'],
@@ -183,7 +180,7 @@ export const services: ServiceData[] = [
     faqsEn: [
       { q: 'Do you handle permits for extensions?', a: 'Yes. Extensions and structural changes need municipal consent, and we prepare or coordinate the drawings and file them for you. Nothing structural begins until the permit is in hand.' },
       { q: 'Can you work on an occupied villa?', a: 'Yes, by zoning the property and phasing the trades so you keep a habitable wing with power, water and a working bathroom. It extends the programme, and we say by how much before you sign.' },
-      { q: 'Which areas do you cover for villas?', a: 'The whole of the government-controlled Republic of Cyprus. Most villa work is in Limassol — Agios Tychonas, Germasogeia, Potamos — but we run projects in Paphos, Larnaca and Nicosia on the same terms.' },
+      { q: 'Which areas do you cover for villas?', a: 'Limassol first — Agios Tychonas, Germasogeia and Potamos are where most villa work is, and where our crews are based. Paphos, Larnaca and Nicosia we run on the same terms, with travel built into the programme. Government-controlled areas only.' },
       { q: 'Do you coordinate the pool and landscaping?', a: 'Yes, as part of the same contract and the same schedule. Pool works, terraces and planting are sequenced with the building works so nothing gets dug up twice.' },
       { q: 'What does a villa renovation actually cost?', a: 'From €190/m². A 250 m² villa to a full specification lands around €72,000. The figure firms up after a free site visit, and once it is in the contract it does not move.' },
       { q: 'I live abroad. Can you run the project without me?', a: 'Yes, and we do it regularly. You get a photo walkthrough every Friday, your project manager is on WhatsApp during working hours, and we video-call before and after key milestones.' },
@@ -191,7 +188,7 @@ export const services: ServiceData[] = [
     faqsRu: [
       { q: 'Вы занимаетесь разрешениями на пристройки?', a: 'Да. Пристройки и конструктивные изменения требуют согласования с муниципалитетом — мы готовим или координируем чертежи и подаём их за вас. Конструктивные работы не начинаются, пока разрешение не получено.' },
       { q: 'Можно работать на вилле, где живут?', a: 'Да — зонируем объект и ведём работы по этапам, чтобы у вас оставалось жилое крыло с электричеством, водой и рабочим санузлом. Это удлиняет срок, и мы говорим насколько до подписания договора.' },
-      { q: 'В каких районах вы делаете виллы?', a: 'По всей подконтрольной правительству территории Республики Кипр. Большая часть работ по виллам — Лимасол: Агиос Тихонас, Гермасогея, Потамос, но проекты в Пафосе, Ларнаке и Никосии ведём на тех же условиях.' },
+      { q: 'В каких районах вы делаете виллы?', a: 'В первую очередь Лимасол — Агиос Тихонас, Гермасогея, Потамос: там большая часть работ по виллам и там базируются бригады. Пафос, Ларнаку и Никосию ведём на тех же условиях, с дорогой, заложенной в график. Только подконтрольная правительству территория.' },
       { q: 'Вы координируете бассейн и ландшафт?', a: 'Да, в рамках того же договора и того же графика. Бассейн, террасы и озеленение ставятся в очередь вместе со строительными работами, чтобы ничего не вскрывать дважды.' },
       { q: 'Сколько на самом деле стоит ремонт виллы?', a: 'От €190/м². Вилла 250 м² под полную отделку выходит около €72 000. Точная сумма определяется после бесплатного выезда, и после подписания договора она не меняется.' },
       { q: 'Я живу за границей. Можно вести проект без меня?', a: 'Да, мы делаем это регулярно. Каждую пятницу — фотообход объекта, прораб на связи в WhatsApp в рабочее время, перед ключевыми этапами и после них созваниваемся по видео.' },
@@ -387,7 +384,10 @@ export const services: ServiceData[] = [
     seoDescRu: 'Ремонт магазинов в Лимасоле — стеллажи, витрины, торговое освещение, фасад и вывеска. Ночные смены, точка продолжает работать. От €150/м².',
     heroSubEn: 'Shelving, lighting and shopfront built around how your customers actually move through the space.',
     heroSubRu: 'Стеллажи, свет и фасад — рассчитанные под то, как покупатель на самом деле идёт по залу.',
-    priceFrom: 170, priceLabelEn: 'from €170/m²', priceLabelRu: 'от €170/м²', priceUnit: 'sqm',
+    /* Было 170 при том, что FAQ на этой же странице говорил «от €150 для
+       торгового помещения, рестораны дороже». €170 было усреднением двух
+       разных услуг; страница теперь про ретейл, и €150 — его честный пол. */
+    priceFrom: 150, priceLabelEn: 'from €150/m²', priceLabelRu: 'от €150/м²', priceUnit: 'sqm',
     timelineEn: '2–6 weeks', timelineRu: '2–6 недель',
     includesEn: ['Layout and customer-flow planning','Shelving, gondolas and wall systems built to the bay','Display units, counters and the till run','Retail lighting — track, accent and shelf-level','Fitting rooms, mirrors and stock room','Shopfront glazing, entrance and illuminated signage','Commercial-grade flooring (porcelain, vinyl, polished concrete)','Power and data sized for tills, security and lighting load'],
     includesRu: ['Планировка и расчёт покупательских потоков','Стеллажи, гондолы и пристенные системы по размеру ниши','Витрины, прилавки и кассовая линия','Торговое освещение — треки, акцентный и полочный свет','Примерочные, зеркала и складская зона','Витринное остекление, входная группа и световая вывеска','Полы под торговую нагрузку (керамогранит, винил, шлифованный бетон)','Электрика и слаботочка под кассы, охрану и свет'],
