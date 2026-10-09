@@ -91,7 +91,7 @@ const topics = posts.map(p => {
         <a href={postHref(post.slug)} class="jp-card">
           <span class="jp-card-img cine-scene">
             {post.data.ogImage && (
-              <img src={post.data.ogImage} alt="" width="480" height="640" loading="lazy" decoding="async" />
+              <img src={post.data.ogImage} alt={post.data.title} width="480" height="640" loading="lazy" decoding="async" />
             )}
             <span class="jp-card-scrim" aria-hidden="true"></span>
             {topics[i] && <span class="jp-chip">{topics[i]}</span>}

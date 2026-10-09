@@ -452,7 +452,7 @@ const deep = en ? svc.deepEn : svc.deepRu;
         <article class="pt-card" data-stagger-item>
           {it.photo && (
             <span class="pt-card-img cine-scene">
-              <img src={it.photo} alt="" width="640" height="400" loading="lazy" decoding="async" />
+              <img src={it.photo} alt={`${it.title} — ${title}, ${en ? "Limassol" : "Лимасол"}`} width="640" height="400" loading="lazy" decoding="async" />
               <span class="pt-card-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
             </span>
           )}
