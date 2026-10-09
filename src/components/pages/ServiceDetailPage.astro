@@ -441,7 +441,7 @@ const deep = en ? svc.deepEn : svc.deepRu;
       <div>
         <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Scope' : 'Объём'}</span>{deep.scopeTitle}</p>
         <h2 class="cine-display pt-h2" data-words>
-          {en ? <>Every surface, <em>its own system.</em></> : <>Каждой поверхности — <em>своя система.</em></>}
+          <Fragment set:html={deep.scopeHead} />
         </h2>
       </div>
       <p class="pt-lead" data-reveal>{deep.scopeLead}</p>
@@ -536,7 +536,7 @@ const deep = en ? svc.deepEn : svc.deepRu;
   <div class="container-wide">
     <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Standard' : 'Стандарт'}</span>{deep.standardTitle}</p>
     <h2 class="cine-display pt-h2 pt-h2--wide" data-words>
-      {en ? <>The difference is <em>before the first coat.</em></> : <>Разница — <em>до первого слоя.</em></>}
+      <Fragment set:html={deep.standardHead} />
     </h2>
     <p class="pt-lead" data-reveal>{deep.standardLead}</p>
 
@@ -564,7 +564,7 @@ const deep = en ? svc.deepEn : svc.deepRu;
       <div>
         <p class="cine-label" data-reveal><span class="cine-label__index">{en ? 'Local conditions' : 'Местные условия'}</span>{deep.climateTitle}</p>
         <h2 class="cine-display pt-h2 pt-h2--wide" data-words>
-          {en ? <>Why paint fails here, <em>and how we stop it.</em></> : <>Почему краска здесь не держится — <em>и как это снимается.</em></>}
+          <Fragment set:html={deep.climateHead} />
         </h2>
       </div>
       <p class="pt-lead pt-lead--right" data-reveal>{deep.climateLead}</p>

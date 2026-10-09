@@ -14,6 +14,20 @@ export interface ServiceScopeItem   { title: string; body: string; photo?: strin
    accordion is not empty; none of them shows the surface it sits on.
    Nothing else references this list, so replacing a path here is the whole
    job. Both languages read from it. */
+/* PLACEHOLDER ARTWORK — the library has no shop photography yet, so these
+   six are stand-ins borrowed from the office and gallery sets. None of them
+   shows a retail interior; they exist only so the accordion is not empty.
+   Swap the six paths here and the whole page updates — nothing else
+   references this list, and both languages read from it. */
+export const RETAIL_SCOPE_PHOTOS = [
+  '/images/gallery/office-after-1.webp',         // 01 торговый зал и планировка
+  '/images/projects/marina-studio.webp',         // 02 стеллажи, витрины, прилавки
+  '/images/projects/city-office.webp',           // 03 торговое освещение
+  '/images/portfolio/city-center-office-2.webp', // 04 примерочные и касса
+  '/images/blog/windows-doors.webp',             // 05 фасад и вывеска
+  '/images/blog/flooring-guide.webp',            // 06 полы и инженерия
+];
+
 export const PAINTING_SCOPE_PHOTOS = [
   '/images/gallery/apartment-after-2.webp',   // 01 walls & ceilings
   '/images/projects/germasogeia-villa.webp',  // 02 facades & balconies
@@ -28,6 +42,12 @@ export interface ServiceStandardRow { stage: string; basic: string; helyot: stri
 export interface ServiceClimateItem { title: string; problem: string; solution: string; }
 
 export interface ServiceDeep {
+  /* Display headlines for three deep sections. They used to be hardcoded in
+     ServiceDetailPage, written for painting — so the shop fit-out page
+     carried «Почему краска здесь не держится» over its climate block.
+     Required rather than optional so the next service cannot inherit the
+     same bug. HTML: <em> marks the gold italic run. */
+  scopeHead:    string;  standardHead: string;  climateHead: string;
   scopeTitle:   string;  scopeLead: string;   scope:      ServiceScopeItem[];
   profileTitle: string;  profiles:  ServiceProfile[];
   benchTitle:   string;  benchLead: string;   benchmarks: ServiceBenchmark[];
@@ -123,7 +143,10 @@ export const services: ServiceData[] = [
     seoDescRu: 'Ремонт квартир под ключ в Лимасоле, Кипр. Электрика, сантехника, плитка, полы, покраска. Фиксированная цена. Бесплатная смета.',
     heroSubEn: 'From layout redesign to final finishing — every trade, one fixed price.',
     heroSubRu: 'От перепланировки до финишной отделки — все работы по одной фиксированной цене.',
-    priceFrom: 170, priceLabelEn: 'from €170/m²', priceLabelRu: 'от €170/м²', priceUnit: 'sqm',
+    /* Было 170 при том, что FAQ на этой же странице говорил «от €150 для
+       торгового помещения». Ресторанная цифра тянула заголовок вверх;
+       страница теперь про ретейл, и €150 — честный пол для него. */
+    priceFrom: 150, priceLabelEn: 'from €150/m²', priceLabelRu: 'от €150/м²', priceUnit: 'sqm',
     timelineEn: '5–14 weeks depending on size', timelineRu: '5–14 недель в зависимости от площади',
     includesEn: ['Demolition & waste removal','Full electrical rewire','New plumbing & drainage','Plastering & ceiling levelling','Tile installation (bathrooms & kitchen)','Flooring (parquet, SPC or tile)','Interior painting (2 coats + primer)','Door & skirting installation','Kitchen fitting (if supplied)','Snagging & handover'],
     includesRu: ['Демонтаж и вывоз мусора','Полная замена электропроводки','Новая сантехника и канализация','Штукатурка и выравнивание потолков','Укладка плитки (ванная, кухня)','Напольные покрытия (паркет, SPC или плитка)','Покраска (2 слоя + грунтовка)','Монтаж дверей и плинтусов','Установка кухни (при наличии)','Приёмка и передача'],
@@ -329,7 +352,7 @@ export const services: ServiceData[] = [
 
   {
     slug: 'hotel-renovation', category: 'commercial', icon: '🏨',
-    titleEn: 'Hotel & Hospitality',       titleRu: 'Отели и рестораны',
+    titleEn: 'Hotels & Restaurants',      titleRu: 'Отели и рестораны',
     seoDescEn: 'Hotel renovation in Limassol. Room refurbishment, lobby redesign, F&B renovation. Phased works with minimal operational disruption.',
     seoDescRu: 'Ремонт отелей в Лимасоле. Реновация номеров, лобби, F&B. Поэтапные работы с минимальным влиянием на операции.',
     heroSubEn: 'Hotel room refurbishment, lobby and restaurant renovation — phased to keep you operational.',
@@ -358,33 +381,175 @@ export const services: ServiceData[] = [
   },
 
   {
-    slug: 'retail-restaurant', category: 'commercial', icon: '🍽️',
-    titleEn: 'Retail & Restaurant',       titleRu: 'Ретейл и рестораны',
-    seoDescEn: 'Shop fit-out and restaurant renovation in Limassol. Bespoke interiors, commercial kitchen, bar installations. Fast turnaround.',
-    seoDescRu: 'Отделка магазинов и ресторанов в Лимасоле. Авторские интерьеры, коммерческая кухня, барные стойки. Быстрые сроки.',
-    heroSubEn: 'Retail and hospitality interiors that convert visitors into loyal customers.',
-    heroSubRu: 'Интерьеры для ретейла и HoReCa, которые превращают посетителей в постоянных клиентов.',
+    slug: 'retail-restaurant', category: 'commercial', icon: '🏪',
+    titleEn: 'Shop Fit-Out',              titleRu: 'Ремонт магазинов',
+    seoDescEn: 'Shop fit-out in Limassol — shelving, display units, retail lighting, shopfront and signage. Night working so you keep trading. From €150/m².',
+    seoDescRu: 'Ремонт магазинов в Лимасоле — стеллажи, витрины, торговое освещение, фасад и вывеска. Ночные смены, точка продолжает работать. От €150/м².',
+    heroSubEn: 'Shelving, lighting and shopfront built around how your customers actually move through the space.',
+    heroSubRu: 'Стеллажи, свет и фасад — рассчитанные под то, как покупатель на самом деле идёт по залу.',
     priceFrom: 170, priceLabelEn: 'from €170/m²', priceLabelRu: 'от €170/м²', priceUnit: 'sqm',
-    timelineEn: '3–8 weeks', timelineRu: '3–8 недель',
-    includesEn: ['Concept and design planning','Full shopfit (shelving, counters, display units)','Commercial kitchen installation (stainless steel, ventilation)','Bar and back-bar construction','Decorative wall finishes and feature lighting','Electrical and plumbing for commercial use','Flooring (epoxy, porcelain or polished concrete)','Signage integration'],
-    includesRu: ['Концепция и планировка','Полная отделка (стеллажи, прилавки, витрины)','Монтаж коммерческой кухни (нержавейка, вентиляция)','Барная стойка и бэк-бар','Декоративные покрытия и дизайнерское освещение','Электрика и сантехника для коммерческого использования','Полы (эпоксид, керамогранит, шлифованный бетон)','Интеграция вывесок'],
+    timelineEn: '2–6 weeks', timelineRu: '2–6 недель',
+    includesEn: ['Layout and customer-flow planning','Shelving, gondolas and wall systems built to the bay','Display units, counters and the till run','Retail lighting — track, accent and shelf-level','Fitting rooms, mirrors and stock room','Shopfront glazing, entrance and illuminated signage','Commercial-grade flooring (porcelain, vinyl, polished concrete)','Power and data sized for tills, security and lighting load'],
+    includesRu: ['Планировка и расчёт покупательских потоков','Стеллажи, гондолы и пристенные системы по размеру ниши','Витрины, прилавки и кассовая линия','Торговое освещение — треки, акцентный и полочный свет','Примерочные, зеркала и складская зона','Витринное остекление, входная группа и световая вывеска','Полы под торговую нагрузку (керамогранит, винил, шлифованный бетон)','Электрика и слаботочка под кассы, охрану и свет'],
     faqsEn: [
-      { q: 'Can you hit a seasonal opening date?', a: 'Yes, and it goes in the contract. We work backwards from your opening date and order long-lead items — extraction, joinery, glazing — first.' },
-      { q: 'Do you install commercial kitchen extraction?', a: 'Yes — canopy, ducting, fire dampers, make-up air and the grease management, sized for the equipment schedule rather than guessed from the floor area.' },
-      { q: 'Can you help with health and fire compliance?', a: 'We build to the requirements and produce the drawings and certificates inspectors ask for. The licence application itself stays with you or your consultant, and we supply whatever documentation they need.' },
-      { q: 'Do you do the shopfront and signage?', a: 'Yes — glazing, entrance doors, awnings and illuminated signage, including the municipal consent that shopfront changes usually need.' },
-      { q: 'What does a fit-out cost per square metre?', a: 'From €150/m² for retail. Restaurants run higher because of the kitchen services, extraction and drainage; we split those out as separate lines so you can see them.' },
-      { q: 'Can you work overnight to keep us trading?', a: 'Yes. Overnight and closed-day working is normal for occupied retail, and the hours are agreed and priced before you sign.' },
+      { q: 'Can you work at night so we keep trading?', a: 'Yes, and for an occupied shop it is usually the only sensible way. Night and closed-day shifts are agreed and priced before you sign, not added later. A trading floor is handed back clean every morning.' },
+      { q: 'What does a shop fit-out cost per square metre?', a: 'From €150/m² for a straightforward retail space. Bespoke joinery, a full lighting design or a new shopfront move it to €230–310/m². Your figure is fixed in writing after a site survey.' },
+      { q: 'Do you make shelving to measure or buy it in?', a: 'Both, and we will tell you which is cheaper for your case. Catalogue systems win on budget and lead time; made-to-measure wins where the bay depth is awkward, the load is heavy or the brand standard is fixed. We cost both.' },
+      { q: 'How much lighting does a shop actually need?', a: 'It is calculated, not guessed — 300–500 lux across the floor, 750–1,000 lux on feature displays, CRI 90+ anywhere colour matters, which in practice is clothing, cosmetics, food and anything with a finish. Under-lit stock is the single most common fault we are called in to fix.' },
+      { q: 'Can you handle the shopfront and the signage consent?', a: 'Yes — glazing, entrance doors, awnings and illuminated signage. Changing a shopfront in Limassol usually needs municipal consent, and we prepare the drawings and run the application rather than leaving it with you.' },
+      { q: 'Will the existing power supply be enough?', a: 'We check it before quoting. Retail lighting, tills, security and air conditioning on an old 1980s unit supply frequently are not, and finding that out mid-fit-out is an expensive week. The load calculation is part of the survey.' },
+      { q: 'Can you hit a fixed opening date?', a: 'Yes, and it goes in the contract. We plan backwards from the date and order the long-lead items first — joinery, glazing, signage. Those are what miss an opening, never the painting.' },
+      { q: 'Do you work to a franchise brand standard?', a: 'Yes. Send us the brand book and we build to it, including the specified materials and light temperatures, and we flag anything in it that does not survive a Cyprus summer before it is installed.' },
     ],
     faqsRu: [
-      { q: 'Успеете сдать к сезонному открытию?', a: 'Да, и это фиксируется в договоре. Планируем от даты открытия назад и в первую очередь заказываем позиции с долгой поставкой: вытяжку, мебель, остекление.' },
-      { q: 'Ставите вытяжку для профессиональной кухни?', a: 'Да — зонт, воздуховоды, огнезадерживающие клапаны, приточный воздух и жироулавливание, рассчитанные под спецификацию оборудования, а не прикинутые по площади.' },
-      { q: 'Поможете с санитарными и пожарными требованиями?', a: 'Строим в соответствии с требованиями и готовим чертежи и сертификаты, которые запрашивают инспекторы. Само получение лицензии остаётся за вами или вашим консультантом, а мы предоставляем всю нужную документацию.' },
-      { q: 'Делаете фасад магазина и вывеску?', a: 'Да — остекление, входные группы, маркизы и световые вывески, включая согласование с муниципалитетом, которое обычно требуется при изменении фасада.' },
-      { q: 'Сколько стоит отделка за квадратный метр?', a: 'От €150/м² для торгового помещения. Рестораны дороже из-за кухонной инженерии, вытяжки и слива — мы выносим их отдельными строками, чтобы вы это видели.' },
-      { q: 'Можно работать ночью, чтобы мы не закрывались?', a: 'Да. Ночные работы и работы в выходные — обычная практика для действующих торговых точек, часы согласуются и учитываются в смете до подписания.' },
+      { q: 'Можно работать ночью, чтобы точка не закрывалась?', a: 'Да, и для действующего магазина это обычно единственный разумный вариант. Ночные смены и работы в выходные согласуются и попадают в смету до подписания, а не добавляются потом. Торговый зал каждое утро возвращается чистым.' },
+      { q: 'Сколько стоит ремонт магазина за квадратный метр?', a: 'От €150/м² для простого торгового помещения. Мебель на заказ, полноценный светодизайн или новый фасад поднимают до €230–310/м². Ваша цифра фиксируется письменно после замера.' },
+      { q: 'Стеллажи делаете на заказ или ставите готовые?', a: 'И то и другое — и мы скажем, что в вашем случае дешевле. Каталожные системы выигрывают по бюджету и срокам; изготовление по размеру выигрывает там, где ниша неудобная, нагрузка большая или стандарт бренда жёсткий. Считаем оба варианта.' },
+      { q: 'Сколько света реально нужно магазину?', a: 'Это считается, а не прикидывается: 300–500 люкс по залу, 750–1000 на акцентных витринах, индекс цветопередачи CRI 90+ везде, где важен цвет — одежда, косметика, продукты, любые покрытия. Недосвеченный товар — самая частая проблема, которую нас зовут исправлять.' },
+      { q: 'Берёте на себя фасад и согласование вывески?', a: 'Да — остекление, входная группа, маркизы, световая вывеска. Изменение фасада в Лимасоле обычно требует согласования с муниципалитетом: мы готовим чертежи и ведём подачу сами, а не оставляем это вам.' },
+      { q: 'Хватит ли существующей электрической мощности?', a: 'Проверяем до сметы. Торговый свет, кассы, охрана и кондиционирование на вводе дома 1980-х часто не помещаются, и выяснить это в середине работ — дорогая неделя. Расчёт нагрузки входит в замер.' },
+      { q: 'Успеете к фиксированной дате открытия?', a: 'Да, и это фиксируется в договоре. Планируем от даты назад и первыми заказываем позиции с долгой поставкой: мебель, остекление, вывеску. Именно они срывают открытие, а не покраска.' },
+      { q: 'Работаете по стандарту франшизы?', a: 'Да. Присылайте брендбук — строим по нему, включая указанные материалы и температуры света. И заранее отмечаем то, что не переживёт кипрское лето, до монтажа, а не после.' },
     ],
-    relatedSlugs: ['office-fit-out', 'electrical-plumbing', 'flooring', 'joinery'],
+    deepEn: {
+      scopeHead: 'Layout, light <em>and what sells.</em>',
+      standardHead: 'Decided <em>before anything is fixed.</em>',
+      climateHead: 'What a Cyprus high street <em>does to a shop.</em>',
+      scopeTitle: 'What a shop fit-out covers',
+      scopeLead: 'A retail unit is not a flat with a till in it. The layout decides what customers see, the lighting decides what they pick up, and the shopfront decides whether they come in at all. We build all three, plus everything behind them.',
+      scope: [
+        { title: 'Sales floor and layout', body: 'Zoning, aisle widths and the path a customer takes from the door to the till — planned before anything is built, because moving a wall later costs ten times what moving it on paper does.', photo: RETAIL_SCOPE_PHOTOS[0] },
+        { title: 'Shelving, gondolas and counters', body: 'Wall systems, free-standing gondolas, display cases and the till run. Catalogue where catalogue is cheaper, made-to-measure where the bay is awkward or the load is real.', photo: RETAIL_SCOPE_PHOTOS[1] },
+        { title: 'Retail lighting', body: 'Track, accent and shelf-level light calculated in lux by zone, with CRI 90+ wherever the colour of the product matters. Not a grid of downlights spaced by eye.', photo: RETAIL_SCOPE_PHOTOS[2] },
+        { title: 'Fitting rooms and till area', body: 'Cubicles, mirrors and the lighting inside them — the one place in a clothing shop where bad light directly costs a sale. Plus the counter, back-counter and stock room behind it.', photo: RETAIL_SCOPE_PHOTOS[3] },
+        { title: 'Shopfront, glazing and signage', body: 'Window glazing, entrance doors, awnings and illuminated signage, including the municipal consent that a facade change needs here.', photo: RETAIL_SCOPE_PHOTOS[4] },
+        { title: 'Flooring and services', body: 'Floors rated for trolley and footfall traffic, and power and data sized for the real load: tills, security, lighting and air conditioning together.', photo: RETAIL_SCOPE_PHOTOS[5] },
+      ],
+      profileTitle: 'Fit-outs matched to the format',
+      profiles: [
+        { title: 'Boutique and small shop', target: '40–120 m², single unit, often an owner-operator', focus: 'Making a small floor feel generous, display density, one strong focal wall, budget held tight', idealFor: 'Clothing, gifts, speciality food, independent retail', photo: '/images/projects/marina-studio.webp', alt: 'Compact retail interior in Limassol with wall shelving and track lighting' },
+        { title: 'Chain unit and franchise', target: 'A brand standard to hit, usually to a fixed opening date', focus: 'Building to the brand book exactly, long-lead ordering, handover documentation the franchisor signs off', idealFor: 'Franchisees, multi-site operators, brand roll-outs', photo: '/images/gallery/office-after-1.webp', alt: 'Retail unit fit-out in Limassol built to a brand specification' },
+        { title: 'Showroom and salon', target: '150–400 m², product shown rather than stacked', focus: 'Lighting design doing most of the work, high-end finishes, long sightlines, consultation areas', idealFor: 'Furniture, optics, beauty, automotive, interiors', photo: '/images/portfolio/city-center-office.webp', alt: 'Showroom interior in Limassol city centre with feature lighting' },
+      ],
+      benchTitle: 'Scope and budget benchmarks',
+      benchLead: 'The rate starts at €150 per square metre of floor area for a straightforward retail space and moves with the joinery, the lighting and whether the shopfront is touched. These are complete figures with materials, not labour-only rates. Yours is fixed in writing after a site survey.',
+      benchmarks: [
+        { title: 'Boutique, 60 m²', scope: 'Catalogue shelving, track lighting, counter, painted walls, vinyl floor, existing shopfront kept.', range: '€9,000 – €14,000', duration: '2–3 weeks' },
+        { title: 'Shop, 150 m², full refit', scope: 'Layout change, made-to-measure wall systems, lighting design, fitting rooms, porcelain floor, new signage.', range: '€26,000 – €42,000', duration: '4–6 weeks' },
+        { title: 'Showroom, 300 m²', scope: 'Bespoke joinery, full lighting scheme, new shopfront glazing, consultation areas, upgraded electrical supply.', range: '€70,000 – €95,000', duration: '7–10 weeks' },
+      ],
+      factorsTitle: 'What moves your final number',
+      factors: [
+        { title: 'State of the unit', body: 'A bare shell with services capped off, or a trading shop that has to be stripped out around stock.' },
+        { title: 'Shelving and display', body: 'Catalogue systems off the shelf, or made-to-measure joinery built to the bay and the brand standard.' },
+        { title: 'Lighting specification', body: 'Basic track and downlights, or a calculated scheme with CRI 90+ accent lighting on every display.' },
+        { title: 'Shopfront and signage', body: 'Existing frontage kept, or new glazing and illuminated signage with the municipal consent that needs.' },
+        { title: 'Electrical capacity', body: 'Existing supply adequate, or a new board and incoming upgrade to carry the lighting and equipment load.' },
+        { title: 'Working hours', body: 'Daytime access in an empty unit, or night and closed-day shifts so the shop keeps trading.' },
+      ],
+      standardTitle: 'The Helyot standard, next to a cheap shopfit',
+      standardLead: 'Most of what separates a shop that works from one that merely looks finished happens in decisions made before anything is installed.',
+      standardHeads: ['Stage', 'Cheap shopfit', 'The Helyot standard'],
+      standard: [
+        { stage: 'Layout',        basic: "Landlord's sketch built as drawn",        helyot: 'Customer flow planned, sightlines and aisle widths set before build' },
+        { stage: 'Lighting',      basic: 'Even ceiling grid, spaced by eye',        helyot: 'Lux calculated per zone, CRI 90+ where colour sells the product' },
+        { stage: 'Shelving',      basic: 'Catalogue units cut down to fit',         helyot: 'Built to the bay, load rated, levelled against an out-of-true wall' },
+        { stage: 'Electrics',     basic: 'Plugged into the existing circuit',       helyot: 'Load calculated for tills, lighting, security and AC together' },
+        { stage: 'Signage',       basic: 'Installed and hope nobody asks',          helyot: 'Municipal consent obtained before anything is fixed to the facade' },
+        { stage: 'Handover',      basic: 'Keys',                                    helyot: 'As-built drawings, electrical certificate, warranties, lamp schedule' },
+      ],
+      climateTitle: 'Built for a Cyprus high street',
+      climateLead: 'Three local conditions ruin retail interiors here faster than anywhere in northern Europe, and all three are designed around rather than repaired later.',
+      climate: [
+        { title: 'Sun through the shop window', problem: 'A south-facing window bleaches stock and cooks the display zone. Textiles fade in a season; the first metre of floor gets too hot to stand in.', solution: 'Solar-control glazing or film specified by orientation, display layout planned away from the worst of it, and awnings where the facade allows them.' },
+        { title: 'Salt in the air', problem: 'Within a kilometre of the sea, chrome shelving brackets, hinges and track rails corrode in two to four seasons — exactly the parts customers touch.', solution: 'Stainless or powder-coated fixings throughout, anodised track, and a 10–15% price difference that buys roughly triple the service life.' },
+        { title: 'Season-driven deadlines', problem: 'Retail here lives on a tourist calendar. Missing a June opening does not delay revenue, it deletes a season of it.', solution: 'The programme is built backwards from the opening date, long-lead items ordered in week one, and the date written into the contract rather than estimated.' },
+      ],
+      fitTitle: 'And who we are not for',
+      fitYesTitle: 'A good fit if',
+      fitNoTitle: 'Probably not us if',
+      fitYes: [
+        'You are opening, relocating or refitting a shop and want one contractor answerable for layout, joinery, lighting and the shopfront together.',
+        'You have an opening date that cannot move and want it in the contract rather than estimated.',
+        'You want to keep trading through the work and are willing to pay for night shifts to do it.',
+      ],
+      fitNo: [
+        'You need a few shelves hung or a lamp replaced — that is an hourly job and we are the wrong call for it.',
+        'You want the lowest number on the market, reached by skipping the load calculation and the signage consent.',
+        'You want the fit-out started before the lease terms and permitted use are settled.',
+        'You are fitting out a restaurant, cafe or bar — the kitchen, extraction and drainage are a different job, and they live on our hospitality page.',
+      ],
+    },
+    deepRu: {
+      scopeHead: 'Планировка, свет — <em>и то, что продаёт.</em>',
+      standardHead: 'Решается <em>до первого крепежа.</em>',
+      climateHead: 'Что кипрская улица <em>делает с магазином.</em>',
+      scopeTitle: 'Что входит в ремонт магазина',
+      scopeLead: 'Торговая точка — это не квартира с кассой. Планировка решает, что покупатель увидит, свет решает, что он возьмёт в руки, а фасад решает, зайдёт ли он вообще. Мы делаем все три части и всё, что за ними стоит.',
+      scope: [
+        { title: 'Торговый зал и планировка', body: 'Зонирование, ширина проходов и маршрут покупателя от входа к кассе — считаем до начала работ, потому что перенести стену на бумаге в десять раз дешевле, чем на объекте.', photo: RETAIL_SCOPE_PHOTOS[0] },
+        { title: 'Стеллажи, гондолы и прилавки', body: 'Пристенные системы, островные гондолы, витрины и кассовая линия. Каталожные там, где это дешевле, и изготовление по размеру там, где ниша неудобная или нагрузка настоящая.', photo: RETAIL_SCOPE_PHOTOS[1] },
+        { title: 'Торговое освещение', body: 'Треки, акцентный и полочный свет, рассчитанные в люксах по зонам, с цветопередачей CRI 90+ везде, где важен цвет товара. Не сетка светильников на глаз.', photo: RETAIL_SCOPE_PHOTOS[2] },
+        { title: 'Примерочные и кассовая зона', body: 'Кабины, зеркала и свет внутри них — единственное место в магазине одежды, где плохой свет напрямую стоит продажи. Плюс прилавок, задняя стенка и склад за ним.', photo: RETAIL_SCOPE_PHOTOS[3] },
+        { title: 'Фасад, витрина и вывеска', body: 'Витринное остекление, входная группа, маркизы и световая вывеска — вместе с согласованием в муниципалитете, которое здесь требует любое изменение фасада.', photo: RETAIL_SCOPE_PHOTOS[4] },
+        { title: 'Полы и инженерия', body: 'Покрытия под тележки и проходимость, электрика и слаботочка — с расчётом на реальную нагрузку: кассы, охрана, свет и кондиционирование одновременно.', photo: RETAIL_SCOPE_PHOTOS[5] },
+      ],
+      profileTitle: 'Решения под формат точки',
+      profiles: [
+        { title: 'Бутик и небольшой магазин', target: '40–120 м², одна точка, часто сам владелец за прилавком', focus: 'Сделать маленький зал просторным, плотность выкладки, одна сильная акцентная стена, жёсткий бюджет', idealFor: 'Одежда, подарки, деликатесы, независимая розница', photo: '/images/projects/marina-studio.webp', alt: 'Компактный торговый зал в Лимасоле с пристенными стеллажами и трековым светом' },
+        { title: 'Сетевая точка и франшиза', target: 'Есть стандарт бренда и, как правило, фиксированная дата открытия', focus: 'Точное соблюдение брендбука, ранний заказ долгих позиций, пакет документов для приёмки франчайзером', idealFor: 'Франчайзи, мультиформатные операторы, запуск сети', photo: '/images/gallery/office-after-1.webp', alt: 'Торговое помещение в Лимасоле, отделанное по стандарту бренда' },
+        { title: 'Шоурум и салон', target: '150–400 м², товар показывают, а не складывают', focus: 'Свет делает основную работу, дорогие материалы, длинные перспективы, зоны консультации', idealFor: 'Мебель, оптика, бьюти, автомобили, интерьерные салоны', photo: '/images/portfolio/city-center-office.webp', alt: 'Интерьер шоурума в центре Лимасола с акцентным освещением' },
+      ],
+      benchTitle: 'Ориентиры по объёму и бюджету',
+      benchLead: 'Ставка начинается от €150 за квадратный метр площади для простого торгового помещения и растёт за счёт мебели, света и того, трогаем ли мы фасад. Это полные цифры с материалами, а не стоимость работы. Ваша фиксируется письменно после замера.',
+      benchmarks: [
+        { title: 'Бутик, 60 м²', scope: 'Каталожные стеллажи, трековый свет, прилавок, покраска, виниловый пол, фасад остаётся существующий.', range: '€9 000 – €14 000', duration: '2–3 недели' },
+        { title: 'Магазин 150 м², полное переоборудование', scope: 'Смена планировки, пристенные системы по размеру, светодизайн, примерочные, керамогранит, новая вывеска.', range: '€26 000 – €42 000', duration: '4–6 недель' },
+        { title: 'Шоурум, 300 м²', scope: 'Мебель на заказ, полная схема освещения, новое витринное остекление, зоны консультации, усиление электрики.', range: '€70 000 – €95 000', duration: '7–10 недель' },
+      ],
+      factorsTitle: 'Что двигает итоговую цифру',
+      factors: [
+        { title: 'Состояние помещения', body: 'Голая коробка с заглушенными вводами или работающий магазин, который надо разбирать вокруг товара.' },
+        { title: 'Стеллажи и выкладка', body: 'Готовые каталожные системы или мебель по размеру ниши и под стандарт бренда.' },
+        { title: 'Уровень освещения', body: 'Базовые треки и споты или расчётная схема с акцентным светом CRI 90+ на каждой витрине.' },
+        { title: 'Фасад и вывеска', body: 'Остаётся существующий или новое остекление и световая вывеска с согласованием в муниципалитете.' },
+        { title: 'Электрическая мощность', body: 'Имеющегося ввода хватает или нужен новый щит и усиление под свет и оборудование.' },
+        { title: 'График работ', body: 'Дневной доступ в пустое помещение или ночные смены и выходные, чтобы точка продолжала торговать.' },
+      ],
+      standardTitle: 'Стандарт Helyot рядом с дешёвой отделкой',
+      standardLead: 'Почти всё, что отличает работающий магазин от просто законченного, решается до того, как что-либо смонтировано.',
+      standardHeads: ['Этап', 'Дешёвая отделка', 'Стандарт Helyot'],
+      standard: [
+        { stage: 'Планировка',  basic: 'Эскиз арендодателя как есть',        helyot: 'Расчёт потоков, перспектив и ширины проходов до монтажа' },
+        { stage: 'Освещение',   basic: 'Равномерная сетка на глаз',          helyot: 'Люксы по зонам, CRI 90+ там, где цвет продаёт товар' },
+        { stage: 'Стеллажи',    basic: 'Каталожные, подрезанные по месту',   helyot: 'По размеру ниши, с расчётом нагрузки и выводом в уровень' },
+        { stage: 'Электрика',   basic: 'Подключение к имеющейся линии',      helyot: 'Расчёт мощности на кассы, свет, охрану и кондиционеры вместе' },
+        { stage: 'Вывеска',     basic: 'Ставим и надеемся, что не спросят',  helyot: 'Согласование с муниципалитетом до крепления к фасаду' },
+        { stage: 'Сдача',       basic: 'Ключи',                              helyot: 'Исполнительные чертежи, электросертификат, гарантии, список ламп' },
+      ],
+      climateTitle: 'Рассчитано на кипрскую торговую улицу',
+      climateLead: 'Три местных условия убивают торговые интерьеры быстрее, чем где-либо в северной Европе. Все три обходятся на этапе проекта, а не чинятся потом.',
+      climate: [
+        { title: 'Солнце в витрине', problem: 'Южная витрина выжигает товар и перегревает прикассовую зону. Текстиль выцветает за сезон, первый метр пола становится горячим.', solution: 'Солнцезащитное остекление или плёнка по ориентации фасада, выкладка планируется в стороне от худшего участка, маркизы там, где фасад позволяет.' },
+        { title: 'Соль в воздухе', problem: 'В километре от моря хромированные кронштейны стеллажей, петли и направляющие корродируют за два-четыре сезона — именно те детали, которых касается покупатель.', solution: 'Нержавейка или порошковая покраска на всём крепеже, анодированный трек. Разница в цене 10–15%, разница в сроке службы — примерно втрое.' },
+        { title: 'Сроки, привязанные к сезону', problem: 'Розница здесь живёт по туристическому календарю. Пропустить открытие в июне — не отложить выручку, а вычеркнуть сезон.', solution: 'График строится от даты открытия назад, позиции с долгой поставкой заказываются на первой неделе, дата пишется в договор, а не прикидывается.' },
+      ],
+      fitTitle: 'И кому мы не подходим',
+      fitYesTitle: 'Подходим, если',
+      fitNoTitle: 'Скорее не мы, если',
+      fitYes: [
+        'Вы открываете, переезжаете или переоборудуете магазин и хотите одного подрядчика, отвечающего за планировку, мебель, свет и фасад вместе.',
+        'У вас есть дата открытия, которую нельзя двигать, и вы хотите её в договоре, а не «ориентировочно».',
+        'Вы хотите продолжать торговать во время работ и готовы оплатить ночные смены ради этого.',
+      ],
+      fitNo: [
+        'Нужно повесить пару полок или заменить светильник — это почасовая работа, и мы здесь не лучший выбор.',
+        'Нужна самая низкая цена на рынке, полученная за счёт пропуска расчёта нагрузки и согласования вывески.',
+        'Вы хотите начать отделку до того, как решены условия аренды и разрешённое использование помещения.',
+        'Вы делаете ресторан, кафе или бар — кухня, вытяжка и слив это другая работа, и она на нашей странице отелей и ресторанов.',
+      ],
+    },
+    relatedSlugs: ['office-fit-out', 'joinery', 'electrical-plumbing', 'flooring'],
   },
 
   /* ── SPECIALIST ───────────────────────────────────────────────────────── */
@@ -599,6 +764,9 @@ export const services: ServiceData[] = [
     relatedSlugs: ['plastering', 'apartment-renovation', 'facade', 'joinery'],
 
     deepEn: {
+      scopeHead: 'Every surface, <em>its own system.</em>',
+      standardHead: 'The difference is <em>before the first coat.</em>',
+      climateHead: 'Why paint fails here, <em>and how we stop it.</em>',
       scopeTitle: 'What we paint',
       scopeLead: 'Complete residential and commercial painting across Limassol and the south coast, with a coating system chosen for each substrate rather than one tin used everywhere.',
       scope: [
@@ -664,6 +832,9 @@ export const services: ServiceData[] = [
       ],
     },
     deepRu: {
+      scopeHead: 'Каждой поверхности — <em>своя система.</em>',
+      standardHead: 'Разница — <em>до первого слоя.</em>',
+      climateHead: 'Почему краска здесь не держится — <em>и как это снимается.</em>',
       scopeTitle: 'Что именно мы красим',
       scopeLead: 'Полный объём по жилым и коммерческим объектам на Кипре. Система покрытия подбирается под каждое основание, а не одна банка на все поверхности.',
       scope: [
